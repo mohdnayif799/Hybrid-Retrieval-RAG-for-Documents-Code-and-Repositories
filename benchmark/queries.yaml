@@ -1,0 +1,729 @@
+# Retrieval benchmark ground truth.
+#
+# CORPUS
+#   repo : psf/requests @ dae7ef63b4df6eded86637f251fc4e3a06c3b479  (95 files, 1111 chunks)
+#   docs : Deep_Learning_Unit1_Quick_Notes.pdf  (2 pages,  4 chunks)
+#          space_planets_moons_advanced.txt     (1 "page", 8 chunks)
+#
+# LOCATOR FORMAT
+#   repo      -> repository-relative path string, e.g. "src/requests/sessions.py"
+#   documents -> {file: <basename>, page: <int>}
+#
+#   `page` is the RAW CHUNK METADATA VALUE and is 0-INDEXED, so PDF page 1 is
+#   page: 0. The UI displays page+1. Ground truth matches the metadata rather
+#   than the display so the matcher needs no conversion and cannot drift by one.
+#   The .txt has no pages; every chunk carries page: 0.
+#
+#   Ground truth is at FILE/PAGE level, never chunk level, so it survives a
+#   change to chunk size.
+#
+# SPANS (optional)
+#   `span_anchor` names a definition or heading. The harness locates it in the
+#   real parent file and derives the character range; no line numbers are typed
+#   by hand, so nothing drifts when the pin changes. Annotated only where the
+#   answer genuinely occupies one contiguous region — conceptual and cross_file
+#   answers do not, and are deliberately left unannotated.
+#
+# AUTHORING PROTOCOL
+#   Every question was written from an information need FIRST, then the answer
+#   was located. Repo questions were drawn from knowledge of the requests
+#   public API and its documentation, not from reading the chunks they are
+#   expected to retrieve. exact_identifier and literal_string deliberately use
+#   the literal token, because that is how people actually search.
+#   `unanswerable` items were each verified absent from the whole corpus.
+
+version: 1
+corpus:
+  repo_sha: dae7ef63b4df6eded86637f251fc4e3a06c3b479
+  documents:
+    - Deep_Learning_Unit1_Quick_Notes.pdf
+    - space_planets_moons_advanced.txt
+
+queries:
+
+# ── exact_identifier (8) ──────────────────────────────────────────────────────
+# The user types the identifier exactly as it appears in the source.
+
+- id: eid-01
+  category: exact_identifier
+  question: CaseInsensitiveDict
+  relevant: ["src/requests/structures.py"]
+  span_anchor: "class CaseInsensitiveDict"
+  notes: The class is defined in structures.py; other files import it but do not define it.
+
+- id: eid-02
+  category: exact_identifier
+  question: resolve_redirects
+  relevant: ["src/requests/sessions.py"]
+  span_anchor: "def resolve_redirects"
+  notes: SessionRedirectMixin.resolve_redirects is the generator that walks the redirect chain.
+
+- id: eid-03
+  category: exact_identifier
+  question: extract_zipped_paths
+  relevant: ["src/requests/utils.py"]
+  span_anchor: "def extract_zipped_paths"
+  notes: Utility that materialises a path living inside a zip archive.
+
+- id: eid-04
+  category: exact_identifier
+  question: TooManyRedirects
+  relevant: ["src/requests/exceptions.py"]
+  span_anchor: "class TooManyRedirects"
+  notes: Exception class definition. sessions.py raises it but exceptions.py defines it.
+
+- id: eid-05
+  category: exact_identifier
+  question: HTTPDigestAuth
+  relevant: ["src/requests/auth.py"]
+  span_anchor: "class HTTPDigestAuth"
+  notes: Digest authentication handler.
+
+- id: eid-06
+  category: exact_identifier
+  question: cookiejar_from_dict
+  relevant: ["src/requests/cookies.py"]
+  span_anchor: "def cookiejar_from_dict"
+  notes: Builds a RequestsCookieJar from a plain dict.
+
+- id: eid-07
+  category: exact_identifier
+  question: init_poolmanager
+  relevant: ["src/requests/adapters.py"]
+  span_anchor: "def init_poolmanager"
+  notes: HTTPAdapter hook that constructs the urllib3 PoolManager.
+
+- id: eid-08
+  category: exact_identifier
+  question: get_encoding_from_headers
+  relevant: ["src/requests/utils.py"]
+  span_anchor: "def get_encoding_from_headers"
+  notes: Derives a charset from the Content-Type header.
+
+# ── paraphrase (8) ────────────────────────────────────────────────────────────
+# The function's purpose described in different vocabulary. No identifier names.
+
+- id: par-01
+  category: paraphrase
+  question: Can I reuse one network connection across many calls to the same website instead of opening a new one every time?
+  relevant: ["src/requests/sessions.py", "src/requests/adapters.py", "docs/user/advanced.rst"]
+  notes: Connection reuse is provided by Session plus the adapter's urllib3 pool. Question avoids "session", "adapter" and "pool".
+
+- id: par-02
+  category: paraphrase
+  question: How do I read a very large reply gradually rather than pulling all of it into memory at once?
+  relevant: ["src/requests/models.py", "docs/user/advanced.rst", "docs/user/quickstart.rst"]
+  notes: iter_content plus the streaming flag. Question avoids "stream", "chunk" and "iter_content".
+
+- id: par-03
+  category: paraphrase
+  question: What stops my program hanging forever when a server never replies?
+  relevant: ["src/requests/adapters.py", "docs/user/quickstart.rst", "docs/user/advanced.rst"]
+  notes: The timeout argument. Question avoids the word "timeout".
+
+- id: par-04
+  category: paraphrase
+  question: After being bounced through several forwarding hops, can I still inspect the earlier replies?
+  relevant: ["src/requests/models.py", "src/requests/sessions.py", "docs/user/quickstart.rst"]
+  notes: Response.history. Question avoids "redirect" and "history".
+
+- id: par-05
+  category: paraphrase
+  question: How do I attach an image alongside ordinary form fields in one submission?
+  relevant: ["src/requests/models.py", "docs/user/quickstart.rst", "docs/user/advanced.rst"]
+  notes: Multipart body preparation. Question avoids "file", "upload" and "multipart".
+
+- id: par-06
+  category: paraphrase
+  question: If a site sends me to a different host, does the library still hand over my username and password?
+  relevant: ["src/requests/sessions.py"]
+  span_anchor: "def rebuild_auth"
+  notes: rebuild_auth strips credentials on cross-host hops. Question avoids "auth" and "redirect".
+
+- id: par-07
+  category: paraphrase
+  question: How can I let the library talk to a server whose certificate my machine does not trust?
+  relevant: ["src/requests/adapters.py", "docs/user/advanced.rst", "src/requests/sessions.py"]
+  notes: The verify parameter and CA bundle handling.
+
+- id: par-08
+  category: paraphrase
+  question: How do I stay logged in across a sequence of calls without re-sending my credentials each time?
+  relevant: ["src/requests/sessions.py", "src/requests/cookies.py", "docs/user/advanced.rst"]
+  notes: Cookie persistence on the Session. Question avoids "cookie" and "session".
+
+# ── conceptual (8) ────────────────────────────────────────────────────────────
+# "How does X work" — a mechanism, usually spanning several regions.
+
+- id: con-01
+  category: conceptual
+  question: How does the library decide whether a particular address should go through a proxy?
+  relevant: ["src/requests/utils.py", "src/requests/sessions.py", "src/requests/adapters.py"]
+  notes: Environment lookup, no_proxy bypass rules, then adapter selection.
+
+- id: con-02
+  category: conceptual
+  question: How is a user's request turned into the exact bytes that go out on the wire?
+  relevant: ["src/requests/models.py"]
+  notes: PreparedRequest.prepare and the prepare_* methods.
+
+- id: con-03
+  category: conceptual
+  question: How does the retry behaviour work when a connection attempt fails?
+  relevant: ["src/requests/adapters.py"]
+  notes: max_retries passed through to urllib3's Retry.
+
+- id: con-04
+  category: conceptual
+  question: How does the library work out which character set a reply is written in?
+  relevant: ["src/requests/models.py", "src/requests/utils.py"]
+  notes: Content-Type header first, then charset detection as a fallback.
+
+- id: con-05
+  category: conceptual
+  question: How are cookies carried from one call to the next within a single conversation?
+  relevant: ["src/requests/cookies.py", "src/requests/sessions.py"]
+  notes: extract_cookies_to_jar on the response, merge into the jar, replay on the next request.
+
+- id: con-06
+  category: conceptual
+  question: How does the callback mechanism let me alter a reply before my own code sees it?
+  relevant: ["src/requests/hooks.py", "src/requests/sessions.py", "src/requests/models.py"]
+  notes: dispatch_hook and the response hook point.
+
+- id: con-07
+  category: conceptual
+  question: How is the length of an outgoing body calculated before it is sent?
+  relevant: ["src/requests/models.py", "src/requests/utils.py"]
+  notes: prepare_content_length plus super_len, which handles files, streams and strings.
+
+- id: con-08
+  category: conceptual
+  question: How do settings given on a single call combine with the ones already configured for the whole conversation?
+  relevant: ["src/requests/sessions.py"]
+  span_anchor: "def merge_setting"
+  notes: merge_setting merges dict-like settings and lets None delete a key.
+
+# ── literal_string (8) ────────────────────────────────────────────────────────
+# An error message, constant name or config key, quoted as it appears.
+
+- id: lit-01
+  category: literal_string
+  question: "Exceeded 30 redirects."
+  relevant: ["src/requests/sessions.py"]
+  notes: The TooManyRedirects message is an f-string "Exceeded {self.max_redirects} redirects." in sessions.py.
+
+- id: lit-02
+  category: literal_string
+  question: DEFAULT_REDIRECT_LIMIT
+  relevant: ["src/requests/models.py", "src/requests/sessions.py"]
+  span_anchor: "DEFAULT_REDIRECT_LIMIT: int = 30"
+  notes: Defined in models.py, imported and applied in sessions.py. Both are legitimate answers.
+
+- id: lit-03
+  category: literal_string
+  question: "Invalid URL: No scheme supplied"
+  relevant: ["src/requests/models.py"]
+  notes: MissingSchema message raised from PreparedRequest.prepare_url.
+
+- id: lit-04
+  category: literal_string
+  question: CONTENT_CHUNK_SIZE
+  relevant: ["src/requests/models.py"]
+  span_anchor: "CONTENT_CHUNK_SIZE: int = 10 * 1024"
+  notes: Module-level constant in models.py.
+
+- id: lit-05
+  category: literal_string
+  question: DEFAULT_POOLSIZE
+  relevant: ["src/requests/adapters.py"]
+  span_anchor: "DEFAULT_POOLSIZE = 10"
+  notes: Adapter pool sizing constant.
+
+- id: lit-06
+  category: literal_string
+  question: REDIRECT_STATI
+  relevant: ["src/requests/models.py", "src/requests/sessions.py"]
+  notes: Tuple of redirect status codes defined in models.py, imported by sessions.py.
+
+- id: lit-07
+  category: literal_string
+  question: DEFAULT_CA_BUNDLE_PATH
+  relevant: ["src/requests/adapters.py", "docs/user/advanced.rst", "src/requests/utils.py"]
+  notes: Re-exported through utils, consumed in adapters, shown in the advanced docs.
+
+- id: lit-08
+  category: literal_string
+  question: "Invalid URL: No host supplied"
+  relevant: ["src/requests/models.py"]
+  notes: InvalidURL message, also raised from prepare_url.
+
+# ── cross_file (7) ────────────────────────────────────────────────────────────
+# Genuinely requires two or more files; all of them listed in `relevant`.
+
+- id: crs-01
+  category: cross_file
+  question: Which exception is raised when a request is forwarded too many times, and where is that ceiling actually set?
+  relevant: ["src/requests/exceptions.py", "src/requests/models.py", "src/requests/sessions.py"]
+  notes: Exception in exceptions.py, limit constant in models.py, enforcement in sessions.py.
+
+- id: crs-02
+  category: cross_file
+  question: How does a proxy set in an environment variable end up changing which connection pool is used?
+  relevant: ["src/requests/utils.py", "src/requests/sessions.py", "src/requests/adapters.py"]
+  notes: utils reads the environment, sessions merges it, adapters selects a proxy manager.
+
+- id: crs-03
+  category: cross_file
+  question: What identifying string does the library announce itself with, and where does the version inside it come from?
+  relevant: ["src/requests/utils.py", "src/requests/__version__.py"]
+  notes: default_user_agent in utils.py interpolates __version__ from __version__.py.
+
+- id: crs-04
+  category: cross_file
+  question: Which bundle of trusted certificates is used by default, and how is its location found?
+  relevant: ["src/requests/certs.py", "src/requests/adapters.py", "src/requests/utils.py"]
+  notes: certs.py resolves the bundle path, utils re-exports it, adapters consumes it.
+
+- id: crs-05
+  category: cross_file
+  question: How does a readable status name like not_found relate to the numeric code, and what raises an error from it?
+  relevant: ["src/requests/status_codes.py", "src/requests/models.py"]
+  notes: status_codes.py builds the lookup table; models.py raise_for_status turns codes into exceptions.
+
+- id: crs-06
+  category: cross_file
+  question: What happens between the top-level one-line call and the point where something is actually sent?
+  relevant: ["src/requests/api.py", "src/requests/sessions.py", "src/requests/adapters.py"]
+  notes: api.py opens a Session, sessions.py prepares and dispatches, adapters.py sends.
+
+- id: crs-07
+  category: cross_file
+  question: How does an authentication handler get attached to an outgoing request during preparation?
+  relevant: ["src/requests/auth.py", "src/requests/models.py", "src/requests/sessions.py"]
+  notes: auth.py defines callables, models.py prepare_auth invokes them, sessions.py supplies them.
+
+# ── doc_factual (5) ───────────────────────────────────────────────────────────
+# A specific fact from a document page. NOTE: page is 0-indexed metadata.
+
+- id: dfa-01
+  category: doc_factual
+  question: What output range does the tanh activation produce?
+  relevant: [{file: Deep_Learning_Unit1_Quick_Notes.pdf, page: 0}]
+  notes: Listed in the activation functions rundown on the first PDF page.
+
+- id: dfa-02
+  category: doc_factual
+  question: Which gradient descent variants are named as common optimisation methods?
+  relevant: [{file: Deep_Learning_Unit1_Quick_Notes.pdf, page: 1}]
+  notes: The optimisation section is on the second PDF page.
+
+- id: dfa-03
+  category: doc_factual
+  question: How long ago did the Solar System form?
+  relevant: [{file: space_planets_moons_advanced.txt, page: 0}]
+  span_anchor: "The Solar System formed approximately"
+  notes: Opening section states 4.57 billion years.
+
+- id: dfa-04
+  category: doc_factual
+  question: How tall is the largest volcano in the Solar System?
+  relevant: [{file: space_planets_moons_advanced.txt, page: 0}]
+  span_anchor: "Olympus Mons is the tallest volcano"
+  notes: Mars section, about 22 km.
+
+- id: dfa-05
+  category: doc_factual
+  question: How quickly is the Moon receding from Earth each year?
+  relevant: [{file: space_planets_moons_advanced.txt, page: 0}]
+  span_anchor: "causes ocean tides and is gradually moving away"
+  notes: Earth's Moon section, about 3.8 cm per year.
+
+# ── doc_conceptual (5) ────────────────────────────────────────────────────────
+
+- id: dco-01
+  category: doc_conceptual
+  question: How do artificial intelligence, machine learning and deep learning relate to one another in scope?
+  relevant: [{file: Deep_Learning_Unit1_Quick_Notes.pdf, page: 0}]
+  notes: Stated as nested subsets on the first PDF page.
+
+- id: dco-02
+  category: doc_conceptual
+  question: What does backpropagation actually compute, and what is it used for?
+  relevant: [{file: Deep_Learning_Unit1_Quick_Notes.pdf, page: 0}]
+  notes: Chain rule gradients feeding gradient descent.
+
+- id: dco-03
+  category: doc_conceptual
+  question: What separates learning from labelled data from learning without labels?
+  relevant: [{file: Deep_Learning_Unit1_Quick_Notes.pdf, page: 0}]
+  notes: Supervised vs unsupervised, in the machine learning section.
+
+- id: dco-04
+  category: doc_conceptual
+  question: Why is one of Jupiter's moons regarded as a promising place to look for life?
+  relevant: [{file: space_planets_moons_advanced.txt, page: 0}]
+  span_anchor: "Europa possesses a global subsurface ocean"
+  notes: Europa's subsurface ocean, in the Jovian moons section.
+
+- id: dco-05
+  category: doc_conceptual
+  question: What has to happen to a star for a black hole to form?
+  relevant: [{file: space_planets_moons_advanced.txt, page: 0}]
+  span_anchor: "A black hole forms when"
+  notes: >
+    Black Holes section, gravitational collapse after fuel exhaustion.
+    REVIEWED: the bias audit flags this at 0.60 overlap. Inspected and kept.
+    The overlap is carried by "black", "hole" and "star" - the entity's own
+    name, which no natural phrasing of this question can avoid - not by
+    inherited sentence structure. Rewording to dodge the flag would make the
+    question contrived and less realistic, which is the worse error.
+
+# ── unanswerable (7) ──────────────────────────────────────────────────────────
+# Plausible-sounding, verified ABSENT from the entire corpus. relevant is [].
+
+- id: una-01
+  category: unanswerable
+  question: How do I enable HTTP/3 or QUIC support?
+  relevant: []
+  notes: Verified - "HTTP/3" appears nowhere in the corpus. requests has no HTTP/3 support.
+
+- id: una-02
+  category: unanswerable
+  question: How do I consume a server-sent events (SSE) stream?
+  relevant: []
+  notes: >
+    Verified - "server-sent" and "SSE" appear nowhere in the corpus.
+    REPLACES an earlier async/await question that the bias audit caught as
+    ANSWERABLE: docs/community/recommended.rst discusses ``async``/``await``
+    via Twisted, which a grep for "await " with a trailing space had missed.
+    Recorded here because the original error is the more instructive fact.
+
+- id: una-03
+  category: unanswerable
+  question: How do I open a WebSocket connection?
+  relevant: []
+  notes: Verified - "websocket" appears nowhere in the corpus.
+
+- id: una-04
+  category: unanswerable
+  question: Which activation function does the material recommend for transformer attention layers?
+  relevant: []
+  notes: Verified - "transformer" and "attention" appear zero times in the PDF.
+
+- id: una-05
+  category: unanswerable
+  question: What does the material say about dropout and batch normalisation as regularisation?
+  relevant: []
+  notes: Verified - "dropout" and "batch normalization" appear zero times in the PDF.
+
+- id: una-06
+  category: unanswerable
+  question: What is the orbital period of Proxima Centauri b?
+  relevant: []
+  notes: Verified - "Proxima Centauri" appears zero times in the .txt (earlier substring hits were "approximately").
+
+- id: una-07
+  category: unanswerable
+  question: What did the Voyager probes discover about the outer planets?
+  relevant: []
+  notes: Verified - "Voyager" appears zero times in the .txt.
+
+# ══════════════════════════════════════════════════════════════════════════════
+# v2 ADDITIONS
+#
+# Corpus expanded with V_SEM_3_to_5_units_ETCE.docx (99 chunks, 78,397 chars).
+#
+# GROUND TRUTH FOR THE .docx IS start_index RANGES, not (file, page).
+# Docx2txtLoader returns ONE Document at page 0, so all 99 chunks share a
+# single (file, page) locator - a file-level hit would be satisfied by any
+# chunk of a 78k-character document and would measure nothing.
+#
+# NOTE: the document contains a 5,439-character VERBATIM DUPLICATE block,
+# [62169,67608) and [67648,73087), covering the kinesics / non-verbal /
+# presentation material. Questions answered there list BOTH ranges; listing
+# only one would score a correct retrieval of the other copy as a miss.
+# ══════════════════════════════════════════════════════════════════════════════
+
+# ── Bucket 1 additions (+5, code corpus, repo pin unchanged) ─────────────────
+
+- id: eid-09
+  category: exact_identifier
+  question: get_netrc_auth
+  relevant: ["src/requests/utils.py"]
+  span_anchor: "def get_netrc_auth"
+  notes: Looks up credentials from the user's netrc file. Defined in utils.py.
+
+- id: eid-10
+  category: exact_identifier
+  question: guess_json_utf
+  relevant: ["src/requests/utils.py"]
+  span_anchor: "def guess_json_utf"
+  notes: Detects the UTF variant of a JSON byte string from its BOM or null pattern.
+
+- id: lit-09
+  category: literal_string
+  question: DEFAULT_RETRIES
+  relevant: ["src/requests/adapters.py"]
+  span_anchor: "DEFAULT_RETRIES"
+  notes: Adapter retry-count constant.
+
+- id: par-09
+  category: paraphrase
+  question: How do I stop the library picking up sign-in details stored in a file in my home directory?
+  relevant: ["src/requests/utils.py", "src/requests/sessions.py"]
+  notes: >
+    netrc credential lookup and trust_env. Question avoids "netrc", "auth"
+    and "credentials" so it does not hand BM25 the answer's vocabulary.
+
+- id: crs-08
+  category: cross_file
+  question: Which error is raised when a compressed reply body cannot be decoded, and where is the decoding actually attempted?
+  relevant: ["src/requests/exceptions.py", "src/requests/models.py"]
+  notes: ContentDecodingError is defined in exceptions.py; decoding happens in models.py iter_content.
+
+# ── doc_factual (+6) ────────────────────────────────────────────────────────
+
+- id: dfa-06
+  category: doc_factual
+  question: How many parts does the material list for a formal report?
+  relevant: [{file: V_SEM_3_to_5_units_ETCE.docx, start: 6155, end: 7253}]
+  notes: The enumerated list of typical formal-report parts.
+
+- id: dfa-07
+  category: doc_factual
+  question: What headings does a memo-format report carry at the top?
+  relevant: [{file: V_SEM_3_to_5_units_ETCE.docx, start: 1483, end: 3057}]
+  notes: Memo format section - To, From, Date, Subject.
+
+- id: dfa-08
+  category: doc_factual
+  question: What items are listed as package contents in the AirPods example manual?
+  relevant: [{file: V_SEM_3_to_5_units_ETCE.docx, start: 50900, end: 51600}]
+  notes: Worked example; the document spells it "Air Pods".
+
+- id: dfa-09
+  category: doc_factual
+  question: Which four report types are introduced at the start of the unit?
+  relevant: [{file: V_SEM_3_to_5_units_ETCE.docx, start: 3057, end: 4151}]
+  notes: Progress, Project, Feasibility, Evaluation.
+
+- id: dfa-10
+  category: doc_factual
+  question: What information belongs on the title page of a user manual?
+  relevant: [{file: V_SEM_3_to_5_units_ETCE.docx, start: 40296, end: 42582}]
+  notes: First element of the user-manual list.
+
+- id: dfa-11
+  category: doc_factual
+  question: In the sample progress report, who is it addressed to and who sent it?
+  relevant: [{file: V_SEM_3_to_5_units_ETCE.docx, start: 13197, end: 14260}]
+  notes: Sample memo-style progress report header.
+
+# ── doc_conceptual (+5) ─────────────────────────────────────────────────────
+
+- id: dco-06
+  category: doc_conceptual
+  question: How does a progress report differ from an evaluation report in purpose and timing?
+  relevant: [{file: V_SEM_3_to_5_units_ETCE.docx, start: 18495, end: 19212}]
+  notes: >
+    The comparison table. Docx2txtLoader flattens Word tables into alternating
+    paragraphs, so row structure is implicit but the content is intact.
+    Labelled doc_conceptual, NOT cross_file - it is a comparison within one
+    document, not a multi-file information need.
+
+- id: dco-07
+  category: doc_conceptual
+  question: When would a short internal note be a better choice than a formal letter for reporting?
+  relevant: [{file: V_SEM_3_to_5_units_ETCE.docx, start: 1483, end: 3057}]
+  notes: Memo versus letter format rationale.
+
+- id: dco-08
+  category: doc_conceptual
+  question: What different kinds of viability does a proposal need to be assessed for before it goes ahead?
+  relevant: [{file: V_SEM_3_to_5_units_ETCE.docx, start: 27623, end: 28207}]
+  notes: >
+    Types of feasibility study - technical, economic, operational, legal,
+    schedule. REWRITTEN after the bias audit: the original phrasing ("What is
+    a feasibility report for?") scored 1.00 overlap because its only two
+    content tokens were "feasibility" and "report", both literal section
+    vocabulary - a doc_exact_term question wearing a conceptual label. The
+    replacement also targets a DIFFERENT section, avoiding a near-duplicate
+    information need with dpa-02.
+
+- id: dco-09
+  category: doc_conceptual
+  question: Why is it worth writing down how to operate something instead of letting people work it out themselves?
+  relevant: [{file: V_SEM_3_to_5_units_ETCE.docx, start: 35524, end: 36200}]
+  notes: >
+    Significance of instructions and manuals. REWRITTEN after the bias audit:
+    the original ("Why do instructions and manuals matter in technical
+    communication?") scored 0.60 by reusing the section heading's own words.
+
+- id: dco-10
+  category: doc_conceptual
+  question: What part does body language play in how a message is received?
+  relevant:
+    - {file: V_SEM_3_to_5_units_ETCE.docx, start: 62169, end: 67608}
+    - {file: V_SEM_3_to_5_units_ETCE.docx, start: 67648, end: 73087}
+  notes: >
+    Answerable from either copy of the duplicated block. Both listed so a
+    correct retrieval of the second copy is not scored as a miss.
+
+# ── doc_paraphrase (+6) - purpose in different vocabulary ───────────────────
+
+- id: dpa-01
+  category: doc_paraphrase
+  question: How do I tell my supervisor how far along the work has got so far?
+  relevant: [{file: V_SEM_3_to_5_units_ETCE.docx, start: 11521, end: 13982}]
+  notes: Progress report. Question avoids "progress" and "report".
+
+- id: dpa-02
+  category: doc_paraphrase
+  question: Which document helps decide whether a proposed plan is actually worth doing?
+  relevant: [{file: V_SEM_3_to_5_units_ETCE.docx, start: 26668, end: 27623}]
+  notes: Feasibility report. Question avoids "feasibility".
+
+- id: dpa-03
+  category: doc_paraphrase
+  question: What paperwork explains to a buyer how to operate the thing they bought?
+  relevant: [{file: V_SEM_3_to_5_units_ETCE.docx, start: 39959, end: 42582}]
+  notes: User manual. Question avoids "user" and "manual".
+
+# dpa-04 REMOVED by the blind quality audit (2026-09-09 20:24:18 IST),
+# criterion DUPLICATE: same ground-truth range and substantially the same
+# information need as dfa-07. Removed before any v2 arm was run, so the
+# removal cannot be outcome-motivated. See benchmark/blind_audit_log.md.
+
+- id: dpa-05
+  category: doc_paraphrase
+  question: What written account judges how well a finished piece of work actually turned out?
+  relevant: [{file: V_SEM_3_to_5_units_ETCE.docx, start: 13982, end: 16482}]
+  notes: Evaluation report. Question avoids "evaluation".
+
+- id: dpa-06
+  category: doc_paraphrase
+  question: What should I think about beforehand so a talk holds the attention of the people listening?
+  relevant: [{file: V_SEM_3_to_5_units_ETCE.docx, start: 73160, end: 74712}]
+  notes: Presentation planning factors. Question avoids "presentation" and "audience".
+
+# ── doc_exact_term (+5) - the literal term, as a user would type it ─────────
+
+- id: dex-01
+  category: doc_exact_term
+  question: Kinesics
+  relevant:
+    - {file: V_SEM_3_to_5_units_ETCE.docx, start: 62169, end: 67608}
+    - {file: V_SEM_3_to_5_units_ETCE.docx, start: 67648, end: 73087}
+  notes: Unusual technical term, unlikely to appear by accident. Duplicated block.
+
+- id: dex-02
+  category: doc_exact_term
+  question: Air Pods User Manual
+  relevant: [{file: V_SEM_3_to_5_units_ETCE.docx, start: 50900, end: 51600}]
+  notes: Named worked example, spelled with a space in the source.
+
+- id: dex-03
+  category: doc_exact_term
+  question: Operational Manual
+  relevant: [{file: V_SEM_3_to_5_units_ETCE.docx, start: 45540, end: 47730}]
+  notes: Section title.
+
+- id: dex-04
+  category: doc_exact_term
+  question: Executive Summary
+  relevant:
+    - {file: V_SEM_3_to_5_units_ETCE.docx, start: 16482, end: 16843}
+    - {file: V_SEM_3_to_5_units_ETCE.docx, start: 30877, end: 31230}
+  notes: Appears as a numbered element in two different report structures; both valid.
+
+- id: dex-05
+  category: doc_exact_term
+  question: Manuscript Format
+  relevant: [{file: V_SEM_3_to_5_units_ETCE.docx, start: 2269, end: 2668}]
+  notes: One of the four common report formats.
+
+# ── doc_discrimination (+8) - must distinguish near-duplicate sections ──────
+# The hard sub-type. Each answer sits in one of a cluster of topically
+# adjacent, similarly-worded sections; retrieving a sibling is a failure.
+
+- id: ddi-01
+  category: doc_discrimination
+  question: What makes a feasibility report a good one specifically?
+  relevant: [{file: V_SEM_3_to_5_units_ETCE.docx, start: 28207, end: 28667}]
+  notes: >
+    Must be distinguished from three sibling sections - Characteristics of a
+    Good Report, of a Report, and of a Project Report.
+
+- id: ddi-02
+  category: doc_discrimination
+  question: Which qualities are listed as characteristic of a project report?
+  relevant: [{file: V_SEM_3_to_5_units_ETCE.docx, start: 22290, end: 22629}]
+  notes: Sibling of the other three "Characteristics of..." sections.
+
+- id: ddi-03
+  category: doc_discrimination
+  question: What features should any report have to be considered a good one?
+  relevant:
+    - {file: V_SEM_3_to_5_units_ETCE.docx, start: 319, end: 504}
+    - {file: V_SEM_3_to_5_units_ETCE.docx, start: 9854, end: 10496}
+  notes: >
+    The two GENERAL characteristics sections, as opposed to the project- and
+    feasibility-specific ones. Both general sections are valid answers.
+
+- id: ddi-04
+  category: doc_discrimination
+  question: Which elements make up a user manual?
+  relevant: [{file: V_SEM_3_to_5_units_ETCE.docx, start: 40296, end: 42582}]
+  notes: Must be distinguished from the product- and operational-manual element lists.
+
+- id: ddi-05
+  category: doc_discrimination
+  question: Which elements make up a product manual?
+  relevant: [{file: V_SEM_3_to_5_units_ETCE.docx, start: 43036, end: 45540}]
+  notes: Sibling of the user- and operational-manual element lists.
+
+- id: ddi-06
+  category: doc_discrimination
+  question: Which elements make up an operational manual?
+  relevant: [{file: V_SEM_3_to_5_units_ETCE.docx, start: 45917, end: 47730}]
+  notes: Sibling of the user- and product-manual element lists.
+
+- id: ddi-07
+  category: doc_discrimination
+  question: How do the three manual types differ from one another side by side?
+  relevant: [{file: V_SEM_3_to_5_units_ETCE.docx, start: 54094, end: 56381}]
+  notes: >
+    The ASCII comparison table. Verified to span THREE chunks (68, 69, 70), so
+    no single chunk holds the whole comparison; any overlapping chunk counts.
+
+- id: ddi-08
+  category: doc_discrimination
+  question: What is the stated purpose of a project report, as opposed to its structure?
+  relevant: [{file: V_SEM_3_to_5_units_ETCE.docx, start: 21863, end: 22290}]
+  notes: Must be distinguished from the adjacent characteristics and structure subsections.
+
+# ── Bucket 3 additions (+3) - distinct failure modes ────────────────────────
+# v1's unanswerables were off-domain (HTTP/3, Proxima Centauri). These are a
+# HARDER, distinct mode: topics adjacent to material the corpus DOES cover.
+
+- id: una-08
+  category: unanswerable
+  question: How should a Gantt chart be prepared for project scheduling?
+  relevant: []
+  notes: >
+    Verified - "gantt" appears 0 times across all three documents. Distinct
+    failure mode: the document DOES cover visual aids (bar charts, tree
+    diagrams, flowcharts), so this is adjacent-but-absent, not off-domain.
+
+- id: una-09
+  category: unanswerable
+  question: How should minutes of a meeting be recorded and circulated?
+  relevant: []
+  notes: Verified - "minutes of meeting" appears 0 times. Plausible ETCE topic, absent.
+
+- id: una-10
+  category: unanswerable
+  question: What guidance is given on writing a resume or curriculum vitae?
+  relevant: []
+  notes: Verified - "resume" and "curriculum vitae" both appear 0 times.

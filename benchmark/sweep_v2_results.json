@@ -1,0 +1,1481 @@
+{
+  "store": "chroma_bench_1788964989_3e871418",
+  "per_config": {
+    "C0_baseline": {
+      "config": {
+        "final_k": 5,
+        "gate": false
+      },
+      "why": "the shipped configuration; reused from results.json, not recomputed",
+      "bucket1": {
+        "n": 44,
+        "hit@1": {
+          "successes": 23,
+          "n": 44,
+          "value": 0.5227272727272727,
+          "ci_low": 0.3793546556062164,
+          "ci_high": 0.662450089677489
+        },
+        "hit@3": {
+          "successes": 37,
+          "n": 44,
+          "value": 0.8409090909090909,
+          "ci_low": 0.7063379493775939,
+          "ci_high": 0.9207332298779876
+        },
+        "hit@5": {
+          "successes": 38,
+          "n": 44,
+          "value": 0.8636363636363636,
+          "ci_low": 0.7329054695148456,
+          "ci_high": 0.9359704550244412
+        },
+        "hit@final_k(5)": {
+          "successes": 38,
+          "n": 44,
+          "value": 0.8636363636363636,
+          "ci_low": 0.7329054695148456,
+          "ci_high": 0.9359704550244412
+        },
+        "mrr@5": 0.6636363636363636,
+        "ranks": {
+          "eid-01": 2,
+          "eid-02": 3,
+          "eid-03": 2,
+          "eid-04": null,
+          "eid-05": 3,
+          "eid-06": 1,
+          "eid-07": 1,
+          "eid-08": 2,
+          "par-01": 1,
+          "par-02": 1,
+          "par-03": 2,
+          "par-04": 1,
+          "par-05": 1,
+          "par-06": null,
+          "par-07": 1,
+          "par-08": 1,
+          "con-01": 3,
+          "con-02": 2,
+          "con-03": 1,
+          "con-04": 5,
+          "con-05": 3,
+          "con-06": 2,
+          "con-07": 1,
+          "con-08": 2,
+          "lit-01": 1,
+          "lit-02": 1,
+          "lit-03": 1,
+          "lit-04": 1,
+          "lit-05": 1,
+          "lit-06": 1,
+          "lit-07": 1,
+          "lit-08": 1,
+          "crs-01": 3,
+          "crs-02": 1,
+          "crs-03": null,
+          "crs-04": 3,
+          "crs-05": 1,
+          "crs-06": null,
+          "crs-07": null,
+          "eid-09": 1,
+          "eid-10": 2,
+          "lit-09": 1,
+          "par-09": null,
+          "crs-08": 1
+        }
+      },
+      "bucket2": {
+        "n": 39,
+        "hit@1": {
+          "successes": 28,
+          "n": 39,
+          "value": 0.717948717948718,
+          "ci_low": 0.5622468051697918,
+          "ci_high": 0.8345650791115233
+        },
+        "hit@3": {
+          "successes": 33,
+          "n": 39,
+          "value": 0.8461538461538461,
+          "ci_low": 0.7027053635107331,
+          "ci_high": 0.927525276230179
+        },
+        "hit@5": {
+          "successes": 34,
+          "n": 39,
+          "value": 0.8717948717948718,
+          "ci_low": 0.7329425662025455,
+          "ci_high": 0.9439718246302862
+        },
+        "hit@final_k(5)": {
+          "successes": 34,
+          "n": 39,
+          "value": 0.8717948717948718,
+          "ci_low": 0.7329425662025455,
+          "ci_high": 0.9439718246302862
+        },
+        "mrr@5": 0.7743589743589743,
+        "ranks": {
+          "dfa-01": 1,
+          "dfa-02": 1,
+          "dfa-03": 1,
+          "dfa-04": 1,
+          "dfa-05": 1,
+          "dco-01": 1,
+          "dco-02": 1,
+          "dco-03": 1,
+          "dco-04": 1,
+          "dco-05": 1,
+          "dfa-06": 3,
+          "dfa-07": 1,
+          "dfa-08": 1,
+          "dfa-09": 1,
+          "dfa-10": 1,
+          "dfa-11": 2,
+          "dco-06": 5,
+          "dco-07": 1,
+          "dco-08": 2,
+          "dco-09": 3,
+          "dco-10": 3,
+          "dpa-01": 1,
+          "dpa-02": null,
+          "dpa-03": null,
+          "dpa-05": null,
+          "dpa-06": null,
+          "dex-01": 1,
+          "dex-02": 1,
+          "dex-03": 1,
+          "dex-04": null,
+          "dex-05": 1,
+          "ddi-01": 1,
+          "ddi-02": 1,
+          "ddi-03": 1,
+          "ddi-04": 1,
+          "ddi-05": 1,
+          "ddi-06": 1,
+          "ddi-07": 1,
+          "ddi-08": 1
+        }
+      },
+      "provenance_b1": {
+        "vector+bm25": 27,
+        "bm25": 4,
+        "vector": 7
+      },
+      "provenance_b2": {
+        "vector+bm25": 29,
+        "bm25": 1,
+        "vector": 4
+      },
+      "bucket3": {
+        "threshold": 0.016261,
+        "above_threshold": {
+          "successes": 1,
+          "n": 10,
+          "value": 0.1,
+          "ci_low": 0.017876213095072868,
+          "ci_high": 0.4041500267952385
+        }
+      },
+      "recovery": {
+        "crs-03": {
+          "rank": null,
+          "recovered": false
+        },
+        "crs-06": {
+          "rank": null,
+          "recovered": false
+        }
+      }
+    },
+    "C1_k6": {
+      "config": {
+        "final_k": 6,
+        "gate": false
+      },
+      "why": "minimal response to the 'relevant chunk sat at dense rank 4' finding",
+      "bucket1": {
+        "n": 44,
+        "hit@1": {
+          "successes": 23,
+          "n": 44,
+          "value": 0.5227272727272727,
+          "ci_low": 0.3793546556062164,
+          "ci_high": 0.662450089677489
+        },
+        "hit@3": {
+          "successes": 37,
+          "n": 44,
+          "value": 0.8409090909090909,
+          "ci_low": 0.7063379493775939,
+          "ci_high": 0.9207332298779876
+        },
+        "hit@5": {
+          "successes": 38,
+          "n": 44,
+          "value": 0.8636363636363636,
+          "ci_low": 0.7329054695148456,
+          "ci_high": 0.9359704550244412
+        },
+        "hit@final_k(6)": {
+          "successes": 38,
+          "n": 44,
+          "value": 0.8636363636363636,
+          "ci_low": 0.7329054695148456,
+          "ci_high": 0.9359704550244412
+        },
+        "mrr@5": 0.6636363636363636,
+        "ranks": {
+          "eid-01": 2,
+          "eid-02": 3,
+          "eid-03": 2,
+          "eid-04": null,
+          "eid-05": 3,
+          "eid-06": 1,
+          "eid-07": 1,
+          "eid-08": 2,
+          "par-01": 1,
+          "par-02": 1,
+          "par-03": 2,
+          "par-04": 1,
+          "par-05": 1,
+          "par-06": null,
+          "par-07": 1,
+          "par-08": 1,
+          "con-01": 3,
+          "con-02": 2,
+          "con-03": 1,
+          "con-04": 5,
+          "con-05": 3,
+          "con-06": 2,
+          "con-07": 1,
+          "con-08": 2,
+          "lit-01": 1,
+          "lit-02": 1,
+          "lit-03": 1,
+          "lit-04": 1,
+          "lit-05": 1,
+          "lit-06": 1,
+          "lit-07": 1,
+          "lit-08": 1,
+          "crs-01": 3,
+          "crs-02": 1,
+          "crs-03": null,
+          "crs-04": 3,
+          "crs-05": 1,
+          "crs-06": null,
+          "crs-07": null,
+          "eid-09": 1,
+          "eid-10": 2,
+          "lit-09": 1,
+          "par-09": null,
+          "crs-08": 1
+        }
+      },
+      "bucket2": {
+        "n": 39,
+        "hit@1": {
+          "successes": 28,
+          "n": 39,
+          "value": 0.717948717948718,
+          "ci_low": 0.5622468051697918,
+          "ci_high": 0.8345650791115233
+        },
+        "hit@3": {
+          "successes": 33,
+          "n": 39,
+          "value": 0.8461538461538461,
+          "ci_low": 0.7027053635107331,
+          "ci_high": 0.927525276230179
+        },
+        "hit@5": {
+          "successes": 34,
+          "n": 39,
+          "value": 0.8717948717948718,
+          "ci_low": 0.7329425662025455,
+          "ci_high": 0.9439718246302862
+        },
+        "hit@final_k(6)": {
+          "successes": 35,
+          "n": 39,
+          "value": 0.8974358974358975,
+          "ci_low": 0.7642114553714348,
+          "ci_high": 0.9593866865533163
+        },
+        "mrr@5": 0.7743589743589743,
+        "ranks": {
+          "dfa-01": 1,
+          "dfa-02": 1,
+          "dfa-03": 1,
+          "dfa-04": 1,
+          "dfa-05": 1,
+          "dco-01": 1,
+          "dco-02": 1,
+          "dco-03": 1,
+          "dco-04": 1,
+          "dco-05": 1,
+          "dfa-06": 3,
+          "dfa-07": 1,
+          "dfa-08": 1,
+          "dfa-09": 1,
+          "dfa-10": 1,
+          "dfa-11": 2,
+          "dco-06": 5,
+          "dco-07": 1,
+          "dco-08": 2,
+          "dco-09": 3,
+          "dco-10": 3,
+          "dpa-01": 1,
+          "dpa-02": null,
+          "dpa-03": null,
+          "dpa-05": null,
+          "dpa-06": null,
+          "dex-01": 1,
+          "dex-02": 1,
+          "dex-03": 1,
+          "dex-04": 6,
+          "dex-05": 1,
+          "ddi-01": 1,
+          "ddi-02": 1,
+          "ddi-03": 1,
+          "ddi-04": 1,
+          "ddi-05": 1,
+          "ddi-06": 1,
+          "ddi-07": 1,
+          "ddi-08": 1
+        }
+      },
+      "provenance_b1": {
+        "vector+bm25": 27,
+        "bm25": 4,
+        "vector": 7
+      },
+      "provenance_b2": {
+        "vector+bm25": 29,
+        "bm25": 2,
+        "vector": 4
+      },
+      "bucket3": {
+        "threshold": 0.016261,
+        "above_threshold": {
+          "successes": 1,
+          "n": 10,
+          "value": 0.1,
+          "ci_low": 0.017876213095072868,
+          "ci_high": 0.4041500267952385
+        }
+      },
+      "recovery": {
+        "crs-03": {
+          "rank": null,
+          "recovered": false
+        },
+        "crs-06": {
+          "rank": null,
+          "recovered": false
+        }
+      }
+    },
+    "C2_k8": {
+      "config": {
+        "final_k": 8,
+        "gate": false
+      },
+      "why": "tests whether the wider 13-query 'worse' group recovers too",
+      "bucket1": {
+        "n": 44,
+        "hit@1": {
+          "successes": 23,
+          "n": 44,
+          "value": 0.5227272727272727,
+          "ci_low": 0.3793546556062164,
+          "ci_high": 0.662450089677489
+        },
+        "hit@3": {
+          "successes": 37,
+          "n": 44,
+          "value": 0.8409090909090909,
+          "ci_low": 0.7063379493775939,
+          "ci_high": 0.9207332298779876
+        },
+        "hit@5": {
+          "successes": 38,
+          "n": 44,
+          "value": 0.8636363636363636,
+          "ci_low": 0.7329054695148456,
+          "ci_high": 0.9359704550244412
+        },
+        "hit@final_k(8)": {
+          "successes": 41,
+          "n": 44,
+          "value": 0.9318181818181818,
+          "ci_low": 0.8177495562977846,
+          "ci_high": 0.9765406040926183
+        },
+        "mrr@5": 0.6636363636363636,
+        "ranks": {
+          "eid-01": 2,
+          "eid-02": 3,
+          "eid-03": 2,
+          "eid-04": null,
+          "eid-05": 3,
+          "eid-06": 1,
+          "eid-07": 1,
+          "eid-08": 2,
+          "par-01": 1,
+          "par-02": 1,
+          "par-03": 2,
+          "par-04": 1,
+          "par-05": 1,
+          "par-06": null,
+          "par-07": 1,
+          "par-08": 1,
+          "con-01": 3,
+          "con-02": 2,
+          "con-03": 1,
+          "con-04": 5,
+          "con-05": 3,
+          "con-06": 2,
+          "con-07": 1,
+          "con-08": 2,
+          "lit-01": 1,
+          "lit-02": 1,
+          "lit-03": 1,
+          "lit-04": 1,
+          "lit-05": 1,
+          "lit-06": 1,
+          "lit-07": 1,
+          "lit-08": 1,
+          "crs-01": 3,
+          "crs-02": 1,
+          "crs-03": 7,
+          "crs-04": 3,
+          "crs-05": 1,
+          "crs-06": 7,
+          "crs-07": 8,
+          "eid-09": 1,
+          "eid-10": 2,
+          "lit-09": 1,
+          "par-09": null,
+          "crs-08": 1
+        }
+      },
+      "bucket2": {
+        "n": 39,
+        "hit@1": {
+          "successes": 28,
+          "n": 39,
+          "value": 0.717948717948718,
+          "ci_low": 0.5622468051697918,
+          "ci_high": 0.8345650791115233
+        },
+        "hit@3": {
+          "successes": 33,
+          "n": 39,
+          "value": 0.8461538461538461,
+          "ci_low": 0.7027053635107331,
+          "ci_high": 0.927525276230179
+        },
+        "hit@5": {
+          "successes": 34,
+          "n": 39,
+          "value": 0.8717948717948718,
+          "ci_low": 0.7329425662025455,
+          "ci_high": 0.9439718246302862
+        },
+        "hit@final_k(8)": {
+          "successes": 36,
+          "n": 39,
+          "value": 0.9230769230769231,
+          "ci_low": 0.7967892883204503,
+          "ci_high": 0.9734926046962203
+        },
+        "mrr@5": 0.7743589743589743,
+        "ranks": {
+          "dfa-01": 1,
+          "dfa-02": 1,
+          "dfa-03": 1,
+          "dfa-04": 1,
+          "dfa-05": 1,
+          "dco-01": 1,
+          "dco-02": 1,
+          "dco-03": 1,
+          "dco-04": 1,
+          "dco-05": 1,
+          "dfa-06": 3,
+          "dfa-07": 1,
+          "dfa-08": 1,
+          "dfa-09": 1,
+          "dfa-10": 1,
+          "dfa-11": 2,
+          "dco-06": 5,
+          "dco-07": 1,
+          "dco-08": 2,
+          "dco-09": 3,
+          "dco-10": 3,
+          "dpa-01": 1,
+          "dpa-02": 7,
+          "dpa-03": null,
+          "dpa-05": null,
+          "dpa-06": null,
+          "dex-01": 1,
+          "dex-02": 1,
+          "dex-03": 1,
+          "dex-04": 6,
+          "dex-05": 1,
+          "ddi-01": 1,
+          "ddi-02": 1,
+          "ddi-03": 1,
+          "ddi-04": 1,
+          "ddi-05": 1,
+          "ddi-06": 1,
+          "ddi-07": 1,
+          "ddi-08": 1
+        }
+      },
+      "provenance_b1": {
+        "vector+bm25": 27,
+        "bm25": 4,
+        "vector": 10
+      },
+      "provenance_b2": {
+        "vector+bm25": 29,
+        "bm25": 3,
+        "vector": 4
+      },
+      "bucket3": {
+        "threshold": 0.016261,
+        "above_threshold": {
+          "successes": 1,
+          "n": 10,
+          "value": 0.1,
+          "ci_low": 0.017876213095072868,
+          "ci_high": 0.4041500267952385
+        }
+      },
+      "recovery": {
+        "crs-03": {
+          "rank": 7,
+          "recovered": true
+        },
+        "crs-06": {
+          "rank": 7,
+          "recovered": true
+        }
+      }
+    },
+    "W1_55_45": {
+      "config": {
+        "final_k": 5,
+        "gate": false,
+        "vector_weight": 0.55,
+        "bm25_weight": 0.45
+      },
+      "why": "v2: reweight RRF away from the equal-weight tie-break that produces strict interleaving. Pre-registered in this round; NOT previously published as a pre-registered config.",
+      "bucket1": {
+        "n": 44,
+        "hit@1": {
+          "successes": 24,
+          "n": 44,
+          "value": 0.5454545454545454,
+          "ci_low": 0.40066183198961974,
+          "ci_high": 0.6829476585777909
+        },
+        "hit@3": {
+          "successes": 36,
+          "n": 44,
+          "value": 0.8181818181818182,
+          "ci_low": 0.6803944911281533,
+          "ci_high": 0.9048719428437227
+        },
+        "hit@5": {
+          "successes": 40,
+          "n": 44,
+          "value": 0.9090909090909091,
+          "ci_low": 0.7884076083340138,
+          "ci_high": 0.9640778067726837
+        },
+        "hit@final_k(5)": {
+          "successes": 40,
+          "n": 44,
+          "value": 0.9090909090909091,
+          "ci_low": 0.7884076083340138,
+          "ci_high": 0.9640778067726837
+        },
+        "mrr@5": 0.684469696969697,
+        "ranks": {
+          "eid-01": 2,
+          "eid-02": 3,
+          "eid-03": 2,
+          "eid-04": null,
+          "eid-05": 2,
+          "eid-06": 1,
+          "eid-07": 1,
+          "eid-08": 1,
+          "par-01": 1,
+          "par-02": 1,
+          "par-03": 3,
+          "par-04": 1,
+          "par-05": 1,
+          "par-06": null,
+          "par-07": 1,
+          "par-08": 1,
+          "con-01": 3,
+          "con-02": 4,
+          "con-03": 1,
+          "con-04": 3,
+          "con-05": 2,
+          "con-06": 2,
+          "con-07": 1,
+          "con-08": 2,
+          "lit-01": 1,
+          "lit-02": 1,
+          "lit-03": 1,
+          "lit-04": 1,
+          "lit-05": 1,
+          "lit-06": 1,
+          "lit-07": 1,
+          "lit-08": 1,
+          "crs-01": 5,
+          "crs-02": 1,
+          "crs-03": 4,
+          "crs-04": 3,
+          "crs-05": 1,
+          "crs-06": 4,
+          "crs-07": null,
+          "eid-09": 1,
+          "eid-10": 2,
+          "lit-09": 1,
+          "par-09": null,
+          "crs-08": 1
+        }
+      },
+      "bucket2": {
+        "n": 39,
+        "hit@1": {
+          "successes": 28,
+          "n": 39,
+          "value": 0.717948717948718,
+          "ci_low": 0.5622468051697918,
+          "ci_high": 0.8345650791115233
+        },
+        "hit@3": {
+          "successes": 32,
+          "n": 39,
+          "value": 0.8205128205128205,
+          "ci_low": 0.6733195433811838,
+          "ci_high": 0.9102273452678089
+        },
+        "hit@5": {
+          "successes": 33,
+          "n": 39,
+          "value": 0.8461538461538461,
+          "ci_low": 0.7027053635107331,
+          "ci_high": 0.927525276230179
+        },
+        "hit@final_k(5)": {
+          "successes": 33,
+          "n": 39,
+          "value": 0.8461538461538461,
+          "ci_low": 0.7027053635107331,
+          "ci_high": 0.927525276230179
+        },
+        "mrr@5": 0.7658119658119658,
+        "ranks": {
+          "dfa-01": 1,
+          "dfa-02": 1,
+          "dfa-03": 1,
+          "dfa-04": 1,
+          "dfa-05": 1,
+          "dco-01": 1,
+          "dco-02": 1,
+          "dco-03": 1,
+          "dco-04": 1,
+          "dco-05": 1,
+          "dfa-06": 3,
+          "dfa-07": 1,
+          "dfa-08": 1,
+          "dfa-09": 1,
+          "dfa-10": 1,
+          "dfa-11": null,
+          "dco-06": 5,
+          "dco-07": 1,
+          "dco-08": 2,
+          "dco-09": 2,
+          "dco-10": 3,
+          "dpa-01": 1,
+          "dpa-02": null,
+          "dpa-03": null,
+          "dpa-05": null,
+          "dpa-06": null,
+          "dex-01": 1,
+          "dex-02": 1,
+          "dex-03": 1,
+          "dex-04": null,
+          "dex-05": 1,
+          "ddi-01": 1,
+          "ddi-02": 1,
+          "ddi-03": 1,
+          "ddi-04": 1,
+          "ddi-05": 1,
+          "ddi-06": 1,
+          "ddi-07": 1,
+          "ddi-08": 1
+        }
+      },
+      "provenance_b1": {
+        "vector+bm25": 27,
+        "vector": 13
+      },
+      "provenance_b2": {
+        "vector+bm25": 29,
+        "vector": 4
+      },
+      "bucket3": {
+        "threshold": 0.016248,
+        "above_threshold": {
+          "successes": 1,
+          "n": 10,
+          "value": 0.1,
+          "ci_low": 0.017876213095072868,
+          "ci_high": 0.4041500267952385
+        }
+      },
+      "recovery": {
+        "crs-03": {
+          "rank": 4,
+          "recovered": true
+        },
+        "crs-06": {
+          "rank": 4,
+          "recovered": true
+        }
+      }
+    },
+    "W2_60_40": {
+      "config": {
+        "final_k": 5,
+        "gate": false,
+        "vector_weight": 0.6,
+        "bm25_weight": 0.4
+      },
+      "why": "v2: a stronger version of the same reweight hypothesis.",
+      "bucket1": {
+        "n": 44,
+        "hit@1": {
+          "successes": 25,
+          "n": 44,
+          "value": 0.5681818181818182,
+          "ci_low": 0.4222414699362943,
+          "ci_high": 0.703172765914822
+        },
+        "hit@3": {
+          "successes": 36,
+          "n": 44,
+          "value": 0.8181818181818182,
+          "ci_low": 0.6803944911281533,
+          "ci_high": 0.9048719428437227
+        },
+        "hit@5": {
+          "successes": 40,
+          "n": 44,
+          "value": 0.9090909090909091,
+          "ci_low": 0.7884076083340138,
+          "ci_high": 0.9640778067726837
+        },
+        "hit@final_k(5)": {
+          "successes": 40,
+          "n": 44,
+          "value": 0.9090909090909091,
+          "ci_low": 0.7884076083340138,
+          "ci_high": 0.9640778067726837
+        },
+        "mrr@5": 0.6958333333333333,
+        "ranks": {
+          "eid-01": 1,
+          "eid-02": 3,
+          "eid-03": 2,
+          "eid-04": null,
+          "eid-05": 2,
+          "eid-06": 1,
+          "eid-07": 1,
+          "eid-08": 1,
+          "par-01": 1,
+          "par-02": 1,
+          "par-03": 3,
+          "par-04": 1,
+          "par-05": 1,
+          "par-06": null,
+          "par-07": 1,
+          "par-08": 1,
+          "con-01": 3,
+          "con-02": 4,
+          "con-03": 1,
+          "con-04": 3,
+          "con-05": 2,
+          "con-06": 2,
+          "con-07": 1,
+          "con-08": 2,
+          "lit-01": 1,
+          "lit-02": 1,
+          "lit-03": 1,
+          "lit-04": 1,
+          "lit-05": 1,
+          "lit-06": 1,
+          "lit-07": 1,
+          "lit-08": 1,
+          "crs-01": 5,
+          "crs-02": 1,
+          "crs-03": 4,
+          "crs-04": 3,
+          "crs-05": 1,
+          "crs-06": 4,
+          "crs-07": null,
+          "eid-09": 1,
+          "eid-10": 2,
+          "lit-09": 1,
+          "par-09": null,
+          "crs-08": 1
+        }
+      },
+      "bucket2": {
+        "n": 39,
+        "hit@1": {
+          "successes": 28,
+          "n": 39,
+          "value": 0.717948717948718,
+          "ci_low": 0.5622468051697918,
+          "ci_high": 0.8345650791115233
+        },
+        "hit@3": {
+          "successes": 32,
+          "n": 39,
+          "value": 0.8205128205128205,
+          "ci_low": 0.6733195433811838,
+          "ci_high": 0.9102273452678089
+        },
+        "hit@5": {
+          "successes": 32,
+          "n": 39,
+          "value": 0.8205128205128205,
+          "ci_low": 0.6733195433811838,
+          "ci_high": 0.9102273452678089
+        },
+        "hit@final_k(5)": {
+          "successes": 32,
+          "n": 39,
+          "value": 0.8205128205128205,
+          "ci_low": 0.6733195433811838,
+          "ci_high": 0.9102273452678089
+        },
+        "mrr@5": 0.7606837606837608,
+        "ranks": {
+          "dfa-01": 1,
+          "dfa-02": 1,
+          "dfa-03": 1,
+          "dfa-04": 1,
+          "dfa-05": 1,
+          "dco-01": 1,
+          "dco-02": 1,
+          "dco-03": 1,
+          "dco-04": 1,
+          "dco-05": 1,
+          "dfa-06": 3,
+          "dfa-07": 1,
+          "dfa-08": 1,
+          "dfa-09": 1,
+          "dfa-10": 1,
+          "dfa-11": null,
+          "dco-06": null,
+          "dco-07": 1,
+          "dco-08": 2,
+          "dco-09": 2,
+          "dco-10": 3,
+          "dpa-01": 1,
+          "dpa-02": null,
+          "dpa-03": null,
+          "dpa-05": null,
+          "dpa-06": null,
+          "dex-01": 1,
+          "dex-02": 1,
+          "dex-03": 1,
+          "dex-04": null,
+          "dex-05": 1,
+          "ddi-01": 1,
+          "ddi-02": 1,
+          "ddi-03": 1,
+          "ddi-04": 1,
+          "ddi-05": 1,
+          "ddi-06": 1,
+          "ddi-07": 1,
+          "ddi-08": 1
+        }
+      },
+      "provenance_b1": {
+        "vector+bm25": 27,
+        "vector": 13
+      },
+      "provenance_b2": {
+        "vector+bm25": 28,
+        "vector": 4
+      },
+      "bucket3": {
+        "threshold": 0.016235,
+        "above_threshold": {
+          "successes": 1,
+          "n": 10,
+          "value": 0.1,
+          "ci_low": 0.017876213095072868,
+          "ci_high": 0.4041500267952385
+        }
+      },
+      "recovery": {
+        "crs-03": {
+          "rank": 4,
+          "recovered": true
+        },
+        "crs-06": {
+          "rank": 4,
+          "recovered": true
+        }
+      }
+    },
+    "C3_gated": {
+      "config": {
+        "final_k": 5,
+        "gate": true
+      },
+      "why": "drop BM25 candidates below the median of that query's OWN candidate scores; self-normalising, no global constant, and specified without reference to which queries it fixes",
+      "bucket1": {
+        "n": 44,
+        "hit@1": {
+          "successes": 22,
+          "n": 44,
+          "value": 0.5,
+          "ci_low": 0.35831760539989393,
+          "ci_high": 0.641682394600106
+        },
+        "hit@3": {
+          "successes": 36,
+          "n": 44,
+          "value": 0.8181818181818182,
+          "ci_low": 0.6803944911281533,
+          "ci_high": 0.9048719428437227
+        },
+        "hit@5": {
+          "successes": 38,
+          "n": 44,
+          "value": 0.8636363636363636,
+          "ci_low": 0.7329054695148456,
+          "ci_high": 0.9359704550244412
+        },
+        "hit@final_k(5)": {
+          "successes": 38,
+          "n": 44,
+          "value": 0.8636363636363636,
+          "ci_low": 0.7329054695148456,
+          "ci_high": 0.9359704550244412
+        },
+        "mrr@5": 0.6492424242424242,
+        "ranks": {
+          "eid-01": 2,
+          "eid-02": 2,
+          "eid-03": 2,
+          "eid-04": null,
+          "eid-05": 3,
+          "eid-06": 1,
+          "eid-07": 1,
+          "eid-08": 2,
+          "par-01": 1,
+          "par-02": 1,
+          "par-03": 2,
+          "par-04": 1,
+          "par-05": 1,
+          "par-06": null,
+          "par-07": 1,
+          "par-08": 5,
+          "con-01": 3,
+          "con-02": 2,
+          "con-03": 1,
+          "con-04": 5,
+          "con-05": 3,
+          "con-06": 2,
+          "con-07": 1,
+          "con-08": 2,
+          "lit-01": 1,
+          "lit-02": 1,
+          "lit-03": 1,
+          "lit-04": 1,
+          "lit-05": 1,
+          "lit-06": 1,
+          "lit-07": 1,
+          "lit-08": 1,
+          "crs-01": 3,
+          "crs-02": 1,
+          "crs-03": null,
+          "crs-04": 3,
+          "crs-05": 1,
+          "crs-06": null,
+          "crs-07": null,
+          "eid-09": 1,
+          "eid-10": 2,
+          "lit-09": 1,
+          "par-09": null,
+          "crs-08": 1
+        }
+      },
+      "bucket2": {
+        "n": 39,
+        "hit@1": {
+          "successes": 29,
+          "n": 39,
+          "value": 0.7435897435897436,
+          "ci_low": 0.5891834407831603,
+          "ci_high": 0.8543121945900741
+        },
+        "hit@3": {
+          "successes": 33,
+          "n": 39,
+          "value": 0.8461538461538461,
+          "ci_low": 0.7027053635107331,
+          "ci_high": 0.927525276230179
+        },
+        "hit@5": {
+          "successes": 36,
+          "n": 39,
+          "value": 0.9230769230769231,
+          "ci_low": 0.7967892883204503,
+          "ci_high": 0.9734926046962203
+        },
+        "hit@final_k(5)": {
+          "successes": 36,
+          "n": 39,
+          "value": 0.9230769230769231,
+          "ci_low": 0.7967892883204503,
+          "ci_high": 0.9734926046962203
+        },
+        "mrr@5": 0.8017094017094016,
+        "ranks": {
+          "dfa-01": 1,
+          "dfa-02": 1,
+          "dfa-03": 1,
+          "dfa-04": 1,
+          "dfa-05": 1,
+          "dco-01": 1,
+          "dco-02": 1,
+          "dco-03": 1,
+          "dco-04": 1,
+          "dco-05": 1,
+          "dfa-06": 3,
+          "dfa-07": 1,
+          "dfa-08": 1,
+          "dfa-09": 1,
+          "dfa-10": 1,
+          "dfa-11": 2,
+          "dco-06": 5,
+          "dco-07": 1,
+          "dco-08": 1,
+          "dco-09": 3,
+          "dco-10": 2,
+          "dpa-01": 1,
+          "dpa-02": 5,
+          "dpa-03": null,
+          "dpa-05": null,
+          "dpa-06": null,
+          "dex-01": 1,
+          "dex-02": 1,
+          "dex-03": 1,
+          "dex-04": 5,
+          "dex-05": 1,
+          "ddi-01": 1,
+          "ddi-02": 1,
+          "ddi-03": 1,
+          "ddi-04": 1,
+          "ddi-05": 1,
+          "ddi-06": 1,
+          "ddi-07": 1,
+          "ddi-08": 1
+        }
+      },
+      "provenance_b1": {
+        "vector+bm25": 23,
+        "bm25": 4,
+        "vector": 11
+      },
+      "provenance_b2": {
+        "vector+bm25": 29,
+        "bm25": 3,
+        "vector": 4
+      },
+      "bucket3": {
+        "threshold": 0.016261,
+        "above_threshold": {
+          "successes": 1,
+          "n": 10,
+          "value": 0.1,
+          "ci_low": 0.017876213095072868,
+          "ci_high": 0.4041500267952385
+        }
+      },
+      "recovery": {
+        "crs-03": {
+          "rank": null,
+          "recovered": false
+        },
+        "crs-06": {
+          "rank": null,
+          "recovered": false
+        }
+      }
+    },
+    "D0_dense_k5": {
+      "config": {
+        "final_k": 5,
+        "arm": "dense_only"
+      },
+      "why": "dense-only at the SAME budget as the hybrid config it is compared against",
+      "bucket1": {
+        "n": 44,
+        "hit@1": {
+          "successes": 25,
+          "n": 44,
+          "value": 0.5681818181818182,
+          "ci_low": 0.4222414699362943,
+          "ci_high": 0.703172765914822
+        },
+        "hit@3": {
+          "successes": 35,
+          "n": 44,
+          "value": 0.7954545454545454,
+          "ci_low": 0.6549942193889834,
+          "ci_high": 0.8884674692991871
+        },
+        "hit@5": {
+          "successes": 39,
+          "n": 44,
+          "value": 0.8863636363636364,
+          "ci_low": 0.7602084758339172,
+          "ci_high": 0.950472193989075
+        },
+        "hit@final_k(5)": {
+          "successes": 39,
+          "n": 44,
+          "value": 0.8863636363636364,
+          "ci_low": 0.7602084758339172,
+          "ci_high": 0.950472193989075
+        },
+        "mrr@5": 0.6920454545454545,
+        "ranks": {
+          "eid-01": 1,
+          "eid-02": 2,
+          "eid-03": 1,
+          "eid-04": null,
+          "eid-05": 2,
+          "eid-06": 1,
+          "eid-07": 1,
+          "eid-08": 1,
+          "par-01": 1,
+          "par-02": 1,
+          "par-03": 3,
+          "par-04": 1,
+          "par-05": 1,
+          "par-06": null,
+          "par-07": 1,
+          "par-08": 3,
+          "con-01": null,
+          "con-02": 4,
+          "con-03": 2,
+          "con-04": 3,
+          "con-05": 2,
+          "con-06": 1,
+          "con-07": 1,
+          "con-08": 1,
+          "lit-01": 2,
+          "lit-02": 1,
+          "lit-03": 1,
+          "lit-04": 1,
+          "lit-05": 1,
+          "lit-06": 1,
+          "lit-07": 1,
+          "lit-08": 2,
+          "crs-01": 5,
+          "crs-02": 1,
+          "crs-03": 4,
+          "crs-04": 1,
+          "crs-05": 1,
+          "crs-06": 4,
+          "crs-07": null,
+          "eid-09": 1,
+          "eid-10": 1,
+          "lit-09": 2,
+          "par-09": null,
+          "crs-08": 1
+        }
+      },
+      "bucket2": {
+        "n": 39,
+        "hit@1": {
+          "successes": 27,
+          "n": 39,
+          "value": 0.6923076923076923,
+          "ci_low": 0.5357874562585069,
+          "ci_high": 0.8143406769308886
+        },
+        "hit@3": {
+          "successes": 30,
+          "n": 39,
+          "value": 0.7692307692307693,
+          "ci_low": 0.6166374277165825,
+          "ci_high": 0.8735419587485715
+        },
+        "hit@5": {
+          "successes": 31,
+          "n": 39,
+          "value": 0.7948717948717948,
+          "ci_low": 0.644660319864177,
+          "ci_high": 0.8922028176928961
+        },
+        "hit@final_k(5)": {
+          "successes": 31,
+          "n": 39,
+          "value": 0.7948717948717948,
+          "ci_low": 0.644660319864177,
+          "ci_high": 0.8922028176928961
+        },
+        "mrr@5": 0.7316239316239316,
+        "ranks": {
+          "dfa-01": 3,
+          "dfa-02": 1,
+          "dfa-03": 1,
+          "dfa-04": 1,
+          "dfa-05": 1,
+          "dco-01": 1,
+          "dco-02": 1,
+          "dco-03": 1,
+          "dco-04": 1,
+          "dco-05": 1,
+          "dfa-06": null,
+          "dfa-07": 1,
+          "dfa-08": 1,
+          "dfa-09": 1,
+          "dfa-10": 1,
+          "dfa-11": null,
+          "dco-06": null,
+          "dco-07": 1,
+          "dco-08": 1,
+          "dco-09": 2,
+          "dco-10": 1,
+          "dpa-01": 1,
+          "dpa-02": null,
+          "dpa-03": null,
+          "dpa-05": null,
+          "dpa-06": null,
+          "dex-01": 1,
+          "dex-02": 1,
+          "dex-03": 1,
+          "dex-04": null,
+          "dex-05": 1,
+          "ddi-01": 2,
+          "ddi-02": 1,
+          "ddi-03": 1,
+          "ddi-04": 1,
+          "ddi-05": 1,
+          "ddi-06": 1,
+          "ddi-07": 5,
+          "ddi-08": 1
+        }
+      },
+      "provenance_b1": {},
+      "provenance_b2": {},
+      "bucket3": {
+        "threshold": null,
+        "above_threshold": null
+      },
+      "recovery": {
+        "crs-03": {
+          "rank": 4,
+          "recovered": true
+        },
+        "crs-06": {
+          "rank": 4,
+          "recovered": true
+        }
+      }
+    },
+    "D1_dense_k8": {
+      "config": {
+        "final_k": 8,
+        "arm": "dense_only"
+      },
+      "why": "dense-only at the SAME budget as the hybrid config it is compared against",
+      "bucket1": {
+        "n": 44,
+        "hit@1": {
+          "successes": 25,
+          "n": 44,
+          "value": 0.5681818181818182,
+          "ci_low": 0.4222414699362943,
+          "ci_high": 0.703172765914822
+        },
+        "hit@3": {
+          "successes": 35,
+          "n": 44,
+          "value": 0.7954545454545454,
+          "ci_low": 0.6549942193889834,
+          "ci_high": 0.8884674692991871
+        },
+        "hit@5": {
+          "successes": 39,
+          "n": 44,
+          "value": 0.8863636363636364,
+          "ci_low": 0.7602084758339172,
+          "ci_high": 0.950472193989075
+        },
+        "hit@final_k(8)": {
+          "successes": 41,
+          "n": 44,
+          "value": 0.9318181818181818,
+          "ci_low": 0.8177495562977846,
+          "ci_high": 0.9765406040926183
+        },
+        "mrr@5": 0.6920454545454545,
+        "ranks": {
+          "eid-01": 1,
+          "eid-02": 2,
+          "eid-03": 1,
+          "eid-04": null,
+          "eid-05": 2,
+          "eid-06": 1,
+          "eid-07": 1,
+          "eid-08": 1,
+          "par-01": 1,
+          "par-02": 1,
+          "par-03": 3,
+          "par-04": 1,
+          "par-05": 1,
+          "par-06": null,
+          "par-07": 1,
+          "par-08": 3,
+          "con-01": 7,
+          "con-02": 4,
+          "con-03": 2,
+          "con-04": 3,
+          "con-05": 2,
+          "con-06": 1,
+          "con-07": 1,
+          "con-08": 1,
+          "lit-01": 2,
+          "lit-02": 1,
+          "lit-03": 1,
+          "lit-04": 1,
+          "lit-05": 1,
+          "lit-06": 1,
+          "lit-07": 1,
+          "lit-08": 2,
+          "crs-01": 5,
+          "crs-02": 1,
+          "crs-03": 4,
+          "crs-04": 1,
+          "crs-05": 1,
+          "crs-06": 4,
+          "crs-07": 6,
+          "eid-09": 1,
+          "eid-10": 1,
+          "lit-09": 2,
+          "par-09": null,
+          "crs-08": 1
+        }
+      },
+      "bucket2": {
+        "n": 39,
+        "hit@1": {
+          "successes": 27,
+          "n": 39,
+          "value": 0.6923076923076923,
+          "ci_low": 0.5357874562585069,
+          "ci_high": 0.8143406769308886
+        },
+        "hit@3": {
+          "successes": 30,
+          "n": 39,
+          "value": 0.7692307692307693,
+          "ci_low": 0.6166374277165825,
+          "ci_high": 0.8735419587485715
+        },
+        "hit@5": {
+          "successes": 31,
+          "n": 39,
+          "value": 0.7948717948717948,
+          "ci_low": 0.644660319864177,
+          "ci_high": 0.8922028176928961
+        },
+        "hit@final_k(8)": {
+          "successes": 34,
+          "n": 39,
+          "value": 0.8717948717948718,
+          "ci_low": 0.7329425662025455,
+          "ci_high": 0.9439718246302862
+        },
+        "mrr@5": 0.7316239316239316,
+        "ranks": {
+          "dfa-01": 3,
+          "dfa-02": 1,
+          "dfa-03": 1,
+          "dfa-04": 1,
+          "dfa-05": 1,
+          "dco-01": 1,
+          "dco-02": 1,
+          "dco-03": 1,
+          "dco-04": 1,
+          "dco-05": 1,
+          "dfa-06": 6,
+          "dfa-07": 1,
+          "dfa-08": 1,
+          "dfa-09": 1,
+          "dfa-10": 1,
+          "dfa-11": null,
+          "dco-06": null,
+          "dco-07": 1,
+          "dco-08": 1,
+          "dco-09": 2,
+          "dco-10": 1,
+          "dpa-01": 1,
+          "dpa-02": null,
+          "dpa-03": null,
+          "dpa-05": 7,
+          "dpa-06": 6,
+          "dex-01": 1,
+          "dex-02": 1,
+          "dex-03": 1,
+          "dex-04": null,
+          "dex-05": 1,
+          "ddi-01": 2,
+          "ddi-02": 1,
+          "ddi-03": 1,
+          "ddi-04": 1,
+          "ddi-05": 1,
+          "ddi-06": 1,
+          "ddi-07": 5,
+          "ddi-08": 1
+        }
+      },
+      "provenance_b1": {},
+      "provenance_b2": {},
+      "bucket3": {
+        "threshold": null,
+        "above_threshold": null
+      },
+      "recovery": {
+        "crs-03": {
+          "rank": 4,
+          "recovered": true
+        },
+        "crs-06": {
+          "rank": 4,
+          "recovered": true
+        }
+      }
+    }
+  }
+}

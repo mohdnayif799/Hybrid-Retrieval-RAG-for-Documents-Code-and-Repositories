@@ -1,0 +1,176 @@
+Space, Planets, and Moons – Advanced Knowledge Base
+
+The Solar System
+
+The Solar System formed approximately 4.57 billion years ago from the
+gravitational collapse of a giant molecular cloud. More than 99.8% of
+the Solar System’s mass is contained in the Sun. The remaining mass is
+distributed among planets, dwarf planets, moons, asteroids, comets,
+meteoroids, and interplanetary dust.
+
+The eight planets, in order from the Sun, are Mercury, Venus, Earth,
+Mars, Jupiter, Saturn, Uranus, and Neptune.
+
+Mercury
+
+Mercury is the smallest planet and the closest to the Sun. It has
+virtually no substantial atmosphere, only a thin exosphere composed
+mainly of oxygen, sodium, hydrogen, helium, and potassium. Mercury
+completes one orbit around the Sun in approximately 88 Earth days and
+rotates three times for every two orbits due to its 3:2 spin-orbit
+resonance. Daytime temperatures can exceed 430°C while nighttime
+temperatures fall below −180°C.
+
+Venus
+
+Venus is similar in size to Earth but has an atmosphere composed of
+about 96.5% carbon dioxide with clouds of sulfuric acid. Surface
+pressure is about 92 times that of Earth. Venus rotates in a retrograde
+direction, meaning it spins opposite to most planets. Its surface
+temperature averages around 465°C due to an extreme runaway greenhouse
+effect.
+
+Earth
+
+Earth is currently the only known planet to support life. About 71% of
+its surface is covered by liquid water. Earth’s atmosphere is composed
+primarily of nitrogen (78%) and oxygen (21%). The Moon stabilizes
+Earth’s axial tilt, helping maintain a relatively stable climate over
+geological time.
+
+Earth’s Moon
+
+Earth’s Moon is the fifth-largest natural satellite in the Solar System.
+It is tidally locked, always showing the same face to Earth. The Moon
+causes ocean tides and is gradually moving away from Earth at
+approximately 3.8 cm per year.
+
+Mars
+
+Mars is known as the Red Planet because of iron oxide on its surface.
+Olympus Mons is the tallest volcano in the Solar System, rising about 22
+km above the surrounding plains. Valles Marineris is a canyon system
+stretching over 4,000 km. Mars has two small moons, Phobos and Deimos.
+Phobos is slowly spiraling toward Mars and may eventually break apart to
+form a ring.
+
+Jupiter
+
+Jupiter is the largest planet in the Solar System and is primarily
+composed of hydrogen and helium. The Great Red Spot is a giant storm
+that has persisted for centuries. Jupiter has a powerful magnetic field
+approximately 20,000 times stronger than Earth’s. It has more than 90
+confirmed moons.
+
+Major Jovian Moons
+
+Io is the most volcanically active body in the Solar System due to tidal
+heating. Europa possesses a global subsurface ocean beneath an icy crust
+and is considered one of the best places to search for extraterrestrial
+microbial life. Ganymede is the largest moon in the Solar System and is
+larger than Mercury. It has its own intrinsic magnetic field. Callisto
+is heavily cratered and likely contains a buried salty ocean.
+
+Saturn
+
+Saturn is famous for its spectacular ring system composed primarily of
+water ice particles. Saturn has the lowest average density of all the
+planets and would theoretically float in a sufficiently large body of
+water.
+
+Titan
+
+Titan is Saturn’s largest moon and possesses a dense nitrogen-rich
+atmosphere. Lakes and seas of liquid methane and ethane exist near its
+poles. Titan has an active methane cycle analogous to Earth’s water
+cycle.
+
+Enceladus
+
+Enceladus ejects water-rich plumes from fractures near its south pole.
+These plumes contain water vapor, salts, silica particles, methane,
+carbon dioxide, and organic molecules, indicating a global subsurface
+ocean.
+
+Uranus
+
+Uranus rotates on its side with an axial tilt of about 98 degrees. This
+unusual orientation likely resulted from a massive collision early in
+its history. Uranus appears blue-green because methane absorbs red
+wavelengths of sunlight.
+
+Neptune
+
+Neptune is the most distant major planet. It experiences the fastest
+winds in the Solar System, exceeding 2,000 km/h. Triton, its largest
+moon, orbits in a retrograde direction and is believed to be a captured
+Kuiper Belt object. Triton has active nitrogen geysers.
+
+Dwarf Planets
+
+Pluto is located in the Kuiper Belt and has five known moons. Charon is
+so large relative to Pluto that they orbit a common barycenter outside
+Pluto itself. Other recognized dwarf planets include Eris, Haumea,
+Makemake, and Ceres.
+
+Asteroids
+
+Most asteroids orbit within the main asteroid belt between Mars and
+Jupiter. Ceres is both the largest asteroid belt object and a dwarf
+planet. Asteroids preserve clues about the early Solar System.
+
+Comets
+
+Comets originate mainly from the Kuiper Belt and the distant Oort Cloud.
+As a comet approaches the Sun, solar radiation causes volatile ices to
+sublimate, producing a glowing coma and one or more tails. The ion tail
+always points away from the Sun because of the solar wind.
+
+Exoplanets
+
+An exoplanet is a planet orbiting a star other than the Sun. Thousands
+have been discovered using methods such as the transit method, radial
+velocity measurements, gravitational microlensing, and direct imaging.
+
+Black Holes
+
+A black hole forms when a sufficiently massive star collapses under
+gravity after exhausting its nuclear fuel. The event horizon marks the
+boundary beyond which nothing, not even light, can escape. Supermassive
+black holes exist at the centers of most large galaxies.
+
+Neutron Stars
+
+Neutron stars are extremely dense stellar remnants formed after certain
+supernova explosions. A teaspoon of neutron-star material would weigh
+billions of tons on Earth. Pulsars are rapidly rotating neutron stars
+that emit beams of electromagnetic radiation.
+
+Galaxies
+
+The Milky Way is a barred spiral galaxy containing hundreds of billions
+of stars. Our Solar System is located in the Orion Arm approximately
+26,000 light-years from the galactic center, where the supermassive
+black hole Sagittarius A* resides.
+
+Cosmology
+
+The observable universe is estimated to be about 13.8 billion years old.
+According to the Big Bang model, the universe has been expanding since
+its origin. Dark matter accounts for roughly 27% of the universe’s
+energy content, while dark energy accounts for about 68%. Ordinary
+matter makes up only about 5%.
+
+Interesting Facts
+
+-   Light from the Sun takes about 8 minutes 20 seconds to reach Earth.
+-   One light-year equals approximately 9.46 trillion kilometers.
+-   Jupiter’s magnetosphere is the largest planetary structure in the
+    Solar System.
+-   Venus has a longer day than its year.
+-   Ganymede is larger than the planet Mercury.
+-   Titan is the only moon with a dense atmosphere.
+-   Europa and Enceladus are leading candidates in the search for
+    extraterrestrial microbial life.
+-   The James Webb Space Telescope studies the early universe primarily
+    in infrared wavelengths.

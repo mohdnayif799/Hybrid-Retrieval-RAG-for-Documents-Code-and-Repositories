@@ -1,0 +1,69 @@
+{
+  "repo_start_line": {
+    "checked": 1111,
+    "mismatched": 0,
+    "failures": []
+  },
+  "pdf_page_content": {
+    "checked": 4,
+    "mismatched": 0,
+    "failures": [],
+    "n_pages": 2
+  },
+  "text_offset": {
+    "checked": 8,
+    "mismatched": 0,
+    "failures": []
+  },
+  "docx_offset": {
+    "checked": 99,
+    "mismatched": 0,
+    "failures": [],
+    "doc_chars": 78397
+  },
+  "grouping": {
+    "distinct_groups": 98,
+    "collisions": {},
+    "n_collisions": 0,
+    "shared_basenames_in_corpus": {
+      "LICENSE": [
+        "LICENSE",
+        "docs/_themes/LICENSE",
+        "ext/LICENSE"
+      ],
+      "Makefile": [
+        "Makefile",
+        "docs/Makefile",
+        "tests/certs/expired/Makefile",
+        "tests/certs/expired/ca/Makefile",
+        "tests/certs/expired/server/Makefile",
+        "tests/certs/mtls/Makefile",
+        "tests/certs/mtls/client/Makefile",
+        "tests/certs/valid/server/Makefile"
+      ],
+      "README.md": [
+        "README.md",
+        "tests/certs/README.md",
+        "tests/certs/expired/README.md",
+        "tests/certs/mtls/README.md"
+      ],
+      "__init__.py": [
+        "src/requests/__init__.py",
+        "tests/__init__.py"
+      ],
+      "compat.py": [
+        "src/requests/compat.py",
+        "tests/compat.py"
+      ],
+      "utils.py": [
+        "src/requests/utils.py",
+        "tests/utils.py"
+      ]
+    },
+    "n_shared_basenames": 6
+  },
+  "pptx": {
+    "checked": 0,
+    "note": "no PPTX in the benchmark corpus; this check could not be run and is reported as not measured"
+  }
+}

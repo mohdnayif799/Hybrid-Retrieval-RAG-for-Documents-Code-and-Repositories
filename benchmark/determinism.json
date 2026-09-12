@@ -1,0 +1,125 @@
+{
+  "store_a": "chroma_bench_1788965043_b7f2839b",
+  "store_b": "chroma_bench_1788965081_3262534b",
+  "n_chunks_a": 1222,
+  "n_chunks_b": 1222,
+  "arms": {
+    "dense_only": {
+      "identical": 53,
+      "total": 56,
+      "differing": [
+        {
+          "id": "par-04",
+          "category": "paraphrase",
+          "kind": "different chunks",
+          "top1_same": false,
+          "a": [
+            ".github/CONTRIBUTING.md@1525",
+            "docs/user/quickstart.rst@16481",
+            "docs/user/advanced.rst@29498",
+            "tests/test_requests.py@17389",
+            "HISTORY.md@27552"
+          ],
+          "b": [
+            "docs/user/quickstart.rst@16481",
+            "docs/user/advanced.rst@29498",
+            "tests/test_requests.py@17389",
+            "HISTORY.md@27552",
+            "HISTORY.md@57307"
+          ]
+        },
+        {
+          "id": "con-08",
+          "category": "conceptual",
+          "kind": "different chunks",
+          "top1_same": true,
+          "a": [
+            "src/requests/sessions.py@1824",
+            "C:\\Users\\Muhammed Nayifuddin\\OneDrive\\Desktop\\rag_qa_system\\benchmark\\corpus\\V_SEM_3_to_5_units_ETCE.docx@63697",
+            "src/requests/api.py@3891",
+            "C:\\Users\\Muhammed Nayifuddin\\OneDrive\\Desktop\\rag_qa_system\\benchmark\\corpus\\V_SEM_3_to_5_units_ETCE.docx@47693",
+            "docs/dev/contributing.rst@3896"
+          ],
+          "b": [
+            "src/requests/sessions.py@1824",
+            "src/requests/sessions.py@0",
+            "C:\\Users\\Muhammed Nayifuddin\\OneDrive\\Desktop\\rag_qa_system\\benchmark\\corpus\\V_SEM_3_to_5_units_ETCE.docx@63697",
+            "src/requests/api.py@3891",
+            "C:\\Users\\Muhammed Nayifuddin\\OneDrive\\Desktop\\rag_qa_system\\benchmark\\corpus\\V_SEM_3_to_5_units_ETCE.docx@47693"
+          ]
+        },
+        {
+          "id": "una-07",
+          "category": "unanswerable",
+          "kind": "different chunks",
+          "top1_same": true,
+          "a": [
+            "C:\\Users\\Muhammed Nayifuddin\\OneDrive\\Desktop\\rag_qa_system\\benchmark\\corpus\\space_planets_moons_advanced.txt@4426",
+            "C:\\Users\\Muhammed Nayifuddin\\OneDrive\\Desktop\\rag_qa_system\\benchmark\\corpus\\space_planets_moons_advanced.txt@3432",
+            "C:\\Users\\Muhammed Nayifuddin\\OneDrive\\Desktop\\rag_qa_system\\benchmark\\corpus\\space_planets_moons_advanced.txt@5957",
+            "AUTHORS.rst@7385",
+            "docs/user/advanced.rst@27742"
+          ],
+          "b": [
+            "C:\\Users\\Muhammed Nayifuddin\\OneDrive\\Desktop\\rag_qa_system\\benchmark\\corpus\\space_planets_moons_advanced.txt@4426",
+            "C:\\Users\\Muhammed Nayifuddin\\OneDrive\\Desktop\\rag_qa_system\\benchmark\\corpus\\space_planets_moons_advanced.txt@3432",
+            "C:\\Users\\Muhammed Nayifuddin\\OneDrive\\Desktop\\rag_qa_system\\benchmark\\corpus\\space_planets_moons_advanced.txt@5957",
+            "AUTHORS.rst@7385",
+            "src/requests/cookies.py@13626"
+          ]
+        }
+      ]
+    },
+    "bm25_only": {
+      "identical": 56,
+      "total": 56,
+      "differing": []
+    },
+    "hybrid": {
+      "identical": 54,
+      "total": 56,
+      "differing": [
+        {
+          "id": "par-04",
+          "category": "paraphrase",
+          "kind": "different chunks",
+          "top1_same": false,
+          "a": [
+            ".github/CONTRIBUTING.md@1525",
+            "HISTORY.md@25681",
+            "docs/user/quickstart.rst@16481",
+            "docs/community/updates.rst@0",
+            "docs/user/advanced.rst@29498"
+          ],
+          "b": [
+            "docs/user/quickstart.rst@16481",
+            "HISTORY.md@25681",
+            "docs/user/advanced.rst@29498",
+            "docs/community/updates.rst@0",
+            "tests/test_requests.py@17389"
+          ]
+        },
+        {
+          "id": "con-08",
+          "category": "conceptual",
+          "kind": "different chunks",
+          "top1_same": false,
+          "a": [
+            "src/requests/sessions.py@1824",
+            "src/requests/cookies.py@19806",
+            "C:\\Users\\Muhammed Nayifuddin\\OneDrive\\Desktop\\rag_qa_system\\benchmark\\corpus\\V_SEM_3_to_5_units_ETCE.docx@63697",
+            "docs/user/quickstart.rst@14614",
+            "src/requests/api.py@3891"
+          ],
+          "b": [
+            "src/requests/adapters.py@15101",
+            "src/requests/sessions.py@1824",
+            "src/requests/cookies.py@19806",
+            "src/requests/sessions.py@0",
+            "docs/user/quickstart.rst@14614"
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "repo": {
+    "slug": "psf/requests",
+    "sha": "dae7ef63b4df6eded86637f251fc4e3a06c3b479",
+    "archive_sha256": "de310df9b97e0c2b28792e6c51db49d65a54b542899687aa4b7c868653b91fbf",
+    "indexable_files": 95,
+    "skipped": {
+      "unsupported extension": 26,
+      "excluded filename": 6,
+      "empty file": 1
+    }
+  },
+  "documents": [
+    {
+      "file": "Deep_Learning_Unit1_Quick_Notes.pdf",
+      "sha256": "974bc4248d10cbd678783fdc5d27104992982db5bce9b356ee4589f1d19ba278",
+      "bytes": 4047
+    },
+    {
+      "file": "space_planets_moons_advanced.txt",
+      "sha256": "581fd18b9738b3efc7ee58b376dd73ae7d59ea4f99db85f3fb25a76253ace4af",
+      "bytes": 6896
+    },
+    {
+      "file": "V_SEM_3_to_5_units_ETCE.docx",
+      "sha256": "ad6579aab7f10f540749ce59730a1bd34564610af5e14c61510057fc7eb67423",
+      "bytes": 122879
+    }
+  ],
+  "chunks": {
+    "total": 1222,
+    "repo": 1111,
+    "upload": 111
+  },
+  "store_dir": "chroma_bench_1788964989_3e871418",
+  "files_with_chunks": 98
+}

@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environment
+venv/
+.venv/
+env/
+
+# Testing / caches
+.pytest_cache/
+.pytest-tmp/
+.coverage
+htmlcov/
+
+# Local app / generated data
+chroma_db_*/
+chroma_bench_*/
+.remember/
+__pycache__/
+
+# Secrets / environment
+.env
+.env.*
+!.env.example
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Python tooling
+*.egg-info/
+dist/
+build/
+
+# Benchmark cache
+benchmark/.cache/

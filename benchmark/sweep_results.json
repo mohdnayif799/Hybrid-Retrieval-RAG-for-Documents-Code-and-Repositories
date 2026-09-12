@@ -1,0 +1,636 @@
+{
+  "store": "chroma_bench_1788912379_36bfad5f",
+  "configs": {
+    "C0_baseline": {
+      "final_k": 5,
+      "gate": false,
+      "why": "the shipped configuration; reused from results.json, not recomputed"
+    },
+    "C1_k6": {
+      "final_k": 6,
+      "gate": false,
+      "why": "minimal response to the 'relevant chunk sat at dense rank 4' finding"
+    },
+    "C2_k8": {
+      "final_k": 8,
+      "gate": false,
+      "why": "tests whether the wider 13-query 'worse' group recovers too"
+    },
+    "C3_gated": {
+      "final_k": 5,
+      "gate": true,
+      "why": "drop BM25 candidates below the median of that query's OWN candidate scores; self-normalising, no global constant, and specified without reference to which queries it fixes"
+    }
+  },
+  "part_a_sign_test": {
+    "worse": 13,
+    "better": 8,
+    "unchanged": 18,
+    "n_non_tied": 21,
+    "p_value": 0.38331031799316406,
+    "scipy_binomtest_p": 0.38331031799316406,
+    "agrees_with_scipy": "True",
+    "significant_at_05": false
+  },
+  "c0_reproducibility": {
+    "note": "C0 recomputed in-process vs the published run; differences are cross-process ANN variation, not configuration effects",
+    "mismatches": {}
+  },
+  "c0_inprocess_bucket1": {
+    "n": 39,
+    "hit@1": {
+      "successes": 19,
+      "n": 39,
+      "value": 0.48717948717948717,
+      "ci_low": 0.33865175329862,
+      "ci_high": 0.6380063711554202
+    },
+    "hit@3": {
+      "successes": 33,
+      "n": 39,
+      "value": 0.8461538461538461,
+      "ci_low": 0.7027053635107331,
+      "ci_high": 0.927525276230179
+    },
+    "hit@5": {
+      "successes": 34,
+      "n": 39,
+      "value": 0.8717948717948718,
+      "ci_low": 0.7329425662025455,
+      "ci_high": 0.9439718246302862
+    },
+    "hit@final_k(5)": {
+      "successes": 34,
+      "n": 39,
+      "value": 0.8717948717948718,
+      "ci_low": 0.7329425662025455,
+      "ci_high": 0.9439718246302862
+    },
+    "mrr@5": 0.6418803418803418
+  },
+  "c0_inprocess_bucket3": {
+    "threshold": 0.016133,
+    "threshold_basis": "median top-1 score over 49 answerable queries",
+    "above_threshold": {
+      "successes": 2,
+      "n": 7,
+      "value": 0.2857142857142857,
+      "ci_low": 0.08221892400405678,
+      "ci_high": 0.6410655481673808
+    },
+    "returned_any": {
+      "successes": 7,
+      "n": 7,
+      "value": 1.0,
+      "ci_low": 0.6456695649333126,
+      "ci_high": 1.0
+    },
+    "per_query": {
+      "una-01": 0.015659,
+      "una-02": 0.016133,
+      "una-03": 0.015659,
+      "una-04": 0.008197,
+      "una-05": 0.016393,
+      "una-06": 0.008197,
+      "una-07": 0.016129
+    }
+  },
+  "gate_diagnostics": {
+    "queries_with_bm25_candidates": 56,
+    "total_candidates": 548,
+    "total_dropped": 274,
+    "drop_distribution": {
+      "5": 54,
+      "2": 2
+    }
+  },
+  "per_config": {
+    "C0_baseline": {
+      "config": {
+        "final_k": 5,
+        "gate": false,
+        "why": "the shipped configuration; reused from results.json, not recomputed"
+      },
+      "bucket1": {
+        "n": 39,
+        "hit@1": {
+          "successes": 19,
+          "n": 39,
+          "value": 0.48717948717948717,
+          "ci_low": 0.33865175329862,
+          "ci_high": 0.6380063711554202
+        },
+        "hit@3": {
+          "successes": 33,
+          "n": 39,
+          "value": 0.8461538461538461,
+          "ci_low": 0.7027053635107331,
+          "ci_high": 0.927525276230179
+        },
+        "hit@5": {
+          "successes": 34,
+          "n": 39,
+          "value": 0.8717948717948718,
+          "ci_low": 0.7329425662025455,
+          "ci_high": 0.9439718246302862
+        },
+        "hit@final_k(5)": {
+          "successes": 34,
+          "n": 39,
+          "value": 0.8717948717948718,
+          "ci_low": 0.7329425662025455,
+          "ci_high": 0.9439718246302862
+        },
+        "mrr@5": 0.6418803418803418,
+        "ranks": {
+          "eid-01": 2,
+          "eid-02": 3,
+          "eid-03": 2,
+          "eid-04": null,
+          "eid-05": 3,
+          "eid-06": 1,
+          "eid-07": 1,
+          "eid-08": 2,
+          "par-01": 1,
+          "par-02": 1,
+          "par-03": 2,
+          "par-04": 3,
+          "par-05": 1,
+          "par-06": null,
+          "par-07": 1,
+          "par-08": 1,
+          "con-01": 3,
+          "con-02": 2,
+          "con-03": 1,
+          "con-04": 5,
+          "con-05": 3,
+          "con-06": 2,
+          "con-07": 1,
+          "con-08": 2,
+          "lit-01": 1,
+          "lit-02": 1,
+          "lit-03": 1,
+          "lit-04": 1,
+          "lit-05": 1,
+          "lit-06": 1,
+          "lit-07": 1,
+          "lit-08": 1,
+          "crs-01": 3,
+          "crs-02": 1,
+          "crs-03": null,
+          "crs-04": 3,
+          "crs-05": 1,
+          "crs-06": null,
+          "crs-07": null
+        }
+      },
+      "recovery": {
+        "crs-03": {
+          "rank": null,
+          "recovered": false
+        },
+        "crs-06": {
+          "rank": null,
+          "recovered": false
+        }
+      },
+      "harm_vs_c0": {
+        "better": [],
+        "worse": [],
+        "unchanged": 39,
+        "n_better": 0,
+        "n_worse": 0
+      },
+      "bucket3": {
+        "threshold": 0.016133,
+        "above_threshold": {
+          "successes": 2,
+          "n": 7,
+          "value": 0.2857142857142857,
+          "ci_low": 0.08221892400405678,
+          "ci_high": 0.6410655481673808
+        },
+        "returned_any": {
+          "successes": 7,
+          "n": 7,
+          "value": 1.0,
+          "ci_low": 0.6456695649333126,
+          "ci_high": 1.0
+        },
+        "per_query": {
+          "una-01": 0.015659,
+          "una-02": 0.016133,
+          "una-03": 0.015659,
+          "una-04": 0.008197,
+          "una-05": 0.016393,
+          "una-06": 0.008197,
+          "una-07": 0.016129
+        },
+        "threshold_basis": "reused from results.json"
+      },
+      "reused": true
+    },
+    "C1_k6": {
+      "config": {
+        "final_k": 6,
+        "gate": false,
+        "why": "minimal response to the 'relevant chunk sat at dense rank 4' finding"
+      },
+      "bucket1": {
+        "n": 39,
+        "hit@1": {
+          "successes": 19,
+          "n": 39,
+          "value": 0.48717948717948717,
+          "ci_low": 0.33865175329862,
+          "ci_high": 0.6380063711554202
+        },
+        "hit@3": {
+          "successes": 33,
+          "n": 39,
+          "value": 0.8461538461538461,
+          "ci_low": 0.7027053635107331,
+          "ci_high": 0.927525276230179
+        },
+        "hit@5": {
+          "successes": 34,
+          "n": 39,
+          "value": 0.8717948717948718,
+          "ci_low": 0.7329425662025455,
+          "ci_high": 0.9439718246302862
+        },
+        "hit@final_k(6)": {
+          "successes": 34,
+          "n": 39,
+          "value": 0.8717948717948718,
+          "ci_low": 0.7329425662025455,
+          "ci_high": 0.9439718246302862
+        },
+        "mrr@5": 0.6418803418803418,
+        "ranks": {
+          "eid-01": 2,
+          "eid-02": 3,
+          "eid-03": 2,
+          "eid-04": null,
+          "eid-05": 3,
+          "eid-06": 1,
+          "eid-07": 1,
+          "eid-08": 2,
+          "par-01": 1,
+          "par-02": 1,
+          "par-03": 2,
+          "par-04": 3,
+          "par-05": 1,
+          "par-06": null,
+          "par-07": 1,
+          "par-08": 1,
+          "con-01": 3,
+          "con-02": 2,
+          "con-03": 1,
+          "con-04": 5,
+          "con-05": 3,
+          "con-06": 2,
+          "con-07": 1,
+          "con-08": 2,
+          "lit-01": 1,
+          "lit-02": 1,
+          "lit-03": 1,
+          "lit-04": 1,
+          "lit-05": 1,
+          "lit-06": 1,
+          "lit-07": 1,
+          "lit-08": 1,
+          "crs-01": 3,
+          "crs-02": 1,
+          "crs-03": null,
+          "crs-04": 3,
+          "crs-05": 1,
+          "crs-06": null,
+          "crs-07": null
+        }
+      },
+      "recovery": {
+        "crs-03": {
+          "rank": null,
+          "recovered": false
+        },
+        "crs-06": {
+          "rank": null,
+          "recovered": false
+        }
+      },
+      "harm_vs_c0": {
+        "better": [],
+        "worse": [],
+        "unchanged": 39,
+        "n_better": 0,
+        "n_worse": 0
+      },
+      "bucket3": {
+        "threshold": 0.016133,
+        "threshold_basis": "median top-1 score over 49 answerable queries",
+        "above_threshold": {
+          "successes": 2,
+          "n": 7,
+          "value": 0.2857142857142857,
+          "ci_low": 0.08221892400405678,
+          "ci_high": 0.6410655481673808
+        },
+        "returned_any": {
+          "successes": 7,
+          "n": 7,
+          "value": 1.0,
+          "ci_low": 0.6456695649333126,
+          "ci_high": 1.0
+        },
+        "per_query": {
+          "una-01": 0.015659,
+          "una-02": 0.016133,
+          "una-03": 0.015659,
+          "una-04": 0.008197,
+          "una-05": 0.016393,
+          "una-06": 0.008197,
+          "una-07": 0.016129
+        }
+      },
+      "reused": false
+    },
+    "C2_k8": {
+      "config": {
+        "final_k": 8,
+        "gate": false,
+        "why": "tests whether the wider 13-query 'worse' group recovers too"
+      },
+      "bucket1": {
+        "n": 39,
+        "hit@1": {
+          "successes": 19,
+          "n": 39,
+          "value": 0.48717948717948717,
+          "ci_low": 0.33865175329862,
+          "ci_high": 0.6380063711554202
+        },
+        "hit@3": {
+          "successes": 33,
+          "n": 39,
+          "value": 0.8461538461538461,
+          "ci_low": 0.7027053635107331,
+          "ci_high": 0.927525276230179
+        },
+        "hit@5": {
+          "successes": 34,
+          "n": 39,
+          "value": 0.8717948717948718,
+          "ci_low": 0.7329425662025455,
+          "ci_high": 0.9439718246302862
+        },
+        "hit@final_k(8)": {
+          "successes": 36,
+          "n": 39,
+          "value": 0.9230769230769231,
+          "ci_low": 0.7967892883204503,
+          "ci_high": 0.9734926046962203
+        },
+        "mrr@5": 0.6418803418803418,
+        "ranks": {
+          "eid-01": 2,
+          "eid-02": 3,
+          "eid-03": 2,
+          "eid-04": null,
+          "eid-05": 3,
+          "eid-06": 1,
+          "eid-07": 1,
+          "eid-08": 2,
+          "par-01": 1,
+          "par-02": 1,
+          "par-03": 2,
+          "par-04": 3,
+          "par-05": 1,
+          "par-06": null,
+          "par-07": 1,
+          "par-08": 1,
+          "con-01": 3,
+          "con-02": 2,
+          "con-03": 1,
+          "con-04": 5,
+          "con-05": 3,
+          "con-06": 2,
+          "con-07": 1,
+          "con-08": 2,
+          "lit-01": 1,
+          "lit-02": 1,
+          "lit-03": 1,
+          "lit-04": 1,
+          "lit-05": 1,
+          "lit-06": 1,
+          "lit-07": 1,
+          "lit-08": 1,
+          "crs-01": 3,
+          "crs-02": 1,
+          "crs-03": 7,
+          "crs-04": 3,
+          "crs-05": 1,
+          "crs-06": 7,
+          "crs-07": null
+        }
+      },
+      "recovery": {
+        "crs-03": {
+          "rank": 7,
+          "recovered": true
+        },
+        "crs-06": {
+          "rank": 7,
+          "recovered": true
+        }
+      },
+      "harm_vs_c0": {
+        "better": [
+          {
+            "id": "crs-03",
+            "category": "cross_file",
+            "c0_rank": null,
+            "config_rank": 7
+          },
+          {
+            "id": "crs-06",
+            "category": "cross_file",
+            "c0_rank": null,
+            "config_rank": 7
+          }
+        ],
+        "worse": [],
+        "unchanged": 37,
+        "n_better": 2,
+        "n_worse": 0
+      },
+      "bucket3": {
+        "threshold": 0.016133,
+        "threshold_basis": "median top-1 score over 49 answerable queries",
+        "above_threshold": {
+          "successes": 2,
+          "n": 7,
+          "value": 0.2857142857142857,
+          "ci_low": 0.08221892400405678,
+          "ci_high": 0.6410655481673808
+        },
+        "returned_any": {
+          "successes": 7,
+          "n": 7,
+          "value": 1.0,
+          "ci_low": 0.6456695649333126,
+          "ci_high": 1.0
+        },
+        "per_query": {
+          "una-01": 0.015659,
+          "una-02": 0.016133,
+          "una-03": 0.015659,
+          "una-04": 0.008197,
+          "una-05": 0.016393,
+          "una-06": 0.008197,
+          "una-07": 0.016129
+        }
+      },
+      "reused": false
+    },
+    "C3_gated": {
+      "config": {
+        "final_k": 5,
+        "gate": true,
+        "why": "drop BM25 candidates below the median of that query's OWN candidate scores; self-normalising, no global constant, and specified without reference to which queries it fixes"
+      },
+      "bucket1": {
+        "n": 39,
+        "hit@1": {
+          "successes": 18,
+          "n": 39,
+          "value": 0.46153846153846156,
+          "ci_low": 0.31566885606727846,
+          "ci_high": 0.6143055172948425
+        },
+        "hit@3": {
+          "successes": 32,
+          "n": 39,
+          "value": 0.8205128205128205,
+          "ci_low": 0.6733195433811838,
+          "ci_high": 0.9102273452678089
+        },
+        "hit@5": {
+          "successes": 34,
+          "n": 39,
+          "value": 0.8717948717948718,
+          "ci_low": 0.7329425662025455,
+          "ci_high": 0.9439718246302862
+        },
+        "hit@final_k(5)": {
+          "successes": 34,
+          "n": 39,
+          "value": 0.8717948717948718,
+          "ci_low": 0.7329425662025455,
+          "ci_high": 0.9439718246302862
+        },
+        "mrr@5": 0.6269230769230768,
+        "ranks": {
+          "eid-01": 2,
+          "eid-02": 2,
+          "eid-03": 2,
+          "eid-04": null,
+          "eid-05": 3,
+          "eid-06": 1,
+          "eid-07": 1,
+          "eid-08": 2,
+          "par-01": 1,
+          "par-02": 1,
+          "par-03": 2,
+          "par-04": 3,
+          "par-05": 1,
+          "par-06": null,
+          "par-07": 1,
+          "par-08": 4,
+          "con-01": 3,
+          "con-02": 2,
+          "con-03": 1,
+          "con-04": 5,
+          "con-05": 3,
+          "con-06": 2,
+          "con-07": 1,
+          "con-08": 2,
+          "lit-01": 1,
+          "lit-02": 1,
+          "lit-03": 1,
+          "lit-04": 1,
+          "lit-05": 1,
+          "lit-06": 1,
+          "lit-07": 1,
+          "lit-08": 1,
+          "crs-01": 3,
+          "crs-02": 1,
+          "crs-03": null,
+          "crs-04": 3,
+          "crs-05": 1,
+          "crs-06": null,
+          "crs-07": null
+        }
+      },
+      "recovery": {
+        "crs-03": {
+          "rank": null,
+          "recovered": false
+        },
+        "crs-06": {
+          "rank": null,
+          "recovered": false
+        }
+      },
+      "harm_vs_c0": {
+        "better": [
+          {
+            "id": "eid-02",
+            "category": "exact_identifier",
+            "c0_rank": 3,
+            "config_rank": 2
+          }
+        ],
+        "worse": [
+          {
+            "id": "par-08",
+            "category": "paraphrase",
+            "c0_rank": 1,
+            "config_rank": 4
+          }
+        ],
+        "unchanged": 37,
+        "n_better": 1,
+        "n_worse": 1
+      },
+      "bucket3": {
+        "threshold": 0.016133,
+        "threshold_basis": "median top-1 score over 49 answerable queries",
+        "above_threshold": {
+          "successes": 2,
+          "n": 7,
+          "value": 0.2857142857142857,
+          "ci_low": 0.08221892400405678,
+          "ci_high": 0.6410655481673808
+        },
+        "returned_any": {
+          "successes": 7,
+          "n": 7,
+          "value": 1.0,
+          "ci_low": 0.6456695649333126,
+          "ci_high": 1.0
+        },
+        "per_query": {
+          "una-01": 0.008197,
+          "una-02": 0.016133,
+          "una-03": 0.015659,
+          "una-04": 0.008197,
+          "una-05": 0.016393,
+          "una-06": 0.008197,
+          "una-07": 0.016129
+        }
+      },
+      "reused": false
+    }
+  }
+}

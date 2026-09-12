@@ -1,0 +1,8061 @@
+{
+  "config": {
+    "final_k": 5,
+    "vector_candidate_k": 10,
+    "vector_fetch_k": 30,
+    "mmr_lambda": 0.6,
+    "bm25_candidate_k": 10,
+    "rrf_smoothing": 60
+  },
+  "store": "chroma_bench_1788912379_36bfad5f",
+  "n_chunks": 1123,
+  "n_queries": 56,
+  "bucket1_code": {
+    "n": 39,
+    "arms": {
+      "dense_only": {
+        "hit@1": {
+          "successes": 21,
+          "n": 39,
+          "value": 0.5384615384615384,
+          "ci_low": 0.3856944827051576,
+          "ci_high": 0.6843311439327215
+        },
+        "hit@3": {
+          "successes": 31,
+          "n": 39,
+          "value": 0.7948717948717948,
+          "ci_low": 0.644660319864177,
+          "ci_high": 0.8922028176928961
+        },
+        "hit@5": {
+          "successes": 35,
+          "n": 39,
+          "value": 0.8974358974358975,
+          "ci_low": 0.7642114553714348,
+          "ci_high": 0.9593866865533163
+        },
+        "mrr@5": 0.6782051282051282,
+        "span_hit@5": {
+          "successes": 9,
+          "n": 13,
+          "value": 0.6923076923076923,
+          "ci_low": 0.42369343180549035,
+          "ci_high": 0.8731929634428948
+        }
+      },
+      "bm25_only": {
+        "hit@1": {
+          "successes": 15,
+          "n": 39,
+          "value": 0.38461538461538464,
+          "ci_low": 0.24891373465561348,
+          "ci_high": 0.5410093854307493
+        },
+        "hit@3": {
+          "successes": 26,
+          "n": 39,
+          "value": 0.6666666666666666,
+          "ci_low": 0.5097739439934599,
+          "ci_high": 0.7936704381040163
+        },
+        "hit@5": {
+          "successes": 29,
+          "n": 39,
+          "value": 0.7435897435897436,
+          "ci_low": 0.5891834407831603,
+          "ci_high": 0.8543121945900741
+        },
+        "mrr@5": 0.5294871794871795,
+        "span_hit@5": {
+          "successes": 6,
+          "n": 13,
+          "value": 0.46153846153846156,
+          "ci_low": 0.232060678095383,
+          "ci_high": 0.7085620428549398
+        }
+      },
+      "hybrid": {
+        "hit@1": {
+          "successes": 19,
+          "n": 39,
+          "value": 0.48717948717948717,
+          "ci_low": 0.33865175329862,
+          "ci_high": 0.6380063711554202
+        },
+        "hit@3": {
+          "successes": 33,
+          "n": 39,
+          "value": 0.8461538461538461,
+          "ci_low": 0.7027053635107331,
+          "ci_high": 0.927525276230179
+        },
+        "hit@5": {
+          "successes": 34,
+          "n": 39,
+          "value": 0.8717948717948718,
+          "ci_low": 0.7329425662025455,
+          "ci_high": 0.9439718246302862
+        },
+        "mrr@5": 0.6418803418803418,
+        "span_hit@5": {
+          "successes": 10,
+          "n": 13,
+          "value": 0.7692307692307693,
+          "ci_low": 0.49743624053272495,
+          "ci_high": 0.9182047128150143
+        }
+      }
+    },
+    "by_category": {
+      "exact_identifier": {
+        "n": 8,
+        "arms": {
+          "dense_only": {
+            "successes": 7,
+            "n": 8,
+            "value": 0.875,
+            "ci_low": 0.5291118177871464,
+            "ci_high": 0.9775825085499433
+          },
+          "bm25_only": {
+            "successes": 7,
+            "n": 8,
+            "value": 0.875,
+            "ci_low": 0.5291118177871464,
+            "ci_high": 0.9775825085499433
+          },
+          "hybrid": {
+            "successes": 7,
+            "n": 8,
+            "value": 0.875,
+            "ci_low": 0.5291118177871464,
+            "ci_high": 0.9775825085499433
+          }
+        }
+      },
+      "paraphrase": {
+        "n": 8,
+        "arms": {
+          "dense_only": {
+            "successes": 7,
+            "n": 8,
+            "value": 0.875,
+            "ci_low": 0.5291118177871464,
+            "ci_high": 0.9775825085499433
+          },
+          "bm25_only": {
+            "successes": 6,
+            "n": 8,
+            "value": 0.75,
+            "ci_low": 0.40927543031016883,
+            "ci_high": 0.9285207872478909
+          },
+          "hybrid": {
+            "successes": 7,
+            "n": 8,
+            "value": 0.875,
+            "ci_low": 0.5291118177871464,
+            "ci_high": 0.9775825085499433
+          }
+        }
+      },
+      "conceptual": {
+        "n": 8,
+        "arms": {
+          "dense_only": {
+            "successes": 7,
+            "n": 8,
+            "value": 0.875,
+            "ci_low": 0.5291118177871464,
+            "ci_high": 0.9775825085499433
+          },
+          "bm25_only": {
+            "successes": 5,
+            "n": 8,
+            "value": 0.625,
+            "ci_low": 0.3057423946026273,
+            "ci_high": 0.8631557141764027
+          },
+          "hybrid": {
+            "successes": 8,
+            "n": 8,
+            "value": 1.0,
+            "ci_low": 0.6755924351161198,
+            "ci_high": 1.0
+          }
+        }
+      },
+      "literal_string": {
+        "n": 8,
+        "arms": {
+          "dense_only": {
+            "successes": 8,
+            "n": 8,
+            "value": 1.0,
+            "ci_low": 0.6755924351161198,
+            "ci_high": 1.0
+          },
+          "bm25_only": {
+            "successes": 8,
+            "n": 8,
+            "value": 1.0,
+            "ci_low": 0.6755924351161198,
+            "ci_high": 1.0
+          },
+          "hybrid": {
+            "successes": 8,
+            "n": 8,
+            "value": 1.0,
+            "ci_low": 0.6755924351161198,
+            "ci_high": 1.0
+          }
+        }
+      },
+      "cross_file": {
+        "n": 7,
+        "arms": {
+          "dense_only": {
+            "successes": 6,
+            "n": 7,
+            "value": 0.8571428571428571,
+            "ci_low": 0.4868721707256811,
+            "ci_high": 0.9743203756552565
+          },
+          "bm25_only": {
+            "successes": 3,
+            "n": 7,
+            "value": 0.42857142857142855,
+            "ci_low": 0.15821985525146975,
+            "ci_high": 0.7495416354723428
+          },
+          "hybrid": {
+            "successes": 4,
+            "n": 7,
+            "value": 0.5714285714285714,
+            "ci_low": 0.2504583645276572,
+            "ci_high": 0.8417801447485302
+          }
+        }
+      }
+    },
+    "cross_file_recall@5": {
+      "dense_only": 0.4523809523809524,
+      "bm25_only": 0.21428571428571427,
+      "hybrid": 0.38095238095238093
+    },
+    "mcnemar": {
+      "dense_won": 2,
+      "hybrid_won": 1,
+      "discordant": 3,
+      "p_value": 1.0,
+      "underpowered": true
+    }
+  },
+  "bucket2_documents": {
+    "n": 10,
+    "arms": {
+      "dense_only": {
+        "hit@1": {
+          "successes": 9,
+          "n": 10,
+          "value": 0.9,
+          "ci_low": 0.5958499732047615,
+          "ci_high": 0.9821237869049271
+        },
+        "hit@3": {
+          "successes": 10,
+          "n": 10,
+          "value": 1.0,
+          "ci_low": 0.7224672001371107,
+          "ci_high": 1.0
+        },
+        "hit@5": {
+          "successes": 10,
+          "n": 10,
+          "value": 1.0,
+          "ci_low": 0.7224672001371107,
+          "ci_high": 1.0
+        },
+        "mrr@5": 0.9333333333333332,
+        "span_hit@5": {
+          "successes": 5,
+          "n": 5,
+          "value": 1.0,
+          "ci_low": 0.5655175352168251,
+          "ci_high": 1.0
+        }
+      },
+      "bm25_only": {
+        "hit@1": {
+          "successes": 10,
+          "n": 10,
+          "value": 1.0,
+          "ci_low": 0.7224672001371107,
+          "ci_high": 1.0
+        },
+        "hit@3": {
+          "successes": 10,
+          "n": 10,
+          "value": 1.0,
+          "ci_low": 0.7224672001371107,
+          "ci_high": 1.0
+        },
+        "hit@5": {
+          "successes": 10,
+          "n": 10,
+          "value": 1.0,
+          "ci_low": 0.7224672001371107,
+          "ci_high": 1.0
+        },
+        "mrr@5": 1.0,
+        "span_hit@5": {
+          "successes": 5,
+          "n": 5,
+          "value": 1.0,
+          "ci_low": 0.5655175352168251,
+          "ci_high": 1.0
+        }
+      },
+      "hybrid": {
+        "hit@1": {
+          "successes": 10,
+          "n": 10,
+          "value": 1.0,
+          "ci_low": 0.7224672001371107,
+          "ci_high": 1.0
+        },
+        "hit@3": {
+          "successes": 10,
+          "n": 10,
+          "value": 1.0,
+          "ci_low": 0.7224672001371107,
+          "ci_high": 1.0
+        },
+        "hit@5": {
+          "successes": 10,
+          "n": 10,
+          "value": 1.0,
+          "ci_low": 0.7224672001371107,
+          "ci_high": 1.0
+        },
+        "mrr@5": 1.0,
+        "span_hit@5": {
+          "successes": 5,
+          "n": 5,
+          "value": 1.0,
+          "ci_low": 0.5655175352168251,
+          "ci_high": 1.0
+        }
+      }
+    },
+    "by_category": {
+      "doc_factual": {
+        "n": 5,
+        "arms": {
+          "dense_only": {
+            "successes": 5,
+            "n": 5,
+            "value": 1.0,
+            "ci_low": 0.5655175352168251,
+            "ci_high": 1.0
+          },
+          "bm25_only": {
+            "successes": 5,
+            "n": 5,
+            "value": 1.0,
+            "ci_low": 0.5655175352168251,
+            "ci_high": 1.0
+          },
+          "hybrid": {
+            "successes": 5,
+            "n": 5,
+            "value": 1.0,
+            "ci_low": 0.5655175352168251,
+            "ci_high": 1.0
+          }
+        }
+      },
+      "doc_conceptual": {
+        "n": 5,
+        "arms": {
+          "dense_only": {
+            "successes": 5,
+            "n": 5,
+            "value": 1.0,
+            "ci_low": 0.5655175352168251,
+            "ci_high": 1.0
+          },
+          "bm25_only": {
+            "successes": 5,
+            "n": 5,
+            "value": 1.0,
+            "ci_low": 0.5655175352168251,
+            "ci_high": 1.0
+          },
+          "hybrid": {
+            "successes": 5,
+            "n": 5,
+            "value": 1.0,
+            "ci_low": 0.5655175352168251,
+            "ci_high": 1.0
+          }
+        }
+      }
+    },
+    "mcnemar": {
+      "dense_won": 0,
+      "hybrid_won": 0,
+      "discordant": 0,
+      "p_value": 1.0,
+      "underpowered": true
+    }
+  },
+  "bucket3_unanswerable": {
+    "note": "score signals differ per arm; see per-arm 'signal'",
+    "arms": {
+      "dense_only": {
+        "signal": "cosine(query, top-1 chunk), computed outside the arm because MMR exposes no score",
+        "threshold": 0.5176661190476651,
+        "threshold_basis": "median top-1 score on the 49 answerable queries",
+        "returned_any_chunk": {
+          "successes": 7,
+          "n": 7,
+          "value": 1.0,
+          "ci_low": 0.6456695649333126,
+          "ci_high": 1.0
+        },
+        "above_threshold": {
+          "successes": 0,
+          "n": 7,
+          "value": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.3543304350666875
+        },
+        "per_query": [
+          {
+            "id": "una-01",
+            "score": 0.47614701730189346
+          },
+          {
+            "id": "una-02",
+            "score": 0.4603188013621774
+          },
+          {
+            "id": "una-03",
+            "score": 0.4187066283703996
+          },
+          {
+            "id": "una-04",
+            "score": 0.35602679318272956
+          },
+          {
+            "id": "una-05",
+            "score": 0.3506450378528435
+          },
+          {
+            "id": "una-06",
+            "score": 0.3132537388489999
+          },
+          {
+            "id": "una-07",
+            "score": 0.44379342596979854
+          }
+        ],
+        "answerable_median": 0.5176661190476651
+      },
+      "bm25_only": {
+        "signal": "Okapi BM25 score",
+        "threshold": 14.537857875673872,
+        "threshold_basis": "median top-1 score on the 49 answerable queries",
+        "returned_any_chunk": {
+          "successes": 7,
+          "n": 7,
+          "value": 1.0,
+          "ci_low": 0.6456695649333126,
+          "ci_high": 1.0
+        },
+        "above_threshold": {
+          "successes": 1,
+          "n": 7,
+          "value": 0.14285714285714285,
+          "ci_low": 0.02567962434474355,
+          "ci_high": 0.5131278292743189
+        },
+        "per_query": [
+          {
+            "id": "una-01",
+            "score": 9.04019388220659
+          },
+          {
+            "id": "una-02",
+            "score": 10.723282080016364
+          },
+          {
+            "id": "una-03",
+            "score": 7.954693901296771
+          },
+          {
+            "id": "una-04",
+            "score": 17.27867887834932
+          },
+          {
+            "id": "una-05",
+            "score": 12.01977221408252
+          },
+          {
+            "id": "una-06",
+            "score": 5.069721517315795
+          },
+          {
+            "id": "una-07",
+            "score": 8.712925738493649
+          }
+        ],
+        "answerable_median": 14.537857875673872
+      },
+      "hybrid": {
+        "signal": "RRF fusion score",
+        "threshold": 0.016133,
+        "threshold_basis": "median top-1 score on the 49 answerable queries",
+        "returned_any_chunk": {
+          "successes": 7,
+          "n": 7,
+          "value": 1.0,
+          "ci_low": 0.6456695649333126,
+          "ci_high": 1.0
+        },
+        "above_threshold": {
+          "successes": 2,
+          "n": 7,
+          "value": 0.2857142857142857,
+          "ci_low": 0.08221892400405678,
+          "ci_high": 0.6410655481673808
+        },
+        "per_query": [
+          {
+            "id": "una-01",
+            "score": 0.015659
+          },
+          {
+            "id": "una-02",
+            "score": 0.016133
+          },
+          {
+            "id": "una-03",
+            "score": 0.015659
+          },
+          {
+            "id": "una-04",
+            "score": 0.008197
+          },
+          {
+            "id": "una-05",
+            "score": 0.016393
+          },
+          {
+            "id": "una-06",
+            "score": 0.008197
+          },
+          {
+            "id": "una-07",
+            "score": 0.016129
+          }
+        ],
+        "answerable_median": 0.016133
+      }
+    }
+  },
+  "provenance": {
+    "overall": {
+      "vector+bm25": 23,
+      "bm25": 4,
+      "vector": 7
+    },
+    "by_category": {
+      "exact_identifier": {
+        "vector+bm25": 5,
+        "bm25": 1,
+        "vector": 1
+      },
+      "paraphrase": {
+        "vector+bm25": 5,
+        "bm25": 1,
+        "vector": 1
+      },
+      "conceptual": {
+        "vector+bm25": 4,
+        "bm25": 1,
+        "vector": 3
+      },
+      "literal_string": {
+        "vector+bm25": 8
+      },
+      "cross_file": {
+        "bm25": 1,
+        "vector": 2,
+        "vector+bm25": 1
+      }
+    }
+  },
+  "harm": {
+    "rows": [
+      {
+        "id": "eid-01",
+        "category": "exact_identifier",
+        "question": "CaseInsensitiveDict",
+        "dense_rank": 1,
+        "hybrid_rank": 2
+      },
+      {
+        "id": "eid-02",
+        "category": "exact_identifier",
+        "question": "resolve_redirects",
+        "dense_rank": 2,
+        "hybrid_rank": 3
+      },
+      {
+        "id": "eid-03",
+        "category": "exact_identifier",
+        "question": "extract_zipped_paths",
+        "dense_rank": 1,
+        "hybrid_rank": 2
+      },
+      {
+        "id": "eid-04",
+        "category": "exact_identifier",
+        "question": "TooManyRedirects",
+        "dense_rank": null,
+        "hybrid_rank": null
+      },
+      {
+        "id": "eid-05",
+        "category": "exact_identifier",
+        "question": "HTTPDigestAuth",
+        "dense_rank": 2,
+        "hybrid_rank": 3
+      },
+      {
+        "id": "eid-06",
+        "category": "exact_identifier",
+        "question": "cookiejar_from_dict",
+        "dense_rank": 1,
+        "hybrid_rank": 1
+      },
+      {
+        "id": "eid-07",
+        "category": "exact_identifier",
+        "question": "init_poolmanager",
+        "dense_rank": 1,
+        "hybrid_rank": 1
+      },
+      {
+        "id": "eid-08",
+        "category": "exact_identifier",
+        "question": "get_encoding_from_headers",
+        "dense_rank": 1,
+        "hybrid_rank": 2
+      },
+      {
+        "id": "par-01",
+        "category": "paraphrase",
+        "question": "Can I reuse one network connection across many calls to the same website instead of opening a new one every time?",
+        "dense_rank": 1,
+        "hybrid_rank": 1
+      },
+      {
+        "id": "par-02",
+        "category": "paraphrase",
+        "question": "How do I read a very large reply gradually rather than pulling all of it into memory at once?",
+        "dense_rank": 1,
+        "hybrid_rank": 1
+      },
+      {
+        "id": "par-03",
+        "category": "paraphrase",
+        "question": "What stops my program hanging forever when a server never replies?",
+        "dense_rank": 3,
+        "hybrid_rank": 2
+      },
+      {
+        "id": "par-04",
+        "category": "paraphrase",
+        "question": "After being bounced through several forwarding hops, can I still inspect the earlier replies?",
+        "dense_rank": 2,
+        "hybrid_rank": 3
+      },
+      {
+        "id": "par-05",
+        "category": "paraphrase",
+        "question": "How do I attach an image alongside ordinary form fields in one submission?",
+        "dense_rank": 1,
+        "hybrid_rank": 1
+      },
+      {
+        "id": "par-06",
+        "category": "paraphrase",
+        "question": "If a site sends me to a different host, does the library still hand over my username and password?",
+        "dense_rank": null,
+        "hybrid_rank": null
+      },
+      {
+        "id": "par-07",
+        "category": "paraphrase",
+        "question": "How can I let the library talk to a server whose certificate my machine does not trust?",
+        "dense_rank": 1,
+        "hybrid_rank": 1
+      },
+      {
+        "id": "par-08",
+        "category": "paraphrase",
+        "question": "How do I stay logged in across a sequence of calls without re-sending my credentials each time?",
+        "dense_rank": 3,
+        "hybrid_rank": 1
+      },
+      {
+        "id": "con-01",
+        "category": "conceptual",
+        "question": "How does the library decide whether a particular address should go through a proxy?",
+        "dense_rank": null,
+        "hybrid_rank": 3
+      },
+      {
+        "id": "con-02",
+        "category": "conceptual",
+        "question": "How is a user's request turned into the exact bytes that go out on the wire?",
+        "dense_rank": 4,
+        "hybrid_rank": 2
+      },
+      {
+        "id": "con-03",
+        "category": "conceptual",
+        "question": "How does the retry behaviour work when a connection attempt fails?",
+        "dense_rank": 2,
+        "hybrid_rank": 1
+      },
+      {
+        "id": "con-04",
+        "category": "conceptual",
+        "question": "How does the library work out which character set a reply is written in?",
+        "dense_rank": 3,
+        "hybrid_rank": 5
+      },
+      {
+        "id": "con-05",
+        "category": "conceptual",
+        "question": "How are cookies carried from one call to the next within a single conversation?",
+        "dense_rank": 2,
+        "hybrid_rank": 3
+      },
+      {
+        "id": "con-06",
+        "category": "conceptual",
+        "question": "How does the callback mechanism let me alter a reply before my own code sees it?",
+        "dense_rank": 1,
+        "hybrid_rank": 2
+      },
+      {
+        "id": "con-07",
+        "category": "conceptual",
+        "question": "How is the length of an outgoing body calculated before it is sent?",
+        "dense_rank": 1,
+        "hybrid_rank": 1
+      },
+      {
+        "id": "con-08",
+        "category": "conceptual",
+        "question": "How do settings given on a single call combine with the ones already configured for the whole conversation?",
+        "dense_rank": 1,
+        "hybrid_rank": 2
+      },
+      {
+        "id": "lit-01",
+        "category": "literal_string",
+        "question": "Exceeded 30 redirects.",
+        "dense_rank": 2,
+        "hybrid_rank": 1
+      },
+      {
+        "id": "lit-02",
+        "category": "literal_string",
+        "question": "DEFAULT_REDIRECT_LIMIT",
+        "dense_rank": 1,
+        "hybrid_rank": 1
+      },
+      {
+        "id": "lit-03",
+        "category": "literal_string",
+        "question": "Invalid URL: No scheme supplied",
+        "dense_rank": 1,
+        "hybrid_rank": 1
+      },
+      {
+        "id": "lit-04",
+        "category": "literal_string",
+        "question": "CONTENT_CHUNK_SIZE",
+        "dense_rank": 1,
+        "hybrid_rank": 1
+      },
+      {
+        "id": "lit-05",
+        "category": "literal_string",
+        "question": "DEFAULT_POOLSIZE",
+        "dense_rank": 1,
+        "hybrid_rank": 1
+      },
+      {
+        "id": "lit-06",
+        "category": "literal_string",
+        "question": "REDIRECT_STATI",
+        "dense_rank": 1,
+        "hybrid_rank": 1
+      },
+      {
+        "id": "lit-07",
+        "category": "literal_string",
+        "question": "DEFAULT_CA_BUNDLE_PATH",
+        "dense_rank": 1,
+        "hybrid_rank": 1
+      },
+      {
+        "id": "lit-08",
+        "category": "literal_string",
+        "question": "Invalid URL: No host supplied",
+        "dense_rank": 2,
+        "hybrid_rank": 1
+      },
+      {
+        "id": "crs-01",
+        "category": "cross_file",
+        "question": "Which exception is raised when a request is forwarded too many times, and where is that ceiling actually set?",
+        "dense_rank": 5,
+        "hybrid_rank": 3
+      },
+      {
+        "id": "crs-02",
+        "category": "cross_file",
+        "question": "How does a proxy set in an environment variable end up changing which connection pool is used?",
+        "dense_rank": 1,
+        "hybrid_rank": 1
+      },
+      {
+        "id": "crs-03",
+        "category": "cross_file",
+        "question": "What identifying string does the library announce itself with, and where does the version inside it come from?",
+        "dense_rank": 4,
+        "hybrid_rank": null
+      },
+      {
+        "id": "crs-04",
+        "category": "cross_file",
+        "question": "Which bundle of trusted certificates is used by default, and how is its location found?",
+        "dense_rank": 1,
+        "hybrid_rank": 3
+      },
+      {
+        "id": "crs-05",
+        "category": "cross_file",
+        "question": "How does a readable status name like not_found relate to the numeric code, and what raises an error from it?",
+        "dense_rank": 1,
+        "hybrid_rank": 1
+      },
+      {
+        "id": "crs-06",
+        "category": "cross_file",
+        "question": "What happens between the top-level one-line call and the point where something is actually sent?",
+        "dense_rank": 4,
+        "hybrid_rank": null
+      },
+      {
+        "id": "crs-07",
+        "category": "cross_file",
+        "question": "How does an authentication handler get attached to an outgoing request during preparation?",
+        "dense_rank": null,
+        "hybrid_rank": null
+      }
+    ],
+    "worse": [
+      {
+        "id": "eid-01",
+        "category": "exact_identifier",
+        "question": "CaseInsensitiveDict",
+        "dense_rank": 1,
+        "hybrid_rank": 2
+      },
+      {
+        "id": "eid-02",
+        "category": "exact_identifier",
+        "question": "resolve_redirects",
+        "dense_rank": 2,
+        "hybrid_rank": 3
+      },
+      {
+        "id": "eid-03",
+        "category": "exact_identifier",
+        "question": "extract_zipped_paths",
+        "dense_rank": 1,
+        "hybrid_rank": 2
+      },
+      {
+        "id": "eid-05",
+        "category": "exact_identifier",
+        "question": "HTTPDigestAuth",
+        "dense_rank": 2,
+        "hybrid_rank": 3
+      },
+      {
+        "id": "eid-08",
+        "category": "exact_identifier",
+        "question": "get_encoding_from_headers",
+        "dense_rank": 1,
+        "hybrid_rank": 2
+      },
+      {
+        "id": "par-04",
+        "category": "paraphrase",
+        "question": "After being bounced through several forwarding hops, can I still inspect the earlier replies?",
+        "dense_rank": 2,
+        "hybrid_rank": 3
+      },
+      {
+        "id": "con-04",
+        "category": "conceptual",
+        "question": "How does the library work out which character set a reply is written in?",
+        "dense_rank": 3,
+        "hybrid_rank": 5
+      },
+      {
+        "id": "con-05",
+        "category": "conceptual",
+        "question": "How are cookies carried from one call to the next within a single conversation?",
+        "dense_rank": 2,
+        "hybrid_rank": 3
+      },
+      {
+        "id": "con-06",
+        "category": "conceptual",
+        "question": "How does the callback mechanism let me alter a reply before my own code sees it?",
+        "dense_rank": 1,
+        "hybrid_rank": 2
+      },
+      {
+        "id": "con-08",
+        "category": "conceptual",
+        "question": "How do settings given on a single call combine with the ones already configured for the whole conversation?",
+        "dense_rank": 1,
+        "hybrid_rank": 2
+      },
+      {
+        "id": "crs-03",
+        "category": "cross_file",
+        "question": "What identifying string does the library announce itself with, and where does the version inside it come from?",
+        "dense_rank": 4,
+        "hybrid_rank": null
+      },
+      {
+        "id": "crs-04",
+        "category": "cross_file",
+        "question": "Which bundle of trusted certificates is used by default, and how is its location found?",
+        "dense_rank": 1,
+        "hybrid_rank": 3
+      },
+      {
+        "id": "crs-06",
+        "category": "cross_file",
+        "question": "What happens between the top-level one-line call and the point where something is actually sent?",
+        "dense_rank": 4,
+        "hybrid_rank": null
+      }
+    ],
+    "better": [
+      {
+        "id": "par-03",
+        "category": "paraphrase",
+        "question": "What stops my program hanging forever when a server never replies?",
+        "dense_rank": 3,
+        "hybrid_rank": 2
+      },
+      {
+        "id": "par-08",
+        "category": "paraphrase",
+        "question": "How do I stay logged in across a sequence of calls without re-sending my credentials each time?",
+        "dense_rank": 3,
+        "hybrid_rank": 1
+      },
+      {
+        "id": "con-01",
+        "category": "conceptual",
+        "question": "How does the library decide whether a particular address should go through a proxy?",
+        "dense_rank": null,
+        "hybrid_rank": 3
+      },
+      {
+        "id": "con-02",
+        "category": "conceptual",
+        "question": "How is a user's request turned into the exact bytes that go out on the wire?",
+        "dense_rank": 4,
+        "hybrid_rank": 2
+      },
+      {
+        "id": "con-03",
+        "category": "conceptual",
+        "question": "How does the retry behaviour work when a connection attempt fails?",
+        "dense_rank": 2,
+        "hybrid_rank": 1
+      },
+      {
+        "id": "lit-01",
+        "category": "literal_string",
+        "question": "Exceeded 30 redirects.",
+        "dense_rank": 2,
+        "hybrid_rank": 1
+      },
+      {
+        "id": "lit-08",
+        "category": "literal_string",
+        "question": "Invalid URL: No host supplied",
+        "dense_rank": 2,
+        "hybrid_rank": 1
+      },
+      {
+        "id": "crs-01",
+        "category": "cross_file",
+        "question": "Which exception is raised when a request is forwarded too many times, and where is that ceiling actually set?",
+        "dense_rank": 5,
+        "hybrid_rank": 3
+      }
+    ],
+    "unchanged": 18
+  },
+  "per_query": {
+    "eid-01": {
+      "dense_only": {
+        "locators": [
+          [
+            "src/requests/structures.py",
+            null
+          ],
+          [
+            "tests/test_structures.py",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ],
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": true
+      },
+      "bm25_only": {
+        "locators": [
+          [
+            "tests/test_structures.py",
+            null
+          ],
+          [
+            "tests/test_structures.py",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ],
+          [
+            "src/requests/structures.py",
+            null
+          ],
+          [
+            "tests/test_utils.py",
+            null
+          ]
+        ],
+        "rank": 4,
+        "hit@1": false,
+        "hit@3": false,
+        "hit@5": true,
+        "mrr@5": 0.25,
+        "recall@5": 1.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": false
+      },
+      "hybrid": {
+        "locators": [
+          [
+            "tests/test_requests.py",
+            null
+          ],
+          [
+            "src/requests/structures.py",
+            null
+          ],
+          [
+            "tests/test_structures.py",
+            null
+          ],
+          [
+            "src/requests/structures.py",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ]
+        ],
+        "rank": 2,
+        "hit@1": false,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 0.5,
+        "recall@5": 1.0,
+        "provenance": [
+          "vector+bm25",
+          "vector+bm25",
+          "vector+bm25",
+          "vector+bm25",
+          "vector+bm25"
+        ],
+        "span_hit": true
+      },
+      "_meta": {
+        "category": "exact_identifier",
+        "question": "CaseInsensitiveDict"
+      }
+    },
+    "eid-02": {
+      "dense_only": {
+        "locators": [
+          [
+            "tests/test_requests.py",
+            null
+          ],
+          [
+            "src/requests/sessions.py",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ]
+        ],
+        "rank": 2,
+        "hit@1": false,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 0.5,
+        "recall@5": 1.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": true
+      },
+      "bm25_only": {
+        "locators": [
+          [
+            "src/requests/sessions.py",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ],
+          [
+            "src/requests/sessions.py",
+            null
+          ],
+          [
+            "src/requests/sessions.py",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": false
+      },
+      "hybrid": {
+        "locators": [
+          [
+            "HISTORY.md",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ],
+          [
+            "src/requests/sessions.py",
+            null
+          ],
+          [
+            "src/requests/sessions.py",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ]
+        ],
+        "rank": 3,
+        "hit@1": false,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 0.3333333333333333,
+        "recall@5": 1.0,
+        "provenance": [
+          "vector+bm25",
+          "vector",
+          "bm25",
+          "vector",
+          "bm25"
+        ],
+        "span_hit": true
+      },
+      "_meta": {
+        "category": "exact_identifier",
+        "question": "resolve_redirects"
+      }
+    },
+    "eid-03": {
+      "dense_only": {
+        "locators": [
+          [
+            "src/requests/utils.py",
+            null
+          ],
+          [
+            "tests/test_utils.py",
+            null
+          ],
+          [
+            "src/requests/utils.py",
+            null
+          ],
+          [
+            "tests/test_utils.py",
+            null
+          ],
+          [
+            "src/requests/utils.py",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": true
+      },
+      "bm25_only": {
+        "locators": [
+          [
+            "tests/test_utils.py",
+            null
+          ],
+          [
+            "tests/test_utils.py",
+            null
+          ],
+          [
+            "src/requests/utils.py",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ]
+        ],
+        "rank": 3,
+        "hit@1": false,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 0.3333333333333333,
+        "recall@5": 1.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": true
+      },
+      "hybrid": {
+        "locators": [
+          [
+            "tests/test_utils.py",
+            null
+          ],
+          [
+            "src/requests/utils.py",
+            null
+          ],
+          [
+            "tests/test_utils.py",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ],
+          [
+            "src/requests/cookies.py",
+            null
+          ]
+        ],
+        "rank": 2,
+        "hit@1": false,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 0.5,
+        "recall@5": 1.0,
+        "provenance": [
+          "vector+bm25",
+          "vector+bm25",
+          "vector+bm25",
+          "vector+bm25",
+          "vector+bm25"
+        ],
+        "span_hit": true
+      },
+      "_meta": {
+        "category": "exact_identifier",
+        "question": "extract_zipped_paths"
+      }
+    },
+    "eid-04": {
+      "dense_only": {
+        "locators": [
+          [
+            "docs/index.rst",
+            null
+          ],
+          [
+            "src/requests/_types.py",
+            null
+          ],
+          [
+            "src/requests/packages.py",
+            null
+          ],
+          [
+            "src/requests/_types.py",
+            null
+          ],
+          [
+            "src/requests/utils.py",
+            null
+          ]
+        ],
+        "rank": null,
+        "hit@1": false,
+        "hit@3": false,
+        "hit@5": false,
+        "mrr@5": 0.0,
+        "recall@5": 0.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": false
+      },
+      "bm25_only": {
+        "locators": [
+          [
+            "tests/test_requests.py",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ],
+          [
+            "src/requests/sessions.py",
+            null
+          ],
+          [
+            "src/requests/sessions.py",
+            null
+          ],
+          [
+            "src/requests/exceptions.py",
+            null
+          ]
+        ],
+        "rank": 5,
+        "hit@1": false,
+        "hit@3": false,
+        "hit@5": true,
+        "mrr@5": 0.2,
+        "recall@5": 1.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": true
+      },
+      "hybrid": {
+        "locators": [
+          [
+            "docs/index.rst",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ],
+          [
+            "src/requests/_types.py",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ],
+          [
+            "src/requests/packages.py",
+            null
+          ]
+        ],
+        "rank": null,
+        "hit@1": false,
+        "hit@3": false,
+        "hit@5": false,
+        "mrr@5": 0.0,
+        "recall@5": 0.0,
+        "provenance": [
+          "vector",
+          "bm25",
+          "vector",
+          "bm25",
+          "vector"
+        ],
+        "span_hit": false
+      },
+      "_meta": {
+        "category": "exact_identifier",
+        "question": "TooManyRedirects"
+      }
+    },
+    "eid-05": {
+      "dense_only": {
+        "locators": [
+          [
+            "docs/user/authentication.rst",
+            null
+          ],
+          [
+            "src/requests/auth.py",
+            null
+          ],
+          [
+            "tests/test_lowlevel.py",
+            null
+          ],
+          [
+            "README.md",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ]
+        ],
+        "rank": 2,
+        "hit@1": false,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 0.5,
+        "recall@5": 1.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": true
+      },
+      "bm25_only": {
+        "locators": [
+          [
+            "tests/test_requests.py",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ],
+          [
+            "tests/test_lowlevel.py",
+            null
+          ],
+          [
+            "tests/test_lowlevel.py",
+            null
+          ]
+        ],
+        "rank": null,
+        "hit@1": false,
+        "hit@3": false,
+        "hit@5": false,
+        "mrr@5": 0.0,
+        "recall@5": 0.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": false
+      },
+      "hybrid": {
+        "locators": [
+          [
+            "docs/user/authentication.rst",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ],
+          [
+            "src/requests/auth.py",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ],
+          [
+            "tests/test_lowlevel.py",
+            null
+          ]
+        ],
+        "rank": 3,
+        "hit@1": false,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 0.3333333333333333,
+        "recall@5": 1.0,
+        "provenance": [
+          "vector",
+          "bm25",
+          "vector",
+          "bm25",
+          "vector"
+        ],
+        "span_hit": true
+      },
+      "_meta": {
+        "category": "exact_identifier",
+        "question": "HTTPDigestAuth"
+      }
+    },
+    "eid-06": {
+      "dense_only": {
+        "locators": [
+          [
+            "src/requests/cookies.py",
+            null
+          ],
+          [
+            "src/requests/cookies.py",
+            null
+          ],
+          [
+            "src/requests/cookies.py",
+            null
+          ],
+          [
+            "src/requests/utils.py",
+            null
+          ],
+          [
+            "src/requests/cookies.py",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": true
+      },
+      "bm25_only": {
+        "locators": [
+          [
+            "src/requests/cookies.py",
+            null
+          ],
+          [
+            "src/requests/cookies.py",
+            null
+          ],
+          [
+            "src/requests/cookies.py",
+            null
+          ],
+          [
+            "src/requests/cookies.py",
+            null
+          ],
+          [
+            "tests/test_utils.py",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": true
+      },
+      "hybrid": {
+        "locators": [
+          [
+            "src/requests/cookies.py",
+            null
+          ],
+          [
+            "src/requests/cookies.py",
+            null
+          ],
+          [
+            "src/requests/cookies.py",
+            null
+          ],
+          [
+            "src/requests/cookies.py",
+            null
+          ],
+          [
+            "src/requests/utils.py",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          "vector+bm25",
+          "vector+bm25",
+          "vector+bm25",
+          "vector+bm25",
+          "vector+bm25"
+        ],
+        "span_hit": true
+      },
+      "_meta": {
+        "category": "exact_identifier",
+        "question": "cookiejar_from_dict"
+      }
+    },
+    "eid-07": {
+      "dense_only": {
+        "locators": [
+          [
+            "src/requests/adapters.py",
+            null
+          ],
+          [
+            "src/requests/adapters.py",
+            null
+          ],
+          [
+            "src/requests/adapters.py",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ],
+          [
+            "src/requests/adapters.py",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": true
+      },
+      "bm25_only": {
+        "locators": [
+          [
+            "src/requests/adapters.py",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "src/requests/adapters.py",
+            null
+          ],
+          [
+            "src/requests/adapters.py",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": true
+      },
+      "hybrid": {
+        "locators": [
+          [
+            "src/requests/adapters.py",
+            null
+          ],
+          [
+            "src/requests/adapters.py",
+            null
+          ],
+          [
+            "src/requests/adapters.py",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ],
+          [
+            "src/requests/adapters.py",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          "vector+bm25",
+          "vector+bm25",
+          "vector+bm25",
+          "vector+bm25",
+          "vector+bm25"
+        ],
+        "span_hit": true
+      },
+      "_meta": {
+        "category": "exact_identifier",
+        "question": "init_poolmanager"
+      }
+    },
+    "eid-08": {
+      "dense_only": {
+        "locators": [
+          [
+            "src/requests/utils.py",
+            null
+          ],
+          [
+            "src/requests/utils.py",
+            null
+          ],
+          [
+            "tests/test_utils.py",
+            null
+          ],
+          [
+            "docs/user/quickstart.rst",
+            null
+          ],
+          [
+            "src/requests/utils.py",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": true
+      },
+      "bm25_only": {
+        "locators": [
+          [
+            "tests/test_utils.py",
+            null
+          ],
+          [
+            "src/requests/utils.py",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ],
+          [
+            "src/requests/adapters.py",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ]
+        ],
+        "rank": 2,
+        "hit@1": false,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 0.5,
+        "recall@5": 1.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": false
+      },
+      "hybrid": {
+        "locators": [
+          [
+            "tests/test_utils.py",
+            null
+          ],
+          [
+            "src/requests/utils.py",
+            null
+          ],
+          [
+            "src/requests/utils.py",
+            null
+          ],
+          [
+            "docs/user/quickstart.rst",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ]
+        ],
+        "rank": 2,
+        "hit@1": false,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 0.5,
+        "recall@5": 1.0,
+        "provenance": [
+          "vector+bm25",
+          "vector+bm25",
+          "vector+bm25",
+          "vector+bm25",
+          "bm25"
+        ],
+        "span_hit": true
+      },
+      "_meta": {
+        "category": "exact_identifier",
+        "question": "get_encoding_from_headers"
+      }
+    },
+    "par-01": {
+      "dense_only": {
+        "locators": [
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "docs/index.rst",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "src/requests/adapters.py",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 0.6666666666666666,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "bm25_only": {
+        "locators": [
+          [
+            "src/requests/auth.py",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "src/requests/sessions.py",
+            null
+          ],
+          [
+            ".github/AI_POLICY.md",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ]
+        ],
+        "rank": 2,
+        "hit@1": false,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 0.5,
+        "recall@5": 0.6666666666666666,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "hybrid": {
+        "locators": [
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "src/requests/auth.py",
+            null
+          ],
+          [
+            "docs/index.rst",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 0.3333333333333333,
+        "provenance": [
+          "vector+bm25",
+          "vector+bm25",
+          "vector",
+          "bm25",
+          "vector"
+        ],
+        "span_hit": null
+      },
+      "_meta": {
+        "category": "paraphrase",
+        "question": "Can I reuse one network connection across many calls to the same website instead of opening a new one every time?"
+      }
+    },
+    "par-02": {
+      "dense_only": {
+        "locators": [
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ],
+          [
+            "tests/testserver/server.py",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 0.3333333333333333,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "bm25_only": {
+        "locators": [
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 0.6666666666666666,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "hybrid": {
+        "locators": [
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ],
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 0.6666666666666666,
+        "provenance": [
+          "vector+bm25",
+          "vector+bm25",
+          "vector",
+          "bm25",
+          "vector"
+        ],
+        "span_hit": null
+      },
+      "_meta": {
+        "category": "paraphrase",
+        "question": "How do I read a very large reply gradually rather than pulling all of it into memory at once?"
+      }
+    },
+    "par-03": {
+      "dense_only": {
+        "locators": [
+          [
+            ".github/CONTRIBUTING.md",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "tests/test_testserver.py",
+            null
+          ],
+          [
+            "docs/user/quickstart.rst",
+            null
+          ]
+        ],
+        "rank": 3,
+        "hit@1": false,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 0.3333333333333333,
+        "recall@5": 0.6666666666666666,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "bm25_only": {
+        "locators": [
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "tests/conftest.py",
+            null
+          ],
+          [
+            "tests/test_lowlevel.py",
+            null
+          ],
+          [
+            "src/requests/adapters.py",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 0.6666666666666666,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "hybrid": {
+        "locators": [
+          [
+            ".github/CONTRIBUTING.md",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ],
+          [
+            "tests/conftest.py",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ]
+        ],
+        "rank": 2,
+        "hit@1": false,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 0.5,
+        "recall@5": 0.3333333333333333,
+        "provenance": [
+          "vector",
+          "bm25",
+          "vector",
+          "bm25",
+          "vector"
+        ],
+        "span_hit": null
+      },
+      "_meta": {
+        "category": "paraphrase",
+        "question": "What stops my program hanging forever when a server never replies?"
+      }
+    },
+    "par-04": {
+      "dense_only": {
+        "locators": [
+          [
+            ".github/CONTRIBUTING.md",
+            null
+          ],
+          [
+            "docs/user/quickstart.rst",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ]
+        ],
+        "rank": 2,
+        "hit@1": false,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 0.5,
+        "recall@5": 0.3333333333333333,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "bm25_only": {
+        "locators": [
+          [
+            "HISTORY.md",
+            null
+          ],
+          [
+            "docs/community/updates.rst",
+            null
+          ],
+          [
+            "docs/dev/contributing.rst",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ],
+          [
+            "src/requests/adapters.py",
+            null
+          ]
+        ],
+        "rank": null,
+        "hit@1": false,
+        "hit@3": false,
+        "hit@5": false,
+        "mrr@5": 0.0,
+        "recall@5": 0.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "hybrid": {
+        "locators": [
+          [
+            ".github/CONTRIBUTING.md",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ],
+          [
+            "docs/user/quickstart.rst",
+            null
+          ],
+          [
+            "docs/community/updates.rst",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ]
+        ],
+        "rank": 3,
+        "hit@1": false,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 0.3333333333333333,
+        "recall@5": 0.3333333333333333,
+        "provenance": [
+          "vector",
+          "bm25",
+          "vector",
+          "bm25",
+          "vector"
+        ],
+        "span_hit": null
+      },
+      "_meta": {
+        "category": "paraphrase",
+        "question": "After being bounced through several forwarding hops, can I still inspect the earlier replies?"
+      }
+    },
+    "par-05": {
+      "dense_only": {
+        "locators": [
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "tests/test_utils.py",
+            null
+          ],
+          [
+            "docs/user/quickstart.rst",
+            null
+          ],
+          [
+            "tests/test_utils.py",
+            null
+          ],
+          [
+            "docs/conf.py",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 0.6666666666666666,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "bm25_only": {
+        "locators": [
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "tests/test_utils.py",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 0.6666666666666666,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "hybrid": {
+        "locators": [
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "tests/test_utils.py",
+            null
+          ],
+          [
+            "docs/user/quickstart.rst",
+            null
+          ],
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "tests/test_utils.py",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          "vector+bm25",
+          "vector+bm25",
+          "vector+bm25",
+          "bm25",
+          "vector"
+        ],
+        "span_hit": null
+      },
+      "_meta": {
+        "category": "paraphrase",
+        "question": "How do I attach an image alongside ordinary form fields in one submission?"
+      }
+    },
+    "par-06": {
+      "dense_only": {
+        "locators": [
+          [
+            "docs/user/authentication.rst",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ],
+          [
+            "docs/user/authentication.rst",
+            null
+          ],
+          [
+            "docs/user/authentication.rst",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ]
+        ],
+        "rank": null,
+        "hit@1": false,
+        "hit@3": false,
+        "hit@5": false,
+        "mrr@5": 0.0,
+        "recall@5": 0.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": false
+      },
+      "bm25_only": {
+        "locators": [
+          [
+            "src/requests/auth.py",
+            null
+          ],
+          [
+            "src/requests/adapters.py",
+            null
+          ],
+          [
+            "src/requests/auth.py",
+            null
+          ],
+          [
+            "src/requests/auth.py",
+            null
+          ],
+          [
+            "src/requests/utils.py",
+            null
+          ]
+        ],
+        "rank": null,
+        "hit@1": false,
+        "hit@3": false,
+        "hit@5": false,
+        "mrr@5": 0.0,
+        "recall@5": 0.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": false
+      },
+      "hybrid": {
+        "locators": [
+          [
+            "src/requests/auth.py",
+            null
+          ],
+          [
+            "docs/user/authentication.rst",
+            null
+          ],
+          [
+            "src/requests/auth.py",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ],
+          [
+            "src/requests/adapters.py",
+            null
+          ]
+        ],
+        "rank": null,
+        "hit@1": false,
+        "hit@3": false,
+        "hit@5": false,
+        "mrr@5": 0.0,
+        "recall@5": 0.0,
+        "provenance": [
+          "vector+bm25",
+          "vector",
+          "bm25",
+          "vector",
+          "bm25"
+        ],
+        "span_hit": false
+      },
+      "_meta": {
+        "category": "paraphrase",
+        "question": "If a site sends me to a different host, does the library still hand over my username and password?"
+      }
+    },
+    "par-07": {
+      "dense_only": {
+        "locators": [
+          [
+            "src/requests/sessions.py",
+            null
+          ],
+          [
+            "tests/testserver/server.py",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "src/requests/adapters.py",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "bm25_only": {
+        "locators": [
+          [
+            "tests/test_requests.py",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "tests/certs/expired/README.md",
+            null
+          ],
+          [
+            "tests/certs/README.md",
+            null
+          ],
+          [
+            "src/requests/sessions.py",
+            null
+          ]
+        ],
+        "rank": 2,
+        "hit@1": false,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 0.5,
+        "recall@5": 0.6666666666666666,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "hybrid": {
+        "locators": [
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "src/requests/sessions.py",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ],
+          [
+            "tests/testserver/server.py",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 0.6666666666666666,
+        "provenance": [
+          "vector+bm25",
+          "vector",
+          "bm25",
+          "vector",
+          "bm25"
+        ],
+        "span_hit": null
+      },
+      "_meta": {
+        "category": "paraphrase",
+        "question": "How can I let the library talk to a server whose certificate my machine does not trust?"
+      }
+    },
+    "par-08": {
+      "dense_only": {
+        "locators": [
+          [
+            "HISTORY.md",
+            null
+          ],
+          [
+            "docs/user/authentication.rst",
+            null
+          ],
+          [
+            "src/requests/sessions.py",
+            null
+          ],
+          [
+            "src/requests/sessions.py",
+            null
+          ],
+          [
+            "src/requests/cookies.py",
+            null
+          ]
+        ],
+        "rank": 3,
+        "hit@1": false,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 0.3333333333333333,
+        "recall@5": 0.6666666666666666,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "bm25_only": {
+        "locators": [
+          [
+            "tests/test_requests.py",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "src/requests/auth.py",
+            null
+          ]
+        ],
+        "rank": 2,
+        "hit@1": false,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 0.5,
+        "recall@5": 0.3333333333333333,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "hybrid": {
+        "locators": [
+          [
+            "src/requests/sessions.py",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ],
+          [
+            "docs/user/authentication.rst",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 0.6666666666666666,
+        "provenance": [
+          "vector+bm25",
+          "vector",
+          "bm25",
+          "vector",
+          "bm25"
+        ],
+        "span_hit": null
+      },
+      "_meta": {
+        "category": "paraphrase",
+        "question": "How do I stay logged in across a sequence of calls without re-sending my credentials each time?"
+      }
+    },
+    "con-01": {
+      "dense_only": {
+        "locators": [
+          [
+            "tests/test_utils.py",
+            null
+          ],
+          [
+            "tests/test_utils.py",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ]
+        ],
+        "rank": null,
+        "hit@1": false,
+        "hit@3": false,
+        "hit@5": false,
+        "mrr@5": 0.0,
+        "recall@5": 0.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "bm25_only": {
+        "locators": [
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "src/requests/utils.py",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ],
+          [
+            "src/requests/utils.py",
+            null
+          ]
+        ],
+        "rank": 2,
+        "hit@1": false,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 0.5,
+        "recall@5": 0.3333333333333333,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "hybrid": {
+        "locators": [
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ],
+          [
+            "src/requests/utils.py",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ],
+          [
+            "tests/test_utils.py",
+            null
+          ]
+        ],
+        "rank": 3,
+        "hit@1": false,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 0.3333333333333333,
+        "recall@5": 0.3333333333333333,
+        "provenance": [
+          "vector+bm25",
+          "vector+bm25",
+          "vector+bm25",
+          "vector+bm25",
+          "vector"
+        ],
+        "span_hit": null
+      },
+      "_meta": {
+        "category": "conceptual",
+        "question": "How does the library decide whether a particular address should go through a proxy?"
+      }
+    },
+    "con-02": {
+      "dense_only": {
+        "locators": [
+          [
+            "HISTORY.md",
+            null
+          ],
+          [
+            "docs/user/quickstart.rst",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ]
+        ],
+        "rank": 4,
+        "hit@1": false,
+        "hit@3": false,
+        "hit@5": true,
+        "mrr@5": 0.25,
+        "recall@5": 1.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "bm25_only": {
+        "locators": [
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "docs/user/authentication.rst",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "src/requests/_internal_utils.py",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "hybrid": {
+        "locators": [
+          [
+            "HISTORY.md",
+            null
+          ],
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "docs/user/quickstart.rst",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ]
+        ],
+        "rank": 2,
+        "hit@1": false,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 0.5,
+        "recall@5": 1.0,
+        "provenance": [
+          "vector",
+          "bm25",
+          "vector",
+          "bm25",
+          "vector"
+        ],
+        "span_hit": null
+      },
+      "_meta": {
+        "category": "conceptual",
+        "question": "How is a user's request turned into the exact bytes that go out on the wire?"
+      }
+    },
+    "con-03": {
+      "dense_only": {
+        "locators": [
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "src/requests/adapters.py",
+            null
+          ],
+          [
+            "docs/user/quickstart.rst",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "src/requests/exceptions.py",
+            null
+          ]
+        ],
+        "rank": 2,
+        "hit@1": false,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 0.5,
+        "recall@5": 1.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "bm25_only": {
+        "locators": [
+          [
+            "src/requests/adapters.py",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ],
+          [
+            ".github/CONTRIBUTING.md",
+            null
+          ],
+          [
+            "src/requests/adapters.py",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "hybrid": {
+        "locators": [
+          [
+            "src/requests/adapters.py",
+            null
+          ],
+          [
+            ".github/CONTRIBUTING.md",
+            null
+          ],
+          [
+            "src/requests/exceptions.py",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          "vector+bm25",
+          "vector+bm25",
+          "vector+bm25",
+          "vector",
+          "bm25"
+        ],
+        "span_hit": null
+      },
+      "_meta": {
+        "category": "conceptual",
+        "question": "How does the retry behaviour work when a connection attempt fails?"
+      }
+    },
+    "con-04": {
+      "dense_only": {
+        "locators": [
+          [
+            "docs/user/quickstart.rst",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ],
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "src/requests/_internal_utils.py",
+            null
+          ],
+          [
+            "tests/test_utils.py",
+            null
+          ]
+        ],
+        "rank": 3,
+        "hit@1": false,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 0.3333333333333333,
+        "recall@5": 0.5,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "bm25_only": {
+        "locators": [
+          [
+            "LICENSE",
+            null
+          ],
+          [
+            "LICENSE",
+            null
+          ],
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "src/requests/__init__.py",
+            null
+          ],
+          [
+            "docs/user/quickstart.rst",
+            null
+          ]
+        ],
+        "rank": 3,
+        "hit@1": false,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 0.3333333333333333,
+        "recall@5": 0.5,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "hybrid": {
+        "locators": [
+          [
+            "docs/user/quickstart.rst",
+            null
+          ],
+          [
+            "LICENSE",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ],
+          [
+            "LICENSE",
+            null
+          ],
+          [
+            "src/requests/models.py",
+            null
+          ]
+        ],
+        "rank": 5,
+        "hit@1": false,
+        "hit@3": false,
+        "hit@5": true,
+        "mrr@5": 0.2,
+        "recall@5": 0.5,
+        "provenance": [
+          "vector",
+          "bm25",
+          "vector",
+          "bm25",
+          "vector"
+        ],
+        "span_hit": null
+      },
+      "_meta": {
+        "category": "conceptual",
+        "question": "How does the library work out which character set a reply is written in?"
+      }
+    },
+    "con-05": {
+      "dense_only": {
+        "locators": [
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "src/requests/cookies.py",
+            null
+          ],
+          [
+            "src/requests/cookies.py",
+            null
+          ],
+          [
+            "src/requests/sessions.py",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ]
+        ],
+        "rank": 2,
+        "hit@1": false,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 0.5,
+        "recall@5": 1.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "bm25_only": {
+        "locators": [
+          [
+            "docs/user/quickstart.rst",
+            null
+          ],
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "LICENSE",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            ".github/SECURITY.md",
+            null
+          ]
+        ],
+        "rank": null,
+        "hit@1": false,
+        "hit@3": false,
+        "hit@5": false,
+        "mrr@5": 0.0,
+        "recall@5": 0.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "hybrid": {
+        "locators": [
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "docs/user/quickstart.rst",
+            null
+          ],
+          [
+            "src/requests/cookies.py",
+            null
+          ],
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "src/requests/cookies.py",
+            null
+          ]
+        ],
+        "rank": 3,
+        "hit@1": false,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 0.3333333333333333,
+        "recall@5": 0.5,
+        "provenance": [
+          "vector",
+          "bm25",
+          "vector",
+          "bm25",
+          "vector"
+        ],
+        "span_hit": null
+      },
+      "_meta": {
+        "category": "conceptual",
+        "question": "How are cookies carried from one call to the next within a single conversation?"
+      }
+    },
+    "con-06": {
+      "dense_only": {
+        "locators": [
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "src/requests/sessions.py",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ],
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 0.6666666666666666,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "bm25_only": {
+        "locators": [
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ]
+        ],
+        "rank": null,
+        "hit@1": false,
+        "hit@3": false,
+        "hit@5": false,
+        "mrr@5": 0.0,
+        "recall@5": 0.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "hybrid": {
+        "locators": [
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "src/requests/sessions.py",
+            null
+          ]
+        ],
+        "rank": 2,
+        "hit@1": false,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 0.5,
+        "recall@5": 0.6666666666666666,
+        "provenance": [
+          "vector+bm25",
+          "vector+bm25",
+          "vector",
+          "bm25",
+          "vector"
+        ],
+        "span_hit": null
+      },
+      "_meta": {
+        "category": "conceptual",
+        "question": "How does the callback mechanism let me alter a reply before my own code sees it?"
+      }
+    },
+    "con-07": {
+      "dense_only": {
+        "locators": [
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ],
+          [
+            "src/requests/models.py",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 0.5,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "bm25_only": {
+        "locators": [
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ],
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "src/requests/models.py",
+            null
+          ]
+        ],
+        "rank": 2,
+        "hit@1": false,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 0.5,
+        "recall@5": 0.5,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "hybrid": {
+        "locators": [
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 0.5,
+        "provenance": [
+          "vector+bm25",
+          "bm25",
+          "vector",
+          "vector",
+          "bm25"
+        ],
+        "span_hit": null
+      },
+      "_meta": {
+        "category": "conceptual",
+        "question": "How is the length of an outgoing body calculated before it is sent?"
+      }
+    },
+    "con-08": {
+      "dense_only": {
+        "locators": [
+          [
+            "src/requests/sessions.py",
+            null
+          ],
+          [
+            "src/requests/sessions.py",
+            null
+          ],
+          [
+            "src/requests/api.py",
+            null
+          ],
+          [
+            "docs/dev/contributing.rst",
+            null
+          ],
+          [
+            "docs/Makefile",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": true
+      },
+      "bm25_only": {
+        "locators": [
+          [
+            "src/requests/cookies.py",
+            null
+          ],
+          [
+            "docs/user/quickstart.rst",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ],
+          [
+            "src/requests/adapters.py",
+            null
+          ],
+          [
+            ".github/AI_POLICY.md",
+            null
+          ]
+        ],
+        "rank": null,
+        "hit@1": false,
+        "hit@3": false,
+        "hit@5": false,
+        "mrr@5": 0.0,
+        "recall@5": 0.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": false
+      },
+      "hybrid": {
+        "locators": [
+          [
+            "src/requests/adapters.py",
+            null
+          ],
+          [
+            "src/requests/sessions.py",
+            null
+          ],
+          [
+            "src/requests/cookies.py",
+            null
+          ],
+          [
+            "src/requests/sessions.py",
+            null
+          ],
+          [
+            "docs/user/quickstart.rst",
+            null
+          ]
+        ],
+        "rank": 2,
+        "hit@1": false,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 0.5,
+        "recall@5": 1.0,
+        "provenance": [
+          "vector+bm25",
+          "vector",
+          "bm25",
+          "vector",
+          "bm25"
+        ],
+        "span_hit": true
+      },
+      "_meta": {
+        "category": "conceptual",
+        "question": "How do settings given on a single call combine with the ones already configured for the whole conversation?"
+      }
+    },
+    "lit-01": {
+      "dense_only": {
+        "locators": [
+          [
+            "tests/test_requests.py",
+            null
+          ],
+          [
+            "src/requests/sessions.py",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ],
+          [
+            "src/requests/exceptions.py",
+            null
+          ]
+        ],
+        "rank": 2,
+        "hit@1": false,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 0.5,
+        "recall@5": 1.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "bm25_only": {
+        "locators": [
+          [
+            "src/requests/sessions.py",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ],
+          [
+            "src/requests/sessions.py",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ],
+          [
+            "src/requests/status_codes.py",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "hybrid": {
+        "locators": [
+          [
+            "src/requests/sessions.py",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ],
+          [
+            "src/requests/sessions.py",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          "vector+bm25",
+          "vector+bm25",
+          "vector+bm25",
+          "vector+bm25",
+          "bm25"
+        ],
+        "span_hit": null
+      },
+      "_meta": {
+        "category": "literal_string",
+        "question": "Exceeded 30 redirects."
+      }
+    },
+    "lit-02": {
+      "dense_only": {
+        "locators": [
+          [
+            "src/requests/sessions.py",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ],
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "src/requests/sessions.py",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": true
+      },
+      "bm25_only": {
+        "locators": [
+          [
+            "src/requests/sessions.py",
+            null
+          ],
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "src/requests/sessions.py",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": true
+      },
+      "hybrid": {
+        "locators": [
+          [
+            "src/requests/sessions.py",
+            null
+          ],
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ],
+          [
+            "src/requests/sessions.py",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          "vector+bm25",
+          "vector+bm25",
+          "vector+bm25",
+          "vector",
+          "bm25"
+        ],
+        "span_hit": true
+      },
+      "_meta": {
+        "category": "literal_string",
+        "question": "DEFAULT_REDIRECT_LIMIT"
+      }
+    },
+    "lit-03": {
+      "dense_only": {
+        "locators": [
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "src/requests/adapters.py",
+            null
+          ],
+          [
+            "src/requests/exceptions.py",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ],
+          [
+            "src/requests/help.py",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "bm25_only": {
+        "locators": [
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "src/requests/exceptions.py",
+            null
+          ],
+          [
+            "src/requests/adapters.py",
+            null
+          ],
+          [
+            "src/requests/adapters.py",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "hybrid": {
+        "locators": [
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "src/requests/exceptions.py",
+            null
+          ],
+          [
+            "src/requests/adapters.py",
+            null
+          ],
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          "vector+bm25",
+          "vector+bm25",
+          "vector",
+          "bm25",
+          "vector"
+        ],
+        "span_hit": null
+      },
+      "_meta": {
+        "category": "literal_string",
+        "question": "Invalid URL: No scheme supplied"
+      }
+    },
+    "lit-04": {
+      "dense_only": {
+        "locators": [
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": false
+      },
+      "bm25_only": {
+        "locators": [
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "src/requests/models.py",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": false
+      },
+      "hybrid": {
+        "locators": [
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "src/requests/models.py",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          "vector+bm25",
+          "vector+bm25",
+          "vector+bm25",
+          "vector+bm25",
+          "bm25"
+        ],
+        "span_hit": false
+      },
+      "_meta": {
+        "category": "literal_string",
+        "question": "CONTENT_CHUNK_SIZE"
+      }
+    },
+    "lit-05": {
+      "dense_only": {
+        "locators": [
+          [
+            "src/requests/adapters.py",
+            null
+          ],
+          [
+            "src/requests/adapters.py",
+            null
+          ],
+          [
+            "src/requests/adapters.py",
+            null
+          ],
+          [
+            "src/requests/adapters.py",
+            null
+          ],
+          [
+            "src/requests/adapters.py",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": false
+      },
+      "bm25_only": {
+        "locators": [
+          [
+            "src/requests/adapters.py",
+            null
+          ],
+          [
+            "src/requests/adapters.py",
+            null
+          ],
+          [
+            "src/requests/utils.py",
+            null
+          ],
+          [
+            "src/requests/sessions.py",
+            null
+          ],
+          [
+            "src/requests/structures.py",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": true
+      },
+      "hybrid": {
+        "locators": [
+          [
+            "src/requests/adapters.py",
+            null
+          ],
+          [
+            "src/requests/adapters.py",
+            null
+          ],
+          [
+            "src/requests/adapters.py",
+            null
+          ],
+          [
+            "src/requests/adapters.py",
+            null
+          ],
+          [
+            "src/requests/utils.py",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          "vector+bm25",
+          "vector",
+          "bm25",
+          "vector",
+          "bm25"
+        ],
+        "span_hit": true
+      },
+      "_meta": {
+        "category": "literal_string",
+        "question": "DEFAULT_POOLSIZE"
+      }
+    },
+    "lit-06": {
+      "dense_only": {
+        "locators": [
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ],
+          [
+            "tests/test_lowlevel.py",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 0.5,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "bm25_only": {
+        "locators": [
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "src/requests/sessions.py",
+            null
+          ],
+          [
+            "src/requests/status_codes.py",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "hybrid": {
+        "locators": [
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ],
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 0.5,
+        "provenance": [
+          "vector+bm25",
+          "vector+bm25",
+          "vector+bm25",
+          "vector+bm25",
+          "vector"
+        ],
+        "span_hit": null
+      },
+      "_meta": {
+        "category": "literal_string",
+        "question": "REDIRECT_STATI"
+      }
+    },
+    "lit-07": {
+      "dense_only": {
+        "locators": [
+          [
+            "src/requests/adapters.py",
+            null
+          ],
+          [
+            "src/requests/certs.py",
+            null
+          ],
+          [
+            "src/requests/adapters.py",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "src/requests/api.py",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 0.6666666666666666,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "bm25_only": {
+        "locators": [
+          [
+            "tests/test_requests.py",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "src/requests/adapters.py",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "tests/conftest.py",
+            null
+          ]
+        ],
+        "rank": 2,
+        "hit@1": false,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 0.5,
+        "recall@5": 0.6666666666666666,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "hybrid": {
+        "locators": [
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "src/requests/adapters.py",
+            null
+          ],
+          [
+            "src/requests/adapters.py",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ],
+          [
+            "src/requests/certs.py",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 0.6666666666666666,
+        "provenance": [
+          "vector+bm25",
+          "vector+bm25",
+          "vector+bm25",
+          "vector+bm25",
+          "vector+bm25"
+        ],
+        "span_hit": null
+      },
+      "_meta": {
+        "category": "literal_string",
+        "question": "DEFAULT_CA_BUNDLE_PATH"
+      }
+    },
+    "lit-08": {
+      "dense_only": {
+        "locators": [
+          [
+            "docs/community/faq.rst",
+            null
+          ],
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "src/requests/adapters.py",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ],
+          [
+            "src/requests/__version__.py",
+            null
+          ]
+        ],
+        "rank": 2,
+        "hit@1": false,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 0.5,
+        "recall@5": 1.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "bm25_only": {
+        "locators": [
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "src/requests/adapters.py",
+            null
+          ],
+          [
+            "tests/test_lowlevel.py",
+            null
+          ],
+          [
+            "src/requests/adapters.py",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "hybrid": {
+        "locators": [
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ],
+          [
+            "src/requests/exceptions.py",
+            null
+          ],
+          [
+            "docs/community/faq.rst",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          "vector+bm25",
+          "vector+bm25",
+          "vector+bm25",
+          "vector+bm25",
+          "vector"
+        ],
+        "span_hit": null
+      },
+      "_meta": {
+        "category": "literal_string",
+        "question": "Invalid URL: No host supplied"
+      }
+    },
+    "crs-01": {
+      "dense_only": {
+        "locators": [
+          [
+            "docs/user/quickstart.rst",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ],
+          [
+            "docs/api.rst",
+            null
+          ],
+          [
+            ".github/CONTRIBUTING.md",
+            null
+          ],
+          [
+            "src/requests/models.py",
+            null
+          ]
+        ],
+        "rank": 5,
+        "hit@1": false,
+        "hit@3": false,
+        "hit@5": true,
+        "mrr@5": 0.2,
+        "recall@5": 0.3333333333333333,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "bm25_only": {
+        "locators": [
+          [
+            "docs/user/quickstart.rst",
+            null
+          ],
+          [
+            "src/requests/sessions.py",
+            null
+          ],
+          [
+            "src/requests/exceptions.py",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ],
+          [
+            "tests/test_utils.py",
+            null
+          ]
+        ],
+        "rank": 2,
+        "hit@1": false,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 0.5,
+        "recall@5": 0.6666666666666666,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "hybrid": {
+        "locators": [
+          [
+            "docs/user/quickstart.rst",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ],
+          [
+            "src/requests/sessions.py",
+            null
+          ],
+          [
+            "docs/api.rst",
+            null
+          ],
+          [
+            "src/requests/exceptions.py",
+            null
+          ]
+        ],
+        "rank": 3,
+        "hit@1": false,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 0.3333333333333333,
+        "recall@5": 0.6666666666666666,
+        "provenance": [
+          "vector+bm25",
+          "vector",
+          "bm25",
+          "vector",
+          "bm25"
+        ],
+        "span_hit": null
+      },
+      "_meta": {
+        "category": "cross_file",
+        "question": "Which exception is raised when a request is forwarded too many times, and where is that ceiling actually set?"
+      }
+    },
+    "crs-02": {
+      "dense_only": {
+        "locators": [
+          [
+            "src/requests/adapters.py",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ],
+          [
+            "src/requests/adapters.py",
+            null
+          ],
+          [
+            "tests/conftest.py",
+            null
+          ],
+          [
+            "tests/test_utils.py",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 0.3333333333333333,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "bm25_only": {
+        "locators": [
+          [
+            "HISTORY.md",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ],
+          [
+            "src/requests/adapters.py",
+            null
+          ],
+          [
+            "src/requests/adapters.py",
+            null
+          ],
+          [
+            "src/requests/adapters.py",
+            null
+          ]
+        ],
+        "rank": 3,
+        "hit@1": false,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 0.3333333333333333,
+        "recall@5": 0.3333333333333333,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "hybrid": {
+        "locators": [
+          [
+            "src/requests/adapters.py",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ],
+          [
+            "src/requests/adapters.py",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 0.3333333333333333,
+        "provenance": [
+          "vector",
+          "bm25",
+          "vector",
+          "bm25",
+          "vector"
+        ],
+        "span_hit": null
+      },
+      "_meta": {
+        "category": "cross_file",
+        "question": "How does a proxy set in an environment variable end up changing which connection pool is used?"
+      }
+    },
+    "crs-03": {
+      "dense_only": {
+        "locators": [
+          [
+            "src/requests/__init__.py",
+            null
+          ],
+          [
+            "src/requests/_internal_utils.py",
+            null
+          ],
+          [
+            "src/requests/exceptions.py",
+            null
+          ],
+          [
+            "src/requests/utils.py",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ]
+        ],
+        "rank": 4,
+        "hit@1": false,
+        "hit@3": false,
+        "hit@5": true,
+        "mrr@5": 0.25,
+        "recall@5": 0.5,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "bm25_only": {
+        "locators": [
+          [
+            "src/requests/__init__.py",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ],
+          [
+            "docs/conf.py",
+            null
+          ]
+        ],
+        "rank": null,
+        "hit@1": false,
+        "hit@3": false,
+        "hit@5": false,
+        "mrr@5": 0.0,
+        "recall@5": 0.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "hybrid": {
+        "locators": [
+          [
+            "src/requests/__init__.py",
+            null
+          ],
+          [
+            "src/requests/__init__.py",
+            null
+          ],
+          [
+            "src/requests/_internal_utils.py",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "src/requests/exceptions.py",
+            null
+          ]
+        ],
+        "rank": null,
+        "hit@1": false,
+        "hit@3": false,
+        "hit@5": false,
+        "mrr@5": 0.0,
+        "recall@5": 0.0,
+        "provenance": [
+          "vector",
+          "bm25",
+          "vector",
+          "bm25",
+          "vector"
+        ],
+        "span_hit": null
+      },
+      "_meta": {
+        "category": "cross_file",
+        "question": "What identifying string does the library announce itself with, and where does the version inside it come from?"
+      }
+    },
+    "crs-04": {
+      "dense_only": {
+        "locators": [
+          [
+            "src/requests/certs.py",
+            null
+          ],
+          [
+            "src/requests/adapters.py",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "tests/certs/README.md",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 0.6666666666666666,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "bm25_only": {
+        "locators": [
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "src/requests/sessions.py",
+            null
+          ],
+          [
+            "docs/community/recommended.rst",
+            null
+          ]
+        ],
+        "rank": null,
+        "hit@1": false,
+        "hit@3": false,
+        "hit@5": false,
+        "mrr@5": 0.0,
+        "recall@5": 0.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "hybrid": {
+        "locators": [
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "src/requests/certs.py",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "src/requests/adapters.py",
+            null
+          ]
+        ],
+        "rank": 3,
+        "hit@1": false,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 0.3333333333333333,
+        "recall@5": 0.6666666666666666,
+        "provenance": [
+          "vector+bm25",
+          "vector+bm25",
+          "vector",
+          "bm25",
+          "vector"
+        ],
+        "span_hit": null
+      },
+      "_meta": {
+        "category": "cross_file",
+        "question": "Which bundle of trusted certificates is used by default, and how is its location found?"
+      }
+    },
+    "crs-05": {
+      "dense_only": {
+        "locators": [
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "src/requests/status_codes.py",
+            null
+          ],
+          [
+            "docs/user/quickstart.rst",
+            null
+          ],
+          [
+            "src/requests/status_codes.py",
+            null
+          ],
+          [
+            "src/requests/__init__.py",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "bm25_only": {
+        "locators": [
+          [
+            "src/requests/cookies.py",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ],
+          [
+            "src/requests/sessions.py",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ],
+          [
+            "src/requests/models.py",
+            null
+          ]
+        ],
+        "rank": 5,
+        "hit@1": false,
+        "hit@3": false,
+        "hit@5": true,
+        "mrr@5": 0.2,
+        "recall@5": 0.5,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "hybrid": {
+        "locators": [
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "docs/user/quickstart.rst",
+            null
+          ],
+          [
+            "src/requests/cookies.py",
+            null
+          ],
+          [
+            "src/requests/status_codes.py",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          "vector+bm25",
+          "vector+bm25",
+          "bm25",
+          "vector",
+          "bm25"
+        ],
+        "span_hit": null
+      },
+      "_meta": {
+        "category": "cross_file",
+        "question": "How does a readable status name like not_found relate to the numeric code, and what raises an error from it?"
+      }
+    },
+    "crs-06": {
+      "dense_only": {
+        "locators": [
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ],
+          [
+            "src/requests/sessions.py",
+            null
+          ],
+          [
+            "src/requests/sessions.py",
+            null
+          ]
+        ],
+        "rank": 4,
+        "hit@1": false,
+        "hit@3": false,
+        "hit@5": true,
+        "mrr@5": 0.25,
+        "recall@5": 0.3333333333333333,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "bm25_only": {
+        "locators": [
+          [
+            ".github/CONTRIBUTING.md",
+            null
+          ],
+          [
+            ".github/SECURITY.md",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ]
+        ],
+        "rank": null,
+        "hit@1": false,
+        "hit@3": false,
+        "hit@5": false,
+        "mrr@5": 0.0,
+        "recall@5": 0.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "hybrid": {
+        "locators": [
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            ".github/CONTRIBUTING.md",
+            null
+          ],
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            ".github/SECURITY.md",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ]
+        ],
+        "rank": null,
+        "hit@1": false,
+        "hit@3": false,
+        "hit@5": false,
+        "mrr@5": 0.0,
+        "recall@5": 0.0,
+        "provenance": [
+          "vector",
+          "bm25",
+          "vector",
+          "bm25",
+          "vector"
+        ],
+        "span_hit": null
+      },
+      "_meta": {
+        "category": "cross_file",
+        "question": "What happens between the top-level one-line call and the point where something is actually sent?"
+      }
+    },
+    "crs-07": {
+      "dense_only": {
+        "locators": [
+          [
+            "docs/user/authentication.rst",
+            null
+          ],
+          [
+            "docs/user/authentication.rst",
+            null
+          ],
+          [
+            "docs/user/authentication.rst",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ]
+        ],
+        "rank": null,
+        "hit@1": false,
+        "hit@3": false,
+        "hit@5": false,
+        "mrr@5": 0.0,
+        "recall@5": 0.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "bm25_only": {
+        "locators": [
+          [
+            "docs/user/authentication.rst",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ],
+          [
+            "src/requests/__init__.py",
+            null
+          ]
+        ],
+        "rank": null,
+        "hit@1": false,
+        "hit@3": false,
+        "hit@5": false,
+        "mrr@5": 0.0,
+        "recall@5": 0.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "hybrid": {
+        "locators": [
+          [
+            "docs/user/authentication.rst",
+            null
+          ],
+          [
+            "HISTORY.md",
+            null
+          ],
+          [
+            "docs/user/authentication.rst",
+            null
+          ],
+          [
+            "docs/user/authentication.rst",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ]
+        ],
+        "rank": null,
+        "hit@1": false,
+        "hit@3": false,
+        "hit@5": false,
+        "mrr@5": 0.0,
+        "recall@5": 0.0,
+        "provenance": [
+          "vector+bm25",
+          "vector+bm25",
+          "vector+bm25",
+          "vector",
+          "bm25"
+        ],
+        "span_hit": null
+      },
+      "_meta": {
+        "category": "cross_file",
+        "question": "How does an authentication handler get attached to an outgoing request during preparation?"
+      }
+    },
+    "dfa-01": {
+      "dense_only": {
+        "locators": [
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "Deep_Learning_Unit1_Quick_Notes.pdf",
+            0
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ],
+          [
+            "docs/community/vulnerabilities.rst",
+            null
+          ]
+        ],
+        "rank": 3,
+        "hit@1": false,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 0.3333333333333333,
+        "recall@5": 1.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "bm25_only": {
+        "locators": [
+          [
+            "Deep_Learning_Unit1_Quick_Notes.pdf",
+            0
+          ],
+          [
+            "docs/conf.py",
+            null
+          ],
+          [
+            "src/requests/status_codes.py",
+            null
+          ],
+          [
+            "src/requests/utils.py",
+            null
+          ],
+          [
+            "docs/conf.py",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "hybrid": {
+        "locators": [
+          [
+            "Deep_Learning_Unit1_Quick_Notes.pdf",
+            0
+          ],
+          [
+            "src/requests/models.py",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "docs/conf.py",
+            null
+          ],
+          [
+            "src/requests/status_codes.py",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          "vector+bm25",
+          "vector",
+          "vector",
+          "bm25",
+          "bm25"
+        ],
+        "span_hit": null
+      },
+      "_meta": {
+        "category": "doc_factual",
+        "question": "What output range does the tanh activation produce?"
+      }
+    },
+    "dfa-02": {
+      "dense_only": {
+        "locators": [
+          [
+            "Deep_Learning_Unit1_Quick_Notes.pdf",
+            1
+          ],
+          [
+            "docs/community/recommended.rst",
+            null
+          ],
+          [
+            "AUTHORS.rst",
+            null
+          ],
+          [
+            "src/requests/exceptions.py",
+            null
+          ],
+          [
+            "docs/index.rst",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "bm25_only": {
+        "locators": [
+          [
+            "Deep_Learning_Unit1_Quick_Notes.pdf",
+            1
+          ],
+          [
+            "Deep_Learning_Unit1_Quick_Notes.pdf",
+            0
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "tests/test_utils.py",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "hybrid": {
+        "locators": [
+          [
+            "Deep_Learning_Unit1_Quick_Notes.pdf",
+            1
+          ],
+          [
+            "docs/community/recommended.rst",
+            null
+          ],
+          [
+            "Deep_Learning_Unit1_Quick_Notes.pdf",
+            0
+          ],
+          [
+            "AUTHORS.rst",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          "vector+bm25",
+          "vector",
+          "bm25",
+          "vector",
+          "bm25"
+        ],
+        "span_hit": null
+      },
+      "_meta": {
+        "category": "doc_factual",
+        "question": "Which gradient descent variants are named as common optimisation methods?"
+      }
+    },
+    "dfa-03": {
+      "dense_only": {
+        "locators": [
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ],
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ],
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ],
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ],
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": true
+      },
+      "bm25_only": {
+        "locators": [
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ],
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ],
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ],
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ],
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": true
+      },
+      "hybrid": {
+        "locators": [
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ],
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ],
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ],
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ],
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          "vector+bm25",
+          "vector+bm25",
+          "vector+bm25",
+          "vector+bm25",
+          "bm25"
+        ],
+        "span_hit": true
+      },
+      "_meta": {
+        "category": "doc_factual",
+        "question": "How long ago did the Solar System form?"
+      }
+    },
+    "dfa-04": {
+      "dense_only": {
+        "locators": [
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ],
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ],
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ],
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ],
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": true
+      },
+      "bm25_only": {
+        "locators": [
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ],
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ],
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ],
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ],
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": true
+      },
+      "hybrid": {
+        "locators": [
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ],
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ],
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ],
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ],
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          "vector+bm25",
+          "vector+bm25",
+          "vector+bm25",
+          "vector+bm25",
+          "vector+bm25"
+        ],
+        "span_hit": true
+      },
+      "_meta": {
+        "category": "doc_factual",
+        "question": "How tall is the largest volcano in the Solar System?"
+      }
+    },
+    "dfa-05": {
+      "dense_only": {
+        "locators": [
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ],
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ],
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ],
+          [
+            ".github/SECURITY.md",
+            null
+          ],
+          [
+            "src/requests/cookies.py",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": true
+      },
+      "bm25_only": {
+        "locators": [
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ],
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ],
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ],
+          [
+            "docs/user/quickstart.rst",
+            null
+          ],
+          [
+            "tests/certs/README.md",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": true
+      },
+      "hybrid": {
+        "locators": [
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ],
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ],
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ],
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ],
+          [
+            ".github/SECURITY.md",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          "vector+bm25",
+          "vector+bm25",
+          "vector",
+          "bm25",
+          "vector"
+        ],
+        "span_hit": true
+      },
+      "_meta": {
+        "category": "doc_factual",
+        "question": "How quickly is the Moon receding from Earth each year?"
+      }
+    },
+    "dco-01": {
+      "dense_only": {
+        "locators": [
+          [
+            "Deep_Learning_Unit1_Quick_Notes.pdf",
+            0
+          ],
+          [
+            "Deep_Learning_Unit1_Quick_Notes.pdf",
+            1
+          ],
+          [
+            "Deep_Learning_Unit1_Quick_Notes.pdf",
+            0
+          ],
+          [
+            ".github/AI_POLICY.md",
+            null
+          ],
+          [
+            "LICENSE",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "bm25_only": {
+        "locators": [
+          [
+            "Deep_Learning_Unit1_Quick_Notes.pdf",
+            0
+          ],
+          [
+            "Deep_Learning_Unit1_Quick_Notes.pdf",
+            1
+          ],
+          [
+            "Deep_Learning_Unit1_Quick_Notes.pdf",
+            0
+          ],
+          [
+            "docs/dev/contributing.rst",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "hybrid": {
+        "locators": [
+          [
+            "Deep_Learning_Unit1_Quick_Notes.pdf",
+            0
+          ],
+          [
+            "Deep_Learning_Unit1_Quick_Notes.pdf",
+            1
+          ],
+          [
+            "Deep_Learning_Unit1_Quick_Notes.pdf",
+            0
+          ],
+          [
+            "Deep_Learning_Unit1_Quick_Notes.pdf",
+            0
+          ],
+          [
+            ".github/AI_POLICY.md",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          "vector+bm25",
+          "vector+bm25",
+          "vector",
+          "bm25",
+          "vector"
+        ],
+        "span_hit": null
+      },
+      "_meta": {
+        "category": "doc_conceptual",
+        "question": "How do artificial intelligence, machine learning and deep learning relate to one another in scope?"
+      }
+    },
+    "dco-02": {
+      "dense_only": {
+        "locators": [
+          [
+            "Deep_Learning_Unit1_Quick_Notes.pdf",
+            0
+          ],
+          [
+            "Deep_Learning_Unit1_Quick_Notes.pdf",
+            0
+          ],
+          [
+            "Deep_Learning_Unit1_Quick_Notes.pdf",
+            0
+          ],
+          [
+            "Deep_Learning_Unit1_Quick_Notes.pdf",
+            1
+          ],
+          [
+            "LICENSE",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "bm25_only": {
+        "locators": [
+          [
+            "Deep_Learning_Unit1_Quick_Notes.pdf",
+            0
+          ],
+          [
+            "HISTORY.md",
+            null
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ],
+          [
+            "tests/test_help.py",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "hybrid": {
+        "locators": [
+          [
+            "Deep_Learning_Unit1_Quick_Notes.pdf",
+            0
+          ],
+          [
+            "Deep_Learning_Unit1_Quick_Notes.pdf",
+            0
+          ],
+          [
+            "HISTORY.md",
+            null
+          ],
+          [
+            "Deep_Learning_Unit1_Quick_Notes.pdf",
+            0
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          "vector+bm25",
+          "vector",
+          "bm25",
+          "vector",
+          "bm25"
+        ],
+        "span_hit": null
+      },
+      "_meta": {
+        "category": "doc_conceptual",
+        "question": "What does backpropagation actually compute, and what is it used for?"
+      }
+    },
+    "dco-03": {
+      "dense_only": {
+        "locators": [
+          [
+            "Deep_Learning_Unit1_Quick_Notes.pdf",
+            0
+          ],
+          [
+            "Deep_Learning_Unit1_Quick_Notes.pdf",
+            0
+          ],
+          [
+            "LICENSE",
+            null
+          ],
+          [
+            "src/requests/structures.py",
+            null
+          ],
+          [
+            ".github/ISSUE_TEMPLATE/Custom.md",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "bm25_only": {
+        "locators": [
+          [
+            "Deep_Learning_Unit1_Quick_Notes.pdf",
+            0
+          ],
+          [
+            "Deep_Learning_Unit1_Quick_Notes.pdf",
+            1
+          ],
+          [
+            "docs/dev/contributing.rst",
+            null
+          ],
+          [
+            "Deep_Learning_Unit1_Quick_Notes.pdf",
+            0
+          ],
+          [
+            ".github/ISSUE_TEMPLATE/Feature_request.md",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": null
+      },
+      "hybrid": {
+        "locators": [
+          [
+            "Deep_Learning_Unit1_Quick_Notes.pdf",
+            0
+          ],
+          [
+            ".github/ISSUE_TEMPLATE/Custom.md",
+            null
+          ],
+          [
+            "Deep_Learning_Unit1_Quick_Notes.pdf",
+            0
+          ],
+          [
+            "Deep_Learning_Unit1_Quick_Notes.pdf",
+            1
+          ],
+          [
+            "LICENSE",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          "vector+bm25",
+          "vector+bm25",
+          "vector",
+          "bm25",
+          "vector"
+        ],
+        "span_hit": null
+      },
+      "_meta": {
+        "category": "doc_conceptual",
+        "question": "What separates learning from labelled data from learning without labels?"
+      }
+    },
+    "dco-04": {
+      "dense_only": {
+        "locators": [
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ],
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ],
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ],
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ],
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": true
+      },
+      "bm25_only": {
+        "locators": [
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ],
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ],
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ],
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ],
+          [
+            "docs/user/advanced.rst",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": true
+      },
+      "hybrid": {
+        "locators": [
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ],
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ],
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ],
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ],
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          "vector+bm25",
+          "vector+bm25",
+          "vector+bm25",
+          "vector+bm25",
+          "bm25"
+        ],
+        "span_hit": true
+      },
+      "_meta": {
+        "category": "doc_conceptual",
+        "question": "Why is one of Jupiter's moons regarded as a promising place to look for life?"
+      }
+    },
+    "dco-05": {
+      "dense_only": {
+        "locators": [
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ],
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ],
+          [
+            "docs/dev/contributing.rst",
+            null
+          ],
+          [
+            ".github/AI_POLICY.md",
+            null
+          ],
+          [
+            "tests/test_requests.py",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": true
+      },
+      "bm25_only": {
+        "locators": [
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ],
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ],
+          [
+            ".github/CONTRIBUTING.md",
+            null
+          ],
+          [
+            "tests/test_utils.py",
+            null
+          ],
+          [
+            "LICENSE",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "span_hit": true
+      },
+      "hybrid": {
+        "locators": [
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ],
+          [
+            "space_planets_moons_advanced.txt",
+            0
+          ],
+          [
+            "docs/dev/contributing.rst",
+            null
+          ],
+          [
+            ".github/CONTRIBUTING.md",
+            null
+          ],
+          [
+            ".github/AI_POLICY.md",
+            null
+          ]
+        ],
+        "rank": 1,
+        "hit@1": true,
+        "hit@3": true,
+        "hit@5": true,
+        "mrr@5": 1.0,
+        "recall@5": 1.0,
+        "provenance": [
+          "vector+bm25",
+          "vector+bm25",
+          "vector",
+          "bm25",
+          "vector"
+        ],
+        "span_hit": true
+      },
+      "_meta": {
+        "category": "doc_conceptual",
+        "question": "What has to happen to a star for a black hole to form?"
+      }
+    }
+  },
+  "bucket3_stability": {
+    "n_builds": 5,
+    "stores": [
+      "chroma_bench_1788912379_36bfad5f",
+      "chroma_bench_1788912412_63800663",
+      "chroma_bench_1788913355_53f0e200",
+      "chroma_bench_1788913376_bc765ce5",
+      "chroma_bench_1788913400_36714f44"
+    ],
+    "spread": {
+      "dense_only": {
+        "signal": "cosine(query, top-1 chunk), computed outside the arm because MMR exposes no score",
+        "above_threshold_rate": {
+          "min": 0.0,
+          "max": 0.0,
+          "values": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "returned_any_rate": {
+          "min": 1.0,
+          "max": 1.0,
+          "values": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "threshold": {
+          "min": 0.5176661190476651,
+          "max": 0.5176661190476651
+        },
+        "per_query_score_range": {
+          "una-01": {
+            "min": 0.47614701730189346,
+            "max": 0.47614701730189346,
+            "spread": 0.0,
+            "values": [
+              0.47614701730189346,
+              0.47614701730189346,
+              0.47614701730189346,
+              0.47614701730189346,
+              0.47614701730189346
+            ]
+          },
+          "una-02": {
+            "min": 0.4603188013621774,
+            "max": 0.4603188013621774,
+            "spread": 0.0,
+            "values": [
+              0.4603188013621774,
+              0.4603188013621774,
+              0.4603188013621774,
+              0.4603188013621774,
+              0.4603188013621774
+            ]
+          },
+          "una-03": {
+            "min": 0.4187066283703996,
+            "max": 0.4187066283703996,
+            "spread": 0.0,
+            "values": [
+              0.4187066283703996,
+              0.4187066283703996,
+              0.4187066283703996,
+              0.4187066283703996,
+              0.4187066283703996
+            ]
+          },
+          "una-04": {
+            "min": 0.35602679318272956,
+            "max": 0.35602679318272956,
+            "spread": 0.0,
+            "values": [
+              0.35602679318272956,
+              0.35602679318272956,
+              0.35602679318272956,
+              0.35602679318272956,
+              0.35602679318272956
+            ]
+          },
+          "una-05": {
+            "min": 0.3506450378528435,
+            "max": 0.3506450378528435,
+            "spread": 0.0,
+            "values": [
+              0.3506450378528435,
+              0.3506450378528435,
+              0.3506450378528435,
+              0.3506450378528435,
+              0.3506450378528435
+            ]
+          },
+          "una-06": {
+            "min": 0.2611641547254056,
+            "max": 0.3132537388489999,
+            "spread": 0.05208958412359427,
+            "values": [
+              0.3132537388489999,
+              0.3132537388489999,
+              0.3132537388489999,
+              0.2611641547254056,
+              0.2611641547254056
+            ]
+          },
+          "una-07": {
+            "min": 0.44379342596979854,
+            "max": 0.44379342596979854,
+            "spread": 0.0,
+            "values": [
+              0.44379342596979854,
+              0.44379342596979854,
+              0.44379342596979854,
+              0.44379342596979854,
+              0.44379342596979854
+            ]
+          }
+        }
+      },
+      "bm25_only": {
+        "signal": "Okapi BM25 score",
+        "above_threshold_rate": {
+          "min": 0.14285714285714285,
+          "max": 0.14285714285714285,
+          "values": [
+            0.14285714285714285,
+            0.14285714285714285,
+            0.14285714285714285,
+            0.14285714285714285,
+            0.14285714285714285
+          ]
+        },
+        "returned_any_rate": {
+          "min": 1.0,
+          "max": 1.0,
+          "values": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "threshold": {
+          "min": 14.537857875673872,
+          "max": 14.537857875673872
+        },
+        "per_query_score_range": {
+          "una-01": {
+            "min": 9.04019388220659,
+            "max": 9.04019388220659,
+            "spread": 0.0,
+            "values": [
+              9.04019388220659,
+              9.04019388220659,
+              9.04019388220659,
+              9.04019388220659,
+              9.04019388220659
+            ]
+          },
+          "una-02": {
+            "min": 10.723282080016364,
+            "max": 10.723282080016364,
+            "spread": 0.0,
+            "values": [
+              10.723282080016364,
+              10.723282080016364,
+              10.723282080016364,
+              10.723282080016364,
+              10.723282080016364
+            ]
+          },
+          "una-03": {
+            "min": 7.954693901296771,
+            "max": 7.954693901296771,
+            "spread": 0.0,
+            "values": [
+              7.954693901296771,
+              7.954693901296771,
+              7.954693901296771,
+              7.954693901296771,
+              7.954693901296771
+            ]
+          },
+          "una-04": {
+            "min": 17.27867887834932,
+            "max": 17.27867887834932,
+            "spread": 0.0,
+            "values": [
+              17.27867887834932,
+              17.27867887834932,
+              17.27867887834932,
+              17.27867887834932,
+              17.27867887834932
+            ]
+          },
+          "una-05": {
+            "min": 12.01977221408252,
+            "max": 12.01977221408252,
+            "spread": 0.0,
+            "values": [
+              12.01977221408252,
+              12.01977221408252,
+              12.01977221408252,
+              12.01977221408252,
+              12.01977221408252
+            ]
+          },
+          "una-06": {
+            "min": 5.069721517315795,
+            "max": 5.069721517315795,
+            "spread": 0.0,
+            "values": [
+              5.069721517315795,
+              5.069721517315795,
+              5.069721517315795,
+              5.069721517315795,
+              5.069721517315795
+            ]
+          },
+          "una-07": {
+            "min": 8.712925738493649,
+            "max": 8.712925738493649,
+            "spread": 0.0,
+            "values": [
+              8.712925738493649,
+              8.712925738493649,
+              8.712925738493649,
+              8.712925738493649,
+              8.712925738493649
+            ]
+          }
+        }
+      },
+      "hybrid": {
+        "signal": "RRF fusion score",
+        "above_threshold_rate": {
+          "min": 0.2857142857142857,
+          "max": 0.2857142857142857,
+          "values": [
+            0.2857142857142857,
+            0.2857142857142857,
+            0.2857142857142857,
+            0.2857142857142857,
+            0.2857142857142857
+          ]
+        },
+        "returned_any_rate": {
+          "min": 1.0,
+          "max": 1.0,
+          "values": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "threshold": {
+          "min": 0.016133,
+          "max": 0.016133
+        },
+        "per_query_score_range": {
+          "una-01": {
+            "min": 0.015659,
+            "max": 0.015659,
+            "spread": 0.0,
+            "values": [
+              0.015659,
+              0.015659,
+              0.015659,
+              0.015659,
+              0.015659
+            ]
+          },
+          "una-02": {
+            "min": 0.016133,
+            "max": 0.016133,
+            "spread": 0.0,
+            "values": [
+              0.016133,
+              0.016133,
+              0.016133,
+              0.016133,
+              0.016133
+            ]
+          },
+          "una-03": {
+            "min": 0.015659,
+            "max": 0.015659,
+            "spread": 0.0,
+            "values": [
+              0.015659,
+              0.015659,
+              0.015659,
+              0.015659,
+              0.015659
+            ]
+          },
+          "una-04": {
+            "min": 0.008197,
+            "max": 0.008197,
+            "spread": 0.0,
+            "values": [
+              0.008197,
+              0.008197,
+              0.008197,
+              0.008197,
+              0.008197
+            ]
+          },
+          "una-05": {
+            "min": 0.016393,
+            "max": 0.016393,
+            "spread": 0.0,
+            "values": [
+              0.016393,
+              0.016393,
+              0.016393,
+              0.016393,
+              0.016393
+            ]
+          },
+          "una-06": {
+            "min": 0.008197,
+            "max": 0.008197,
+            "spread": 0.0,
+            "values": [
+              0.008197,
+              0.008197,
+              0.008197,
+              0.008197,
+              0.008197
+            ]
+          },
+          "una-07": {
+            "min": 0.016129,
+            "max": 0.016129,
+            "spread": 0.0,
+            "values": [
+              0.016129,
+              0.016129,
+              0.016129,
+              0.016129,
+              0.016129
+            ]
+          }
+        }
+      }
+    },
+    "observations": [
+      {
+        "store": "chroma_bench_1788912379_36bfad5f",
+        "analysis": {
+          "note": "score signals differ per arm; see per-arm 'signal'",
+          "arms": {
+            "dense_only": {
+              "signal": "cosine(query, top-1 chunk), computed outside the arm because MMR exposes no score",
+              "threshold": 0.5176661190476651,
+              "threshold_basis": "median top-1 score on the 49 answerable queries",
+              "returned_any_chunk": {
+                "successes": 7,
+                "n": 7,
+                "value": 1.0,
+                "ci_low": 0.6456695649333126,
+                "ci_high": 1.0
+              },
+              "above_threshold": {
+                "successes": 0,
+                "n": 7,
+                "value": 0.0,
+                "ci_low": 0.0,
+                "ci_high": 0.3543304350666875
+              },
+              "per_query": [
+                {
+                  "id": "una-01",
+                  "score": 0.47614701730189346
+                },
+                {
+                  "id": "una-02",
+                  "score": 0.4603188013621774
+                },
+                {
+                  "id": "una-03",
+                  "score": 0.4187066283703996
+                },
+                {
+                  "id": "una-04",
+                  "score": 0.35602679318272956
+                },
+                {
+                  "id": "una-05",
+                  "score": 0.3506450378528435
+                },
+                {
+                  "id": "una-06",
+                  "score": 0.3132537388489999
+                },
+                {
+                  "id": "una-07",
+                  "score": 0.44379342596979854
+                }
+              ],
+              "answerable_median": 0.5176661190476651
+            },
+            "bm25_only": {
+              "signal": "Okapi BM25 score",
+              "threshold": 14.537857875673872,
+              "threshold_basis": "median top-1 score on the 49 answerable queries",
+              "returned_any_chunk": {
+                "successes": 7,
+                "n": 7,
+                "value": 1.0,
+                "ci_low": 0.6456695649333126,
+                "ci_high": 1.0
+              },
+              "above_threshold": {
+                "successes": 1,
+                "n": 7,
+                "value": 0.14285714285714285,
+                "ci_low": 0.02567962434474355,
+                "ci_high": 0.5131278292743189
+              },
+              "per_query": [
+                {
+                  "id": "una-01",
+                  "score": 9.04019388220659
+                },
+                {
+                  "id": "una-02",
+                  "score": 10.723282080016364
+                },
+                {
+                  "id": "una-03",
+                  "score": 7.954693901296771
+                },
+                {
+                  "id": "una-04",
+                  "score": 17.27867887834932
+                },
+                {
+                  "id": "una-05",
+                  "score": 12.01977221408252
+                },
+                {
+                  "id": "una-06",
+                  "score": 5.069721517315795
+                },
+                {
+                  "id": "una-07",
+                  "score": 8.712925738493649
+                }
+              ],
+              "answerable_median": 14.537857875673872
+            },
+            "hybrid": {
+              "signal": "RRF fusion score",
+              "threshold": 0.016133,
+              "threshold_basis": "median top-1 score on the 49 answerable queries",
+              "returned_any_chunk": {
+                "successes": 7,
+                "n": 7,
+                "value": 1.0,
+                "ci_low": 0.6456695649333126,
+                "ci_high": 1.0
+              },
+              "above_threshold": {
+                "successes": 2,
+                "n": 7,
+                "value": 0.2857142857142857,
+                "ci_low": 0.08221892400405678,
+                "ci_high": 0.6410655481673808
+              },
+              "per_query": [
+                {
+                  "id": "una-01",
+                  "score": 0.015659
+                },
+                {
+                  "id": "una-02",
+                  "score": 0.016133
+                },
+                {
+                  "id": "una-03",
+                  "score": 0.015659
+                },
+                {
+                  "id": "una-04",
+                  "score": 0.008197
+                },
+                {
+                  "id": "una-05",
+                  "score": 0.016393
+                },
+                {
+                  "id": "una-06",
+                  "score": 0.008197
+                },
+                {
+                  "id": "una-07",
+                  "score": 0.016129
+                }
+              ],
+              "answerable_median": 0.016133
+            }
+          }
+        }
+      },
+      {
+        "store": "chroma_bench_1788912412_63800663",
+        "analysis": {
+          "note": "score signals differ per arm; see per-arm 'signal'",
+          "arms": {
+            "dense_only": {
+              "signal": "cosine(query, top-1 chunk), computed outside the arm because MMR exposes no score",
+              "threshold": 0.5176661190476651,
+              "threshold_basis": "median top-1 score on the 49 answerable queries",
+              "returned_any_chunk": {
+                "successes": 7,
+                "n": 7,
+                "value": 1.0,
+                "ci_low": 0.6456695649333126,
+                "ci_high": 1.0
+              },
+              "above_threshold": {
+                "successes": 0,
+                "n": 7,
+                "value": 0.0,
+                "ci_low": 0.0,
+                "ci_high": 0.3543304350666875
+              },
+              "per_query": [
+                {
+                  "id": "una-01",
+                  "score": 0.47614701730189346
+                },
+                {
+                  "id": "una-02",
+                  "score": 0.4603188013621774
+                },
+                {
+                  "id": "una-03",
+                  "score": 0.4187066283703996
+                },
+                {
+                  "id": "una-04",
+                  "score": 0.35602679318272956
+                },
+                {
+                  "id": "una-05",
+                  "score": 0.3506450378528435
+                },
+                {
+                  "id": "una-06",
+                  "score": 0.3132537388489999
+                },
+                {
+                  "id": "una-07",
+                  "score": 0.44379342596979854
+                }
+              ],
+              "answerable_median": 0.5176661190476651
+            },
+            "bm25_only": {
+              "signal": "Okapi BM25 score",
+              "threshold": 14.537857875673872,
+              "threshold_basis": "median top-1 score on the 49 answerable queries",
+              "returned_any_chunk": {
+                "successes": 7,
+                "n": 7,
+                "value": 1.0,
+                "ci_low": 0.6456695649333126,
+                "ci_high": 1.0
+              },
+              "above_threshold": {
+                "successes": 1,
+                "n": 7,
+                "value": 0.14285714285714285,
+                "ci_low": 0.02567962434474355,
+                "ci_high": 0.5131278292743189
+              },
+              "per_query": [
+                {
+                  "id": "una-01",
+                  "score": 9.04019388220659
+                },
+                {
+                  "id": "una-02",
+                  "score": 10.723282080016364
+                },
+                {
+                  "id": "una-03",
+                  "score": 7.954693901296771
+                },
+                {
+                  "id": "una-04",
+                  "score": 17.27867887834932
+                },
+                {
+                  "id": "una-05",
+                  "score": 12.01977221408252
+                },
+                {
+                  "id": "una-06",
+                  "score": 5.069721517315795
+                },
+                {
+                  "id": "una-07",
+                  "score": 8.712925738493649
+                }
+              ],
+              "answerable_median": 14.537857875673872
+            },
+            "hybrid": {
+              "signal": "RRF fusion score",
+              "threshold": 0.016133,
+              "threshold_basis": "median top-1 score on the 49 answerable queries",
+              "returned_any_chunk": {
+                "successes": 7,
+                "n": 7,
+                "value": 1.0,
+                "ci_low": 0.6456695649333126,
+                "ci_high": 1.0
+              },
+              "above_threshold": {
+                "successes": 2,
+                "n": 7,
+                "value": 0.2857142857142857,
+                "ci_low": 0.08221892400405678,
+                "ci_high": 0.6410655481673808
+              },
+              "per_query": [
+                {
+                  "id": "una-01",
+                  "score": 0.015659
+                },
+                {
+                  "id": "una-02",
+                  "score": 0.016133
+                },
+                {
+                  "id": "una-03",
+                  "score": 0.015659
+                },
+                {
+                  "id": "una-04",
+                  "score": 0.008197
+                },
+                {
+                  "id": "una-05",
+                  "score": 0.016393
+                },
+                {
+                  "id": "una-06",
+                  "score": 0.008197
+                },
+                {
+                  "id": "una-07",
+                  "score": 0.016129
+                }
+              ],
+              "answerable_median": 0.016133
+            }
+          }
+        }
+      },
+      {
+        "store": "chroma_bench_1788913355_53f0e200",
+        "analysis": {
+          "note": "score signals differ per arm; see per-arm 'signal'",
+          "arms": {
+            "dense_only": {
+              "signal": "cosine(query, top-1 chunk), computed outside the arm because MMR exposes no score",
+              "threshold": 0.5176661190476651,
+              "threshold_basis": "median top-1 score on the 49 answerable queries",
+              "returned_any_chunk": {
+                "successes": 7,
+                "n": 7,
+                "value": 1.0,
+                "ci_low": 0.6456695649333126,
+                "ci_high": 1.0
+              },
+              "above_threshold": {
+                "successes": 0,
+                "n": 7,
+                "value": 0.0,
+                "ci_low": 0.0,
+                "ci_high": 0.3543304350666875
+              },
+              "per_query": [
+                {
+                  "id": "una-01",
+                  "score": 0.47614701730189346
+                },
+                {
+                  "id": "una-02",
+                  "score": 0.4603188013621774
+                },
+                {
+                  "id": "una-03",
+                  "score": 0.4187066283703996
+                },
+                {
+                  "id": "una-04",
+                  "score": 0.35602679318272956
+                },
+                {
+                  "id": "una-05",
+                  "score": 0.3506450378528435
+                },
+                {
+                  "id": "una-06",
+                  "score": 0.3132537388489999
+                },
+                {
+                  "id": "una-07",
+                  "score": 0.44379342596979854
+                }
+              ],
+              "answerable_median": 0.5176661190476651
+            },
+            "bm25_only": {
+              "signal": "Okapi BM25 score",
+              "threshold": 14.537857875673872,
+              "threshold_basis": "median top-1 score on the 49 answerable queries",
+              "returned_any_chunk": {
+                "successes": 7,
+                "n": 7,
+                "value": 1.0,
+                "ci_low": 0.6456695649333126,
+                "ci_high": 1.0
+              },
+              "above_threshold": {
+                "successes": 1,
+                "n": 7,
+                "value": 0.14285714285714285,
+                "ci_low": 0.02567962434474355,
+                "ci_high": 0.5131278292743189
+              },
+              "per_query": [
+                {
+                  "id": "una-01",
+                  "score": 9.04019388220659
+                },
+                {
+                  "id": "una-02",
+                  "score": 10.723282080016364
+                },
+                {
+                  "id": "una-03",
+                  "score": 7.954693901296771
+                },
+                {
+                  "id": "una-04",
+                  "score": 17.27867887834932
+                },
+                {
+                  "id": "una-05",
+                  "score": 12.01977221408252
+                },
+                {
+                  "id": "una-06",
+                  "score": 5.069721517315795
+                },
+                {
+                  "id": "una-07",
+                  "score": 8.712925738493649
+                }
+              ],
+              "answerable_median": 14.537857875673872
+            },
+            "hybrid": {
+              "signal": "RRF fusion score",
+              "threshold": 0.016133,
+              "threshold_basis": "median top-1 score on the 49 answerable queries",
+              "returned_any_chunk": {
+                "successes": 7,
+                "n": 7,
+                "value": 1.0,
+                "ci_low": 0.6456695649333126,
+                "ci_high": 1.0
+              },
+              "above_threshold": {
+                "successes": 2,
+                "n": 7,
+                "value": 0.2857142857142857,
+                "ci_low": 0.08221892400405678,
+                "ci_high": 0.6410655481673808
+              },
+              "per_query": [
+                {
+                  "id": "una-01",
+                  "score": 0.015659
+                },
+                {
+                  "id": "una-02",
+                  "score": 0.016133
+                },
+                {
+                  "id": "una-03",
+                  "score": 0.015659
+                },
+                {
+                  "id": "una-04",
+                  "score": 0.008197
+                },
+                {
+                  "id": "una-05",
+                  "score": 0.016393
+                },
+                {
+                  "id": "una-06",
+                  "score": 0.008197
+                },
+                {
+                  "id": "una-07",
+                  "score": 0.016129
+                }
+              ],
+              "answerable_median": 0.016133
+            }
+          }
+        }
+      },
+      {
+        "store": "chroma_bench_1788913376_bc765ce5",
+        "analysis": {
+          "note": "score signals differ per arm; see per-arm 'signal'",
+          "arms": {
+            "dense_only": {
+              "signal": "cosine(query, top-1 chunk), computed outside the arm because MMR exposes no score",
+              "threshold": 0.5176661190476651,
+              "threshold_basis": "median top-1 score on the 49 answerable queries",
+              "returned_any_chunk": {
+                "successes": 7,
+                "n": 7,
+                "value": 1.0,
+                "ci_low": 0.6456695649333126,
+                "ci_high": 1.0
+              },
+              "above_threshold": {
+                "successes": 0,
+                "n": 7,
+                "value": 0.0,
+                "ci_low": 0.0,
+                "ci_high": 0.3543304350666875
+              },
+              "per_query": [
+                {
+                  "id": "una-01",
+                  "score": 0.47614701730189346
+                },
+                {
+                  "id": "una-02",
+                  "score": 0.4603188013621774
+                },
+                {
+                  "id": "una-03",
+                  "score": 0.4187066283703996
+                },
+                {
+                  "id": "una-04",
+                  "score": 0.35602679318272956
+                },
+                {
+                  "id": "una-05",
+                  "score": 0.3506450378528435
+                },
+                {
+                  "id": "una-06",
+                  "score": 0.2611641547254056
+                },
+                {
+                  "id": "una-07",
+                  "score": 0.44379342596979854
+                }
+              ],
+              "answerable_median": 0.5176661190476651
+            },
+            "bm25_only": {
+              "signal": "Okapi BM25 score",
+              "threshold": 14.537857875673872,
+              "threshold_basis": "median top-1 score on the 49 answerable queries",
+              "returned_any_chunk": {
+                "successes": 7,
+                "n": 7,
+                "value": 1.0,
+                "ci_low": 0.6456695649333126,
+                "ci_high": 1.0
+              },
+              "above_threshold": {
+                "successes": 1,
+                "n": 7,
+                "value": 0.14285714285714285,
+                "ci_low": 0.02567962434474355,
+                "ci_high": 0.5131278292743189
+              },
+              "per_query": [
+                {
+                  "id": "una-01",
+                  "score": 9.04019388220659
+                },
+                {
+                  "id": "una-02",
+                  "score": 10.723282080016364
+                },
+                {
+                  "id": "una-03",
+                  "score": 7.954693901296771
+                },
+                {
+                  "id": "una-04",
+                  "score": 17.27867887834932
+                },
+                {
+                  "id": "una-05",
+                  "score": 12.01977221408252
+                },
+                {
+                  "id": "una-06",
+                  "score": 5.069721517315795
+                },
+                {
+                  "id": "una-07",
+                  "score": 8.712925738493649
+                }
+              ],
+              "answerable_median": 14.537857875673872
+            },
+            "hybrid": {
+              "signal": "RRF fusion score",
+              "threshold": 0.016133,
+              "threshold_basis": "median top-1 score on the 49 answerable queries",
+              "returned_any_chunk": {
+                "successes": 7,
+                "n": 7,
+                "value": 1.0,
+                "ci_low": 0.6456695649333126,
+                "ci_high": 1.0
+              },
+              "above_threshold": {
+                "successes": 2,
+                "n": 7,
+                "value": 0.2857142857142857,
+                "ci_low": 0.08221892400405678,
+                "ci_high": 0.6410655481673808
+              },
+              "per_query": [
+                {
+                  "id": "una-01",
+                  "score": 0.015659
+                },
+                {
+                  "id": "una-02",
+                  "score": 0.016133
+                },
+                {
+                  "id": "una-03",
+                  "score": 0.015659
+                },
+                {
+                  "id": "una-04",
+                  "score": 0.008197
+                },
+                {
+                  "id": "una-05",
+                  "score": 0.016393
+                },
+                {
+                  "id": "una-06",
+                  "score": 0.008197
+                },
+                {
+                  "id": "una-07",
+                  "score": 0.016129
+                }
+              ],
+              "answerable_median": 0.016133
+            }
+          }
+        }
+      },
+      {
+        "store": "chroma_bench_1788913400_36714f44",
+        "analysis": {
+          "note": "score signals differ per arm; see per-arm 'signal'",
+          "arms": {
+            "dense_only": {
+              "signal": "cosine(query, top-1 chunk), computed outside the arm because MMR exposes no score",
+              "threshold": 0.5176661190476651,
+              "threshold_basis": "median top-1 score on the 49 answerable queries",
+              "returned_any_chunk": {
+                "successes": 7,
+                "n": 7,
+                "value": 1.0,
+                "ci_low": 0.6456695649333126,
+                "ci_high": 1.0
+              },
+              "above_threshold": {
+                "successes": 0,
+                "n": 7,
+                "value": 0.0,
+                "ci_low": 0.0,
+                "ci_high": 0.3543304350666875
+              },
+              "per_query": [
+                {
+                  "id": "una-01",
+                  "score": 0.47614701730189346
+                },
+                {
+                  "id": "una-02",
+                  "score": 0.4603188013621774
+                },
+                {
+                  "id": "una-03",
+                  "score": 0.4187066283703996
+                },
+                {
+                  "id": "una-04",
+                  "score": 0.35602679318272956
+                },
+                {
+                  "id": "una-05",
+                  "score": 0.3506450378528435
+                },
+                {
+                  "id": "una-06",
+                  "score": 0.2611641547254056
+                },
+                {
+                  "id": "una-07",
+                  "score": 0.44379342596979854
+                }
+              ],
+              "answerable_median": 0.5176661190476651
+            },
+            "bm25_only": {
+              "signal": "Okapi BM25 score",
+              "threshold": 14.537857875673872,
+              "threshold_basis": "median top-1 score on the 49 answerable queries",
+              "returned_any_chunk": {
+                "successes": 7,
+                "n": 7,
+                "value": 1.0,
+                "ci_low": 0.6456695649333126,
+                "ci_high": 1.0
+              },
+              "above_threshold": {
+                "successes": 1,
+                "n": 7,
+                "value": 0.14285714285714285,
+                "ci_low": 0.02567962434474355,
+                "ci_high": 0.5131278292743189
+              },
+              "per_query": [
+                {
+                  "id": "una-01",
+                  "score": 9.04019388220659
+                },
+                {
+                  "id": "una-02",
+                  "score": 10.723282080016364
+                },
+                {
+                  "id": "una-03",
+                  "score": 7.954693901296771
+                },
+                {
+                  "id": "una-04",
+                  "score": 17.27867887834932
+                },
+                {
+                  "id": "una-05",
+                  "score": 12.01977221408252
+                },
+                {
+                  "id": "una-06",
+                  "score": 5.069721517315795
+                },
+                {
+                  "id": "una-07",
+                  "score": 8.712925738493649
+                }
+              ],
+              "answerable_median": 14.537857875673872
+            },
+            "hybrid": {
+              "signal": "RRF fusion score",
+              "threshold": 0.016133,
+              "threshold_basis": "median top-1 score on the 49 answerable queries",
+              "returned_any_chunk": {
+                "successes": 7,
+                "n": 7,
+                "value": 1.0,
+                "ci_low": 0.6456695649333126,
+                "ci_high": 1.0
+              },
+              "above_threshold": {
+                "successes": 2,
+                "n": 7,
+                "value": 0.2857142857142857,
+                "ci_low": 0.08221892400405678,
+                "ci_high": 0.6410655481673808
+              },
+              "per_query": [
+                {
+                  "id": "una-01",
+                  "score": 0.015659
+                },
+                {
+                  "id": "una-02",
+                  "score": 0.016133
+                },
+                {
+                  "id": "una-03",
+                  "score": 0.015659
+                },
+                {
+                  "id": "una-04",
+                  "score": 0.008197
+                },
+                {
+                  "id": "una-05",
+                  "score": 0.016393
+                },
+                {
+                  "id": "una-06",
+                  "score": 0.008197
+                },
+                {
+                  "id": "una-07",
+                  "score": 0.016129
+                }
+              ],
+              "answerable_median": 0.016133
+            }
+          }
+        }
+      }
+    ]
+  }
+}
