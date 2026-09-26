@@ -9,7 +9,7 @@ fixtures. The harness does the I/O; this module does the arithmetic.
 from __future__ import annotations
 
 import math
-import os
+import ntpath  # basename that splits on / and \ on every OS
 
 # ── Locator identity ─────────────────────────────────────────────────────────
 # Ground truth is file/page level, never chunk level, so it survives a change
@@ -21,7 +21,7 @@ def locator_of(chunk) -> tuple:
     source = chunk.metadata.get("source", "")
     if chunk.metadata.get("source_type") == "repo":
         return (source, None)
-    return (os.path.basename(source), chunk.metadata.get("page"))
+    return (ntpath.basename(source), chunk.metadata.get("page"))
 
 
 def normalise_locator(entry) -> tuple:
@@ -67,7 +67,7 @@ def _chunk_file(chunk) -> str:
     source = chunk.metadata.get("source", "")
     if chunk.metadata.get("source_type") == "repo":
         return source
-    return os.path.basename(source)
+    return ntpath.basename(source)
 
 
 def chunk_matches(spec: tuple, chunk) -> bool:

@@ -54,6 +54,11 @@ def _shared_key():
     return os.environ.get("GOOGLE_API_KEY") or None
 
 
+def shared_key_configured():
+    """True when the server has a shared key to offer (GOOGLE_API_KEY is set)."""
+    return _shared_key() is not None
+
+
 def _count():
     return st.session_state.get(_COUNT_KEY, 0)
 

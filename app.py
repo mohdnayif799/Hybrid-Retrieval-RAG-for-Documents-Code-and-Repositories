@@ -1,6 +1,7 @@
 import html
 import os
 import tempfile
+import time
 import uuid
 
 import streamlit as st
@@ -13,8 +14,11 @@ from src.vector_store import (
     create_chat_vector_store,
     append_to_vector_store,
     get_store_stats,
+    store_exists,
 )
 from src.rag_chain import build_rag_chain
+from src.example_repo import EXAMPLE_REPO, EXAMPLE_REPO_URL, load_example_repository
+from src.query_log import CallCounter, is_quota_error, log_query, redact
 from src.citations import (
     build_inline_citations,
     doc_type_label,
@@ -27,7 +31,14 @@ from src.repo_ingestion import (
     load_repository,
     parse_repo_url,
 )
-from demo_key import get_api_key, limit_reached, increment_query_count, queries_remaining
+from demo_key import (
+    SHARED_QUERY_LIMIT,
+    get_api_key,
+    increment_query_count,
+    limit_reached,
+    queries_remaining,
+    shared_key_configured,
+)
 
 load_dotenv()
 
@@ -110,8 +121,68 @@ div[data-testid="stSidebar"] div.stButton button {
 @media (max-width: 640px) {
     .user-msg { max-width: 86%; }
 }
+/* Example chips: pill-shaped, same as AgentCrew's example questions. */
+.st-key-example_chips button {
+    border-radius: 999px;
+    font-size: 0.9rem;
+}
 </style>
 """, unsafe_allow_html=True)
+
+
+# ── Demo-mode wording ─────────────────────────────────────────────────────────
+# Word-for-word consistent with AgentCrew, which uses the same shared-key
+# pattern, so both public demos read the same way ("runs" there, "queries"
+# here, because that is what the limit counts in each app).
+DEMO_LIMIT_MESSAGE = (
+    f"You've used the {SHARED_QUERY_LIMIT} free demo queries. Add your own Gemini "
+    "key (free at aistudio.google.com/apikey) under 'Use your own API key' to "
+    "keep going."
+)
+NO_KEY_MESSAGE = (
+    "This deployment has no shared demo key. Add your own Gemini key (free at "
+    "aistudio.google.com/apikey) under 'Use your own API key'."
+)
+SHARED_QUOTA_MESSAGE = (
+    "The shared demo quota is used up for now. Try again later or add your own key."
+)
+OWN_QUOTA_MESSAGE = (
+    "Your API key hit its provider's quota or rate limit. Wait a moment and try "
+    "again, or check the limits on your key."
+)
+DEMO_UNAVAILABLE_MESSAGE = (
+    "The demo is temporarily unavailable. Try again later, or add your own key "
+    "under 'Use your own API key'."
+)
+STORE_CLEARED_MESSAGE = (
+    "This chat's indexed documents were cleared after a period of inactivity, "
+    "to free memory on this shared demo. Add them again to keep asking about them."
+)
+
+# ── Model ─────────────────────────────────────────────────────────────────────
+# Flash-Lite by default: one query makes 2-3 Gemini calls (rewrite, answer,
+# and a title on the first message), and Flash-Lite's free daily quota is far
+# larger than Flash's. RAG_MODEL picks the default, e.g. from the Dockerfile.
+MODEL_CHOICES = ("gemini-3.5-flash-lite", "gemini-3.5-flash")
+DEFAULT_MODEL = os.environ.get("RAG_MODEL", "").strip() or MODEL_CHOICES[0]
+MODEL_OPTIONS = [DEFAULT_MODEL, *(m for m in MODEL_CHOICES if m != DEFAULT_MODEL)]
+
+# ── "Try an example" ─────────────────────────────────────────────────────────
+# Lets a visitor with nothing to upload see the app work in one click. The
+# repository is a tag tarball shipped with the app (src/example_repo.py), so
+# the example never calls GitHub and its content, and therefore the suggested
+# question, can never drift.
+EXAMPLE_REPO_SLUG = EXAMPLE_REPO.slug
+EXAMPLE_REPO_HELP = (
+    "itsdangerous 2.2.0: a small, BSD-licensed Python library for signing data "
+    "(from the Flask team). 48 files; indexing takes under a minute."
+)
+EXAMPLE_QUESTION = (
+    "How does itsdangerous reject a signed token that is older than max_age?"
+)
+
+# st.session_state key a suggestion chip writes its question to.
+PENDING_QUESTION = "pending_question"
 
 
 # ── Citation display ─────────────────────────────────────────────────────────
@@ -155,6 +226,9 @@ def _blank_chat() -> dict:
         "uploaded_files": [],
         "repos":          [],
         "response_cache": {},
+        # Message count when the example repo was indexed; the suggested
+        # question is offered until the next message is sent.
+        "example_hint_at": None,
     }
 
 
@@ -225,6 +299,9 @@ def _index_chunks(aid: str, chunks: list, progress_bar, base_pct: int = 60):
     """
     chat = st.session_state.chats[aid]
     total = max(len(chunks), 1)
+    # Anything indexed after the example makes its "Try asking" hint stale.
+    # (The example path sets the hint again once its own indexing finishes.)
+    chat["example_hint_at"] = None
 
     def embed_progress(done, _total):
         pct = base_pct + int((done / total) * (99 - base_pct))
@@ -246,37 +323,217 @@ def _new_chat():
     st.session_state.active_id = nid
 
 
+# ── Demo-key helpers ──────────────────────────────────────────────────────────
+
+def _show_demo_counter(slot, user_key: str) -> None:
+    """
+    'Demo queries left' while the shared key is the one that would be used.
+
+    Written into a placeholder at the top of the sidebar, and called again
+    after each answer, so the count shown is never one query behind.
+    """
+    remaining = queries_remaining(user_key)
+    if remaining is None or not shared_key_configured():
+        slot.empty()
+        return
+    slot.caption(f"Demo queries left: {remaining} of {SHARED_QUERY_LIMIT}")
+
+
+def _query_failure_message(exc: Exception, key_kind: str, own_key: str) -> str:
+    """
+    What the visitor sees when a query fails, as in AgentCrew: a quota
+    refusal gets its own wording, the visitor's own key gets the provider's
+    error text (with the key redacted), and the shared key gets a generic
+    message, leaving the detail to the server log.
+    """
+    if is_quota_error(exc):
+        return OWN_QUOTA_MESSAGE if key_kind == "own" else SHARED_QUOTA_MESSAGE
+    if key_kind == "own":
+        return f"Error generating answer: {redact(str(exc), own_key)}"
+    return DEMO_UNAVAILABLE_MESSAGE
+
+
+def _missing_key_message(user_key: str) -> str:
+    """Why there is no key to use right now, in words the visitor can act on."""
+    return DEMO_LIMIT_MESSAGE if limit_reached(user_key) else NO_KEY_MESSAGE
+
+
+# ── Repository ingestion ──────────────────────────────────────────────────────
+
+def _ingest_repository(aid: str, repo_url: str, token: str | None = None,
+                       *, from_example: bool = False) -> bool:
+    """
+    Download, chunk and index one GitHub repository into chat ``aid``.
+
+    Shared by the sidebar form and the "Try an example" chip, so both get the
+    same duplicate check, progress bar and error handling. Renders into
+    whichever container it is called from. ``from_example`` reads the
+    bundled example tarball instead of calling GitHub.
+    Returns True when a repository was indexed.
+    """
+    chat = st.session_state.chats[aid]
+    chat.setdefault("repos", [])
+
+    try:
+        # Parse first: catches a bad URL with no network call at all.
+        parsed = parse_repo_url(repo_url)
+    except RepositoryError as exc:
+        st.error(str(exc))
+        return False
+
+    already = [r for r in chat["repos"] if r.startswith(parsed.slug + "@")]
+    if already:
+        st.info(f"Already indexed in this chat: {already[0]}")
+        return False
+
+    progress_bar = st.progress(0, text="Resolving repository…")
+
+    def on_phase(phase, current, _total):
+        if phase == "resolve":
+            progress_bar.progress(3, text="Resolving repository…")
+        elif phase == "download":
+            mb = current / (1024 * 1024)
+            progress_bar.progress(
+                min(35, 5 + int(mb * 3)),
+                text=f"Downloading archive… {mb:.1f} MB",
+            )
+        elif phase == "read":
+            progress_bar.progress(
+                45, text=f"Reading files… {current} kept"
+            )
+
+    try:
+        if from_example:
+            progress_bar.progress(10, text="Reading the example repository…")
+            docs, repo, ref, report = load_example_repository()
+        else:
+            docs, repo, ref, report = load_repository(
+                repo_url, token=token, on_phase=on_phase,
+            )
+
+        progress_bar.progress(55, text="Chunking source files…")
+        chunks = chunk_documents(docs)
+
+        _index_chunks(aid, chunks, progress_bar, base_pct=60)
+
+        label = repo.label(ref)
+        chat["repos"].append(label)
+        progress_bar.progress(100, text="Done!")
+
+        skipped = report.skipped_total
+        st.success(
+            f"✅ Indexed **{label}**\n\n"
+            f"{report.kept} file(s) → **{len(chunks)} chunks**"
+            + (f" · {skipped} file(s) filtered out" if skipped else "")
+        )
+        if report.skipped:
+            with st.expander("What was filtered out"):
+                for reason, count in sorted(
+                    report.skipped.items(), key=lambda kv: -kv[1]
+                ):
+                    st.caption(f"• {count} × {reason}")
+        return True
+
+    except RepositoryError as exc:
+        # Expected, user-actionable failures: bad URL, private
+        # repo, rate limit, oversized repo, nothing indexable.
+        progress_bar.empty()
+        st.error(str(exc))
+    except Exception as exc:
+        progress_bar.empty()
+        st.error(f"Unexpected error ingesting repository: {exc}")
+    return False
+
+
+# ── Empty-state onboarding ────────────────────────────────────────────────────
+
+def _queue_question(question: str) -> None:
+    """Suggestion-chip callback: the rerun this click triggers asks the question."""
+    st.session_state[PENDING_QUESTION] = question
+
+
+def _render_onboarding(chat: dict, api_key: str | None, user_key: str) -> None:
+    """
+    Help for a visitor who brought nothing to upload.
+
+    While this chat has nothing indexed, offer the example repository. Right
+    after it is indexed, offer a question it can answer, until the visitor
+    sends their next message.
+    """
+    if chat["chroma_dir"] is None:
+        st.caption("Nothing to upload? Try an example:")
+        with st.container(key="example_chips", horizontal=True, gap="small"):
+            clicked = st.button(
+                f"\U0001f419 Index {EXAMPLE_REPO_SLUG}",
+                key="example_repo",
+                help=EXAMPLE_REPO_HELP,
+            )
+        if not clicked:
+            return
+        if not api_key:
+            st.warning(_missing_key_message(user_key))
+        elif _ingest_repository(st.session_state.active_id, EXAMPLE_REPO_URL,
+                                from_example=True):
+            chat["example_hint_at"] = len(chat["messages"])
+            st.rerun()   # redraw the sidebar's sources and status too
+    elif chat.get("example_hint_at") == len(chat["messages"]):
+        st.caption(f"{EXAMPLE_REPO_SLUG} is indexed. Try asking:")
+        with st.container(key="example_chips", horizontal=True, gap="small"):
+            st.button(
+                EXAMPLE_QUESTION,
+                key="example_question",
+                on_click=_queue_question,
+                args=(EXAMPLE_QUESTION,),
+            )
+
+
+def _forget_evicted_stores() -> None:
+    """
+    Detach any chat whose store the eviction policy deleted.
+
+    Must run before anything opens a store: Chroma silently recreates a
+    missing directory as an EMPTY store, and the chat would then answer "I
+    don't have enough information" with nothing saying why. Instead the chat
+    forgets its sources and shows STORE_CLEARED_MESSAGE once.
+    """
+    for chat in st.session_state.chats.values():
+        if chat["chroma_dir"] and not store_exists(chat["chroma_dir"]):
+            chat.update(
+                chroma_dir=None, uploaded_files=[], repos=[], response_cache={},
+                example_hint_at=None, store_cleared=True,
+            )
+
+
 # ── Bootstrap ─────────────────────────────────────────────────────────────────
 _init()
+_forget_evicted_stores()
 
 # ── Sidebar ───────────────────────────────────────────────────────────────────
 with st.sidebar:
 
-    # Configuration
+    # Configuration. The demo-key controls are laid out like AgentCrew's: the
+    # counter first, and the visitor's own key tucked into an expander, since
+    # most visitors never need it.
     st.markdown("### \u2699\ufe0f Configuration")
 
-    user_gemini_key = st.text_input(
-        "Your own Gemini API key (optional)",
-        type="password",
-        help="Leave blank to use the shared demo key. Get a free key at "
-             "https://aistudio.google.com/apikey",
-    )
+    # Filled by _show_demo_counter(), which runs again after each answer.
+    demo_counter = st.empty()
+
+    with st.expander("Use your own API key"):
+        user_gemini_key = st.text_input(
+            "Gemini API key",
+            type="password",
+            key="own_gemini_key",
+            help="Used only for this session. It is never written to disk or "
+                 "logged. Get a free key at https://aistudio.google.com/apikey",
+        )
 
     gemini_api_key = get_api_key(user_gemini_key)
+    _show_demo_counter(demo_counter, user_gemini_key)
 
-    if limit_reached(user_gemini_key):
-        st.error(
-            "Shared demo key limit reached (5 queries this session). "
-            "Enter your own key above to keep going."
-        )
-    elif not user_gemini_key and gemini_api_key:
-        st.caption(
-            f"Using the shared demo key \u2014 "
-            f"{queries_remaining(user_gemini_key)} of 5 queries left this session."
-        )
     model_name = st.selectbox(
         "Model",
-        options=["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.0-flash-lite"],
+        options=MODEL_OPTIONS,
         index=0,
     )
 
@@ -338,7 +595,7 @@ with st.sidebar:
 
     if process_btn:
         if not gemini_api_key:
-            st.error("Enter your Gemini API key above.")
+            st.error(_missing_key_message(user_gemini_key))
         else:
             aid         = st.session_state.active_id
             known_files = st.session_state.chats[aid]["uploaded_files"]
@@ -353,8 +610,8 @@ with st.sidebar:
                 st.warning("No new documents to process.")
             else:
                 with st.spinner(f"Processing {len(new_uploads)} file(s)\u2026"):
+                    temp_paths, original_names = [], []
                     try:
-                        temp_paths, original_names = [], []
                         for f in new_uploads:
                             suffix = os.path.splitext(f.name)[1]
                             with tempfile.NamedTemporaryFile(
@@ -389,9 +646,6 @@ with st.sidebar:
 
                         st.session_state.chats[aid]["uploaded_files"].extend(original_names)
 
-                        for p in temp_paths:
-                            os.unlink(p)
-
                         progress_bar.progress(100, text="Done!")
                         n_docs = len(st.session_state.chats[aid]["uploaded_files"])
                         st.success(
@@ -401,6 +655,15 @@ with st.sidebar:
 
                     except Exception as e:
                         st.error(f"Failed to process documents: {e}")
+                    finally:
+                        # Also on failure: on Cloud Run /tmp is memory, so a
+                        # copy left behind by a file that failed to parse
+                        # would stay for the life of the instance.
+                        for p in temp_paths:
+                            try:
+                                os.unlink(p)
+                            except FileNotFoundError:
+                                pass
 
     st.divider()
 
@@ -436,78 +699,12 @@ with st.sidebar:
     )
 
     if repo_btn:
-        aid = st.session_state.active_id
-        chat = st.session_state.chats[aid]
-        chat.setdefault("repos", [])
-
         if not gemini_api_key:
-            st.error("Enter your Gemini API key above.")
+            st.error(_missing_key_message(user_gemini_key))
         else:
-            try:
-                # Parse first: catches a bad URL with no network call at all.
-                parsed = parse_repo_url(repo_url)
-                already = [r for r in chat["repos"] if r.startswith(parsed.slug + "@")]
-            except RepositoryError as exc:
-                parsed, already = None, []
-                st.error(str(exc))
-
-            if parsed is not None:
-                if already:
-                    st.info(f"Already indexed in this chat: {already[0]}")
-                else:
-                    progress_bar = st.progress(0, text="Resolving repository\u2026")
-
-                    def on_phase(phase, current, _total):
-                        if phase == "resolve":
-                            progress_bar.progress(3, text="Resolving repository\u2026")
-                        elif phase == "download":
-                            mb = current / (1024 * 1024)
-                            progress_bar.progress(
-                                min(35, 5 + int(mb * 3)),
-                                text=f"Downloading archive\u2026 {mb:.1f} MB",
-                            )
-                        elif phase == "read":
-                            progress_bar.progress(
-                                45, text=f"Reading files\u2026 {current} kept"
-                            )
-
-                    try:
-                        docs, repo, ref, report = load_repository(
-                            repo_url,
-                            token=(github_token or None),
-                            on_phase=on_phase,
-                        )
-
-                        progress_bar.progress(55, text="Chunking source files\u2026")
-                        chunks = chunk_documents(docs)
-
-                        _index_chunks(aid, chunks, progress_bar, base_pct=60)
-
-                        label = repo.label(ref)
-                        chat["repos"].append(label)
-                        progress_bar.progress(100, text="Done!")
-
-                        skipped = report.skipped_total
-                        st.success(
-                            f"\u2705 Indexed **{label}**\n\n"
-                            f"{report.kept} file(s) \u2192 **{len(chunks)} chunks**"
-                            + (f" · {skipped} file(s) filtered out" if skipped else "")
-                        )
-                        if report.skipped:
-                            with st.expander("What was filtered out"):
-                                for reason, count in sorted(
-                                    report.skipped.items(), key=lambda kv: -kv[1]
-                                ):
-                                    st.caption(f"\u2022 {count} \u00d7 {reason}")
-
-                    except RepositoryError as exc:
-                        # Expected, user-actionable failures: bad URL, private
-                        # repo, rate limit, oversized repo, nothing indexable.
-                        progress_bar.empty()
-                        st.error(str(exc))
-                    except Exception as exc:
-                        progress_bar.empty()
-                        st.error(f"Unexpected error ingesting repository: {exc}")
+            _ingest_repository(
+                st.session_state.active_id, repo_url, token=(github_token or None)
+            )
 
     st.divider()
 
@@ -533,7 +730,7 @@ with st.sidebar:
     if not gemini_api_key:
         status_html = (
             '<div class="status-box-warn">\U0001f7e1 <b>Waiting</b><br>'
-            'Enter Gemini API key to begin.</div>'
+            "Add a Gemini key under 'Use your own API key' to begin.</div>"
         )
     elif not active_chat["chroma_dir"]:
         status_html = (
@@ -565,6 +762,16 @@ st.caption("Chat naturally, or upload documents in the sidebar for grounded, cit
 
 active_chat = _active()
 
+if active_chat.pop("store_cleared", False):
+    st.info(STORE_CLEARED_MESSAGE)
+
+# st.chat_input is pinned to the bottom of the page wherever it is called.
+# Calling it before the history means this run already knows whether a
+# question arrived (typed, or queued by a suggestion chip), so the onboarding
+# chips can be skipped. Same pattern as AgentCrew.
+submitted = st.chat_input("Ask a question, or just say hello…")
+user_question = submitted or st.session_state.pop(PENDING_QUESTION, None)
+
 for msg in active_chat["messages"]:
     if msg["role"] == "user":
         _render_user_message(msg["content"])
@@ -580,9 +787,15 @@ for msg in active_chat["messages"]:
             _render_sources(msg.get("sources") or [])
 
 # ── Chat input ────────────────────────────────────────────────────────────────
-if user_question := st.chat_input("Ask a question, or just say hello\u2026"):
+if user_question:
+    key_kind = "own" if (user_gemini_key or "").strip() else "shared"
+    started = time.perf_counter()
+    gemini_calls = CallCounter()
+
     if not gemini_api_key:
-        st.warning("\u26a0\ufe0f Enter your Gemini API key in the sidebar.")
+        st.warning(_missing_key_message(user_gemini_key))
+        log_query("demo_limit" if limit_reached(user_gemini_key) else "no_key",
+                  key_kind, model_name, 0.0, 0)
     else:
         # No blocking check on chroma_dir here — build_rag_chain accepts
         # chroma_dir=None and routes every message through the conversational
@@ -591,6 +804,7 @@ if user_question := st.chat_input("Ask a question, or just say hello\u2026"):
 
         # ── Improvement 2: LLM-generated title on first message ───────────────
         if not st.session_state.chats[aid]["messages"]:
+            gemini_calls()          # _generate_title makes exactly one call
             st.session_state.chats[aid]["title"] = _generate_title(
                 user_question, gemini_api_key, model_name
             )
@@ -606,24 +820,31 @@ if user_question := st.chat_input("Ask a question, or just say hello\u2026"):
                 cache     = st.session_state.chats[aid]["response_cache"]
 
                 if cache_key in cache:
+                    status      = "cached"
                     answer      = cache[cache_key]["answer"]
                     source_docs = cache[cache_key]["source_docs"]
-                    st.caption("\U0001f5c4\ufe0f *(retrieved from session cache)*")
+                    st.caption("\U0001f5c4️ *(retrieved from session cache)*")
                 else:
-                    with st.spinner("Searching documents and generating answer\u2026"):
+                    with st.spinner("Searching documents and generating answer…"):
                         chain = build_rag_chain(
                             gemini_api_key,
                             model_name,
                             st.session_state.chats[aid]["chroma_dir"],
                         )
                         result = chain.invoke({
-                            "input":        user_question,
-                            "chat_history": st.session_state.chats[aid]["lc_history"],
+                            "input":          user_question,
+                            "chat_history":   st.session_state.chats[aid]["lc_history"],
+                            "on_gemini_call": gemini_calls,
                         })
+                        status      = "ok"
                         answer      = result["answer"]
                         source_docs = result["context"]
                         cache[cache_key] = {"answer": answer, "source_docs": source_docs}
-                        increment_query_count(user_gemini_key)  # only a real Gemini call counts
+                        # Only a completed answer counts. A failure or a quota
+                        # refusal raises before this line, so it never uses up
+                        # one of the visitor's demo queries.
+                        increment_query_count(user_gemini_key)
+                        _show_demo_counter(demo_counter, user_gemini_key)
 
                 st.markdown(answer)
 
@@ -640,10 +861,23 @@ if user_question := st.chat_input("Ask a question, or just say hello\u2026"):
                     HumanMessage(content=user_question),
                     AIMessage(content=answer),
                 ])
+                log_query(status, key_kind, model_name,
+                          time.perf_counter() - started, gemini_calls.count)
 
             except Exception as e:
-                error_msg = f"Error generating answer: {e}"
-                st.error(error_msg)
+                quota = is_quota_error(e)
+                message = _query_failure_message(e, key_kind, user_gemini_key)
+                if quota:
+                    st.warning(message)
+                else:
+                    st.error(message)
+                log_query("quota" if quota else "error", key_kind, model_name,
+                          time.perf_counter() - started, gemini_calls.count, error=e)
                 st.session_state.chats[aid]["messages"].append(
-                    {"role": "assistant", "content": error_msg, "sources": []}
+                    {"role": "assistant", "content": message, "sources": []}
                 )
+else:
+    # No question this run: offer the example repository (or, right after it
+    # is indexed, a question to ask about it) so a visitor who brought nothing
+    # is never left facing an empty page.
+    _render_onboarding(active_chat, gemini_api_key, user_gemini_key)

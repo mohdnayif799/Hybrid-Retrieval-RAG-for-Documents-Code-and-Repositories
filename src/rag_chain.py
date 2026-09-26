@@ -94,7 +94,7 @@ User: {question}
 Respond naturally and concisely:"""
 
 
-def _conversational_response(client, model_name: str, question: str,
+def _conversational_response(generate, question: str,
                               chat_history: list, has_documents: bool) -> dict:
     """
     Generate a natural conversational reply without touching the retriever.
@@ -131,7 +131,7 @@ def _conversational_response(client, model_name: str, question: str,
         history=history_text,
         question=question,
     )
-    response = client.models.generate_content(model=model_name, contents=prompt)
+    response = generate(prompt)
     return {"answer": response.text.strip(), "context": []}
 
 
@@ -235,6 +235,13 @@ def build_rag_chain(gemini_api_key: str, model_name: str, chroma_dir: str | None
     def run_pipeline(input_dict: dict) -> dict:
         question     = input_dict["input"]
         chat_history = input_dict.get("chat_history", [])
+        # Optional callable, invoked once before every Gemini call, so the
+        # caller can log how many calls a query made even when it fails.
+        on_gemini_call = input_dict.get("on_gemini_call") or (lambda: None)
+
+        def generate(prompt: str):
+            on_gemini_call()
+            return client.models.generate_content(model=model_name, contents=prompt)
 
         # ── Route 1: no documents at all, or high-confidence casual message ──
         # Never touches the retriever. Guarantees correctness when
@@ -242,7 +249,7 @@ def build_rag_chain(gemini_api_key: str, model_name: str, chroma_dir: str | None
         # casual replies fast, natural, and free of irrelevant grounding.
         if not has_documents or _is_casual_message(question):
             return _conversational_response(
-                client, model_name, question, chat_history, has_documents
+                generate, question, chat_history, has_documents
             )
 
         # ── Route 2: standard RAG pipeline ────────────────────────────────
@@ -252,7 +259,7 @@ def build_rag_chain(gemini_api_key: str, model_name: str, chroma_dir: str | None
                 history=history_text,
                 question=question,
             )
-            rw = client.models.generate_content(model=model_name, contents=rewrite_prompt)
+            rw = generate(rewrite_prompt)
             standalone = rw.text.strip()
             if len(standalone) > 500 or "\n" in standalone[:50]:
                 standalone = question
@@ -277,7 +284,7 @@ def build_rag_chain(gemini_api_key: str, model_name: str, chroma_dir: str | None
             question=question,
             history_block=history_block,
         )
-        qa = client.models.generate_content(model=model_name, contents=qa_prompt)
+        qa = generate(qa_prompt)
         return {"answer": qa.text.strip(), "context": source_docs}
 
     return RunnableLambda(run_pipeline)

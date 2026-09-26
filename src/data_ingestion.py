@@ -7,7 +7,6 @@ import streamlit as st
 from PIL import Image
 
 import fitz
-import easyocr
 
 from langchain_community.document_loaders import (
     PyPDFLoader,
@@ -29,7 +28,16 @@ SUPPORTED_EXTENSIONS = {".pdf", ".txt", ".docx", ".doc", ".md", ".pptx"}
 
 @st.cache_resource(show_spinner="Loading OCR engine (first run only)…")
 def get_ocr_reader():
-    """Load EasyOCR once and cache it. gpu=False works on any machine."""
+    """
+    Load EasyOCR once and cache it. gpu=False works on any machine.
+
+    Imported here, not at module level: ``import easyocr`` pulls in
+    torchvision, OpenCV, scikit-image and SciPy, and only scanned PDF pages
+    need any of it. Every session imports this module, so a top-level import
+    made every visitor pay for OCR whether or not they ever used it.
+    """
+    import easyocr  # lazy — see docstring
+
     return easyocr.Reader(["en"], gpu=False)
 
 

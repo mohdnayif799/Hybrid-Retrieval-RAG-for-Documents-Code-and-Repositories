@@ -1,6 +1,6 @@
 langchain>=0.3.0
 langchain-community>=0.3.0
-langchain-google-genai>=2.0.0
+google-genai>=1.0.0    # imported directly by app.py and src/rag_chain.py
 langchain-huggingface>=0.1.0
 langchain-text-splitters>=0.3.0
 chromadb>=0.5.0

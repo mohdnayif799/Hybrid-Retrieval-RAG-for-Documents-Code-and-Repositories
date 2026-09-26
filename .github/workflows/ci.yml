@@ -1,0 +1,122 @@
+name: CI
+
+# Every push to any branch, and every pull request. CI only: nothing here
+# deploys - the image is built and tested, then thrown away.
+on:
+  push:
+  pull_request:
+
+# Least privilege: the jobs only read the repository. No secrets are used -
+# the test suite needs no API key, and the Docker job only checks that the
+# image starts and that its models load offline.
+permissions:
+  contents: read
+
+# A newer push to the same branch cancels the run still going for the old
+# one, so a quick fix-up commit doesn't queue behind a stale build.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Lint and test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+          # Either file changing means a different install, so both decide the
+          # cache key.
+          cache-dependency-path: |
+            requirements.txt
+            constraints.txt
+
+      # Same two-step install as the Dockerfile. CPU-only torch first, from
+      # PyTorch's own index: a plain "pip install" would pull the CUDA build,
+      # several GB that GitHub's runners (no GPU, limited disk) cannot use.
+      - name: Install CPU-only PyTorch
+        run: >-
+          pip install torch torchvision
+          --index-url https://download.pytorch.org/whl/cpu
+          -c constraints.txt
+
+      # ruff is pinned here rather than in requirements.txt so the linter never
+      # ships inside the production image.
+      - name: Install dependencies
+        run: pip install -r requirements.txt -c constraints.txt ruff==0.16.9
+
+      # Bug-only gate: syntax errors (E9), invalid comparisons such as
+      # "is" against a literal (F63), misplaced statements such as "return"
+      # outside a function (F7), and undefined names (F82). These are the
+      # checks that catch code which cannot run; style rules are left out.
+      - name: Lint
+        run: ruff check --select E9,F63,F7,F82 .
+
+      - name: Test
+        run: pytest -q
+
+  docker:
+    name: Build and smoke-test the image
+    # Only build once lint and tests pass: the build is the slow part.
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      # Deliberately not 8080, to prove the container honours $PORT the way
+      # Cloud Run requires instead of assuming its default.
+      PORT: 9090
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Build the image
+        run: docker build -t rag-qa:ci .
+
+      - name: Start the container
+        run: docker run -d --name rag-qa -e PORT="$PORT" -p "$PORT:$PORT" rag-qa:ci
+
+      - name: Wait for the health endpoint
+        run: |
+          for attempt in $(seq 1 90); do
+            if curl -fsS "http://localhost:$PORT/_stcore/health"; then
+              echo
+              echo "Healthy after ${attempt} attempt(s)."
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "The app did not answer /_stcore/health within 90 seconds."
+          exit 1
+
+      # The health endpoint only proves Streamlit is listening; it never runs
+      # app.py. These run inside the container, as its non-root user, with no
+      # network access needed.
+      - name: Check the image
+        run: |
+          set -eu
+          echo "Runs as: $(docker exec rag-qa id -u)"
+          test "$(docker exec rag-qa id -u)" = "10001"
+
+          # Both models load from the baked-in files, through the app's own
+          # code, with HF_HUB_OFFLINE=1 (set in the image). A model name that
+          # no longer matches the Dockerfile's download fails here.
+          docker exec rag-qa python -c "from src.vector_store import get_embeddings; assert len(get_embeddings().embed_query('ok')) == 384"
+          docker exec rag-qa python -c "from src.data_ingestion import get_ocr_reader; get_ocr_reader()"
+
+          # Run app.py headlessly and check the empty state renders without an
+          # exception and offers the example repository.
+          docker exec rag-qa python -c "
+          from streamlit.testing.v1 import AppTest
+          at = AppTest.from_file('app.py', default_timeout=120).run()
+          assert not at.exception, at.exception
+          assert 'pallets/itsdangerous' in at.button(key='example_repo').label
+          print('app.py renders, example chip present')
+          "
+
+      - name: Container logs
+        if: always()
+        run: docker logs rag-qa

@@ -50,6 +50,7 @@ from __future__ import annotations
 import functools
 import hashlib
 import re
+import threading
 from typing import Any, Iterable, Sequence
 
 from langchain_core.documents import Document
@@ -472,6 +473,42 @@ def load_bm25_index(chroma_dir: str, chunk_count: int) -> BM25Index:
     return index
 
 
+# ── Releasing cached indexes ─────────────────────────────────────────────────
+# The (chroma_dir, chunk_count) key invalidates correctly on append, but the
+# superseded entry used to stay cached for the life of the process: one
+# stale index per append, per chat. This records the count each directory's
+# index was last built for, so the previous entry can be dropped when the
+# count changes, and a store's entry can be dropped when it is evicted.
+
+_BM25_BUILT_FOR: dict[str, int] = {}
+_BM25_LOCK = threading.Lock()
+
+
+def _clear_bm25_entry(chroma_dir: str, chunk_count: int) -> None:
+    clear = getattr(load_bm25_index, "clear", None)
+    if clear is not None:
+        clear(chroma_dir, chunk_count)      # st.cache_resource: this entry only
+    else:                                   # pragma: no cover - lru_cache shim
+        load_bm25_index.cache_clear()
+
+
+def _record_bm25_count(chroma_dir: str, chunk_count: int) -> None:
+    """Remember the count about to be used; drop the entry it supersedes."""
+    with _BM25_LOCK:
+        previous = _BM25_BUILT_FOR.get(chroma_dir)
+        _BM25_BUILT_FOR[chroma_dir] = chunk_count
+    if previous is not None and previous != chunk_count:
+        _clear_bm25_entry(chroma_dir, previous)
+
+
+def forget_bm25_index(chroma_dir: str) -> None:
+    """Drop the cached BM25 index of a store that is being evicted."""
+    with _BM25_LOCK:
+        chunk_count = _BM25_BUILT_FOR.pop(chroma_dir, None)
+    if chunk_count is not None:
+        _clear_bm25_entry(chroma_dir, chunk_count)
+
+
 def build_hybrid_retriever(chroma_dir: str):
     """
     Assemble the retriever used by the RAG pipeline.
@@ -498,7 +535,9 @@ def build_hybrid_retriever(chroma_dir: str):
         return vector_retriever
 
     try:
-        bm25_index = load_bm25_index(chroma_dir, count_chunks(chroma_dir))
+        chunk_count = count_chunks(chroma_dir)
+        _record_bm25_count(chroma_dir, chunk_count)
+        bm25_index = load_bm25_index(chroma_dir, chunk_count)
     except Exception as exc:
         # Retrieval quality should degrade, not the app. Vector search alone
         # is still a working system.

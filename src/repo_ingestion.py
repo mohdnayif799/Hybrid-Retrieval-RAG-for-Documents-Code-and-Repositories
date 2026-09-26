@@ -36,12 +36,14 @@ indexed, with nothing anywhere indicating why.
 
 from __future__ import annotations
 
+import hashlib
 import io
+import os
 import posixpath
 import re
 import tarfile
-from dataclasses import dataclass, field
-from typing import BinaryIO, Iterable
+from dataclasses import dataclass, field, replace
+from typing import BinaryIO, Iterable, Mapping
 from urllib.parse import quote, urlparse
 
 import requests
@@ -84,7 +86,37 @@ class RepoLimits:
     max_line_length: int = 2000                    # longer => generated/minified
 
 
-DEFAULT_LIMITS = RepoLimits()
+_MB = 1024 * 1024
+
+# Optional overrides, e.g. for a public demo where the store being built can
+# never be evicted mid-ingestion. Unset or blank keeps the default above.
+_LIMIT_ENV_VARS = {
+    "RAG_REPO_MAX_FILES": ("max_files", 1),
+    "RAG_REPO_MAX_ARCHIVE_MB": ("max_archive_bytes", _MB),
+    "RAG_REPO_MAX_TEXT_MB": ("max_total_text_bytes", _MB),
+}
+
+
+def limits_from_env(env: Mapping[str, str] | None = None,
+                    base: RepoLimits = RepoLimits()) -> RepoLimits:
+    """
+    ``base`` with any limits overridden from the environment. A malformed or
+    non-positive value raises, so a deployment typo fails loudly at startup
+    instead of silently leaving the demo unbounded.
+    """
+    env = os.environ if env is None else env
+    overrides = {}
+    for name, (field_name, unit) in _LIMIT_ENV_VARS.items():
+        raw = (env.get(name) or "").strip()
+        if not raw:
+            continue
+        if not raw.isdigit() or int(raw) <= 0:
+            raise ValueError(f"{name} must be a positive whole number, got {raw!r}")
+        overrides[field_name] = int(raw) * unit
+    return replace(base, **overrides)
+
+
+DEFAULT_LIMITS = limits_from_env()
 
 
 # ── Errors ────────────────────────────────────────────────────────────────────
@@ -564,3 +596,31 @@ def load_repository(url: str, token: str | None = None,
     print(f"[INFO] {repo.slug}@{ref}: kept {report.kept} file(s), "
           f"skipped {report.skipped_total}.")
     return documents, repo, ref, report
+
+
+def load_repository_archive(path: str, repo: RepoRef, ref: str, *,
+                            sha256: str | None = None,
+                            limits: RepoLimits = DEFAULT_LIMITS,
+                            ) -> tuple[list[Document], RepoRef, str, IngestReport]:
+    """
+    Same result as ``load_repository``, from a tarball already on disk.
+
+    No network: used for the bundled example repository, so a demo instance
+    never spends GitHub's shared anonymous rate limit on it. The archive goes
+    through the same ``read_archive`` filters and bounds as a download.
+    ``sha256``, when given, must match the file exactly.
+    """
+    with open(path, "rb") as fh:
+        raw = fh.read()
+    if sha256 is not None and hashlib.sha256(raw).hexdigest() != sha256:
+        raise RepositoryError(
+            f"{os.path.basename(path)} does not match its expected SHA-256; "
+            "refusing to index it."
+        )
+
+    files, report = read_archive(io.BytesIO(raw), limits=limits)
+    if not files:
+        raise RepositoryEmpty(
+            f"No indexable source or documentation files found in {repo.slug}@{ref}."
+        )
+    return repo_files_to_documents(files, repo, ref), repo, ref, report

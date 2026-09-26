@@ -1,0 +1,10 @@
+# Streamlit settings, read from ./.streamlit/config.toml when the app starts.
+# Also copied into the Docker image. Never put secrets here: secrets belong in
+# environment variables (or .streamlit/secrets.toml, which is never shipped).
+
+[server]
+# Largest file a visitor can upload, in MB (Streamlit's default is 200).
+# Uploads are held in memory while they are parsed and embedded, and the store
+# they build is the one the eviction policy never removes (it is in use), so
+# this is what bounds one visitor's footprint on a shared demo instance.
+maxUploadSize = 10

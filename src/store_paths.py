@@ -62,9 +62,20 @@ def _unique_suffix() -> str:
     return f"{int(time.time())}_{uuid.uuid4().hex[:8]}"
 
 
+def chat_store_root() -> str:
+    """
+    Directory that holds per-chat stores: ``RAG_STORE_DIR`` if set, else the
+    repository root (the historical location, so local runs are unchanged).
+
+    The container sets it to a dedicated writable directory, which lets the
+    application code itself stay read-only for the app's user.
+    """
+    return os.environ.get("RAG_STORE_DIR", "").strip() or project_root()
+
+
 def new_chat_store_dir(root: str | None = None) -> str:
     """Path for a new per-chat store. Never deleted by the eval cleanup."""
-    return os.path.join(root or project_root(), f"{CHAT_STORE_PREFIX}_{_unique_suffix()}")
+    return os.path.join(root or chat_store_root(), f"{CHAT_STORE_PREFIX}_{_unique_suffix()}")
 
 
 def new_eval_store_dir(root: str | None = None) -> str:

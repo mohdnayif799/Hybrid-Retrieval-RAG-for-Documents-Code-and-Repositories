@@ -1,4 +1,6 @@
+import os
 import shutil
+import sys
 import time
 import gc
 import streamlit as st
@@ -11,6 +13,7 @@ from src.store_paths import (
     new_eval_store_dir,
     stale_eval_store_dirs,
 )
+from src.store_registry import StoreRegistry, budget_from_env
 
 EMBEDDING_MODEL = "all-MiniLM-L6-v2"
 
@@ -62,6 +65,57 @@ def _cleanup_old_eval_dirs(keep: str):
             pass
 
 
+# ── Chat-store lifecycle ─────────────────────────────────────────────────────
+# Every chat store this process creates is registered here and evicted when
+# idle or over budget (policy and limits: src/store_registry.py).
+
+def _release_chroma_system(chroma_dir: str) -> None:
+    """
+    Stop Chroma's shared "system" for one directory, closing its files.
+
+    chromadb keeps one system per persist directory in a class-level registry,
+    refcounted by the clients that use it, and a client that is merely dropped
+    (as the cached one is when evicted, or the temporary one in
+    append_to_vector_store) never decrements that count. Deleting the
+    directory without this unlinks files that are still open, which on Cloud
+    Run's in-memory filesystem frees nothing. This reaches into chromadb
+    internals, so tests/test_store_eviction.py pins it against the chromadb
+    version in constraints.txt.
+    """
+    from chromadb.api.shared_system_client import SharedSystemClient as shared
+
+    with shared._refcount_lock:
+        shared._identifier_to_refcount.pop(chroma_dir, None)
+        system = shared._identifier_to_system.pop(chroma_dir, None)
+    if system is not None:
+        system.stop()
+
+
+def evict_store(chroma_dir: str) -> None:
+    """Release everything a chat store holds in this process, then delete it."""
+    from src.hybrid_retrieval import forget_bm25_index  # lazy: circular import
+
+    forget_bm25_index(chroma_dir)
+    load_vector_store.clear(chroma_dir)
+    _store_stats_cached.clear()          # keyed by (dir, count); cheap to rebuild
+    _release_chroma_system(chroma_dir)
+    gc.collect()
+    try:
+        shutil.rmtree(chroma_dir)
+    except FileNotFoundError:
+        pass                             # already gone: nothing left to free
+    print(f"[INFO] Evicted chat store '{os.path.basename(chroma_dir)}'.",
+          file=sys.stderr)
+
+
+def store_exists(chroma_dir: str) -> bool:
+    """False once a chat's store has been evicted (or removed by anything else)."""
+    return os.path.isdir(chroma_dir)
+
+
+STORE_REGISTRY = StoreRegistry(budget_from_env(), release=evict_store)
+
+
 # ── Used by app.py (per-chat, no cross-chat cleanup) ─────────────────────────
 
 def create_chat_vector_store(chunks: list, progress_callback=None) -> tuple:
@@ -76,6 +130,8 @@ def create_chat_vector_store(chunks: list, progress_callback=None) -> tuple:
     store = _embed_in_batches(chunks, chroma_dir, progress_callback)
     count = store._collection.count()
     print(f"[INFO] Chat store created at '{chroma_dir}' with {count} chunks.")
+    STORE_REGISTRY.register(chroma_dir)
+    STORE_REGISTRY.enforce(keep=chroma_dir)
     return store, chroma_dir
 
 
@@ -148,6 +204,10 @@ def append_to_vector_store(chunks: list, chroma_dir: str, progress_callback=None
     # Cache is already cleared from Step 1; next load_vector_store call
     # will open a new connection that sees all {after} chunks.
 
+    # The store just grew, so it may now push the process over budget.
+    STORE_REGISTRY.touch(chroma_dir)
+    STORE_REGISTRY.enforce(keep=chroma_dir)
+
 
 def get_store_stats(chroma_dir: str) -> dict:
     """
@@ -159,6 +219,9 @@ def get_store_stats(chroma_dir: str) -> dict:
     file is precisely the condition that caused the multi-document data loss
     documented in append_to_vector_store().
     """
+    # Runs on every rerun of the chat being viewed, which makes it the "this
+    # store is in use" signal for idle eviction.
+    STORE_REGISTRY.touch(chroma_dir)
     try:
         total = count_chunks(chroma_dir)
         return _store_stats_cached(chroma_dir, total)

@@ -1,0 +1,47 @@
+# .dockerignore decides what "docker build" sends to the builder (the "build
+# context"). Anything excluded here cannot end up in the image, even by
+# accident, e.g. a careless "COPY . .".
+#
+# This is an ALLOWLIST, the same approach as AgentCrew: exclude everything,
+# then re-include only the files the Dockerfile actually reads. A denylist
+# ("exclude .env, venv, ...") protects only against files you remembered; a
+# new .env.production or a stray key file would ship silently. With an
+# allowlist, a file you forgot to allow makes COPY fail loudly at build time,
+# which is the safe way to fail.
+#
+# It also keeps the context tiny. Without this file, "docker build" would
+# upload ~1.85 GB from this folder before doing anything.
+#
+# Excluded by the first rule, among everything else:
+#   .env / .env.*          API keys - these must only ever arrive at runtime
+#   .streamlit/secrets.toml  Streamlit's own secrets file, same reason
+#   venv/ .venv/           local virtualenv (~1.7 GB of Windows binaries that
+#                          would not even run on Linux)
+#   .git/                  full history, including anything ever committed
+#   __pycache__/ *.pyc     stale bytecode compiled by your Windows Python
+#   .pytest_cache/ .pytest-tmp/ .ruff_cache/   test and lint artifacts
+#   chroma_db_*/ chroma_bench_*/ chroma_eval_*/  local vector stores (they
+#                          hold the text of whatever you indexed)
+#   *.log logs/            local logs
+#   benchmark/ tests/ assets/ evaluate_*.py smoke_*.py README.md
+#   .github/ .remember/ .claude/   not needed at runtime
+
+# 1. Exclude everything.
+*
+
+# 2. Re-include what the Dockerfile COPYs. Later rules override earlier ones.
+!requirements.txt
+!constraints.txt
+!app.py
+!demo_key.py
+!src/
+!examples/
+# Only the config file: .streamlit/secrets.toml must stay excluded.
+!.streamlit/config.toml
+
+# 3. Re-exclude junk that can live INSIDE the allowed paths. These come last
+#    so they win over step 2.
+**/__pycache__
+**/*.py[cod]
+**/.env
+**/.env.*
