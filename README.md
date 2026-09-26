@@ -1,5 +1,12 @@
 # Hybrid-Retrieval RAG for Documents & Code Repositories
 
+[![CI](https://github.com/mohdnayif799/Hybrid-Retrieval-RAG-for-Documents-Code-and-Repositories/actions/workflows/ci.yml/badge.svg)](https://github.com/mohdnayif799/Hybrid-Retrieval-RAG-for-Documents-Code-and-Repositories/actions/workflows/ci.yml)
+
+**Live demo:** https://rag-qa-732702710111.asia-south1.run.app
+
+> The demo scales to zero when idle, so the first load may take around 20–40 seconds while the Cloud Run instance starts.
+
+
 A retrieval-augmented question answering system for **documents and source code**. Upload PDFs, Word documents, presentations or plain text — or paste a GitHub repository URL — and ask questions that are answered strictly from the indexed material, with citations that point to the exact page, slide, character offset, or `file.py:line`.
 
 Retrieval is **hybrid**: dense vector search for meaning, BM25 for exact terms, fused with Reciprocal Rank Fusion. A controlled retrieval evaluation — 93 hand-authored queries over a 1,222-chunk corpus, scored with confidence intervals and significance tests — measures exactly where that combination helps, where it doesn't, and why (see [Evaluation](#evaluation)). Each conversation is an isolated workspace with its own vector store, and documents and repositories can be indexed side by side in the same chat.
@@ -9,6 +16,8 @@ Retrieval is **hybrid**: dense vector search for meaning, BM25 for exact terms, 
 ## Table of Contents
 
 - [Demo](#demo)
+- [Demo mode](#demo-mode)
+- [Deployment](#deployment)
 - [What the system does](#what-the-system-does)
 - [Grounding behaviour](#grounding-behaviour)
 - [Retrieval architecture](#retrieval-architecture)
@@ -53,7 +62,32 @@ The *Source Chunks Used* panel, expanded to show retrieved chunks alongside thei
 
 Independent, LLM-titled chats in the sidebar. Each keeps its own sources, history and vector store.
 
----
+
+## Demo mode
+
+The public Cloud Run demo is intentionally rate-limited and resource-bounded:
+
+- **5 queries per browser session** when using the shared Gemini key.
+- Visitors can optionally provide their **own Gemini API key** to bypass the shared demo limit.
+- Document uploads are limited to **10 MB**.
+- GitHub repository ingestion is limited to **300 files / 20 MB**.
+- The **Try an example** option uses a bundled snapshot of `pallets/itsdangerous` **2.2.0**, so the example works without depending on GitHub API availability.
+- The bundled `itsdangerous` source is distributed under its **BSD-3-Clause license**.
+
+## Deployment
+
+The production demo is containerized with Docker and deployed to **Google Cloud Run** in `asia-south1` (Mumbai).
+
+- Docker image stored in **Artifact Registry**.
+- Runtime secret stored in **Secret Manager** and exposed as `GOOGLE_API_KEY`.
+- Cloud Run uses a dedicated least-privilege service account: `rag-runtime`.
+- **1 vCPU / 2 GiB RAM**.
+- **Min instances: 0** for scale-to-zero when idle.
+- **Max instances: 1** for cost control.
+- **Concurrency: 10**.
+- **Session affinity enabled** for the Streamlit app.
+- GitHub Actions currently provides **CI only**; deployment is still manual.
+
 
 ## What the system does
 
