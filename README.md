@@ -249,53 +249,15 @@ The source-chunk panel shows the fully qualified reference `src/rag_chain.py:142
 
 ## Architecture
 
-```mermaid
-flowchart TB
-    subgraph Sources["Input Sources"]
-        Upload["Uploaded files<br/>PDF · DOCX · PPTX · TXT · MD"]
-        Repo["GitHub repository URL"]
-    end
+**Ingestion, once per upload**
 
-    subgraph Ingest["Ingestion"]
-        Loader["Document loader<br/>+ per-page OCR fallback"]
-        RepoIngest["Repository ingestion<br/>archive stream · filter · validate"]
-        Chunker["chunk_documents()<br/>generic splitter for documents<br/>language-aware splitter for code"]
-    end
+<p align="center"><img src="docs/images/rag_ingestion.png" alt="RAG ingestion pipeline, run once per upload" width="880"></p>
 
-    subgraph Index["Per-chat index"]
-        Embed["all-MiniLM-L6-v2<br/>384-dim, CPU, batched"]
-        Chroma[("ChromaDB<br/>chroma_db_*")]
-        BM25["BM25 index<br/>rebuilt from the same chunks"]
-    end
+**Each question**
 
-    subgraph Retrieve["Hybrid retrieval"]
-        MMR["Dense · MMR<br/>k=10, fetch_k=30"]
-        Lex["Sparse · BM25<br/>k=10"]
-        RRF["Reciprocal Rank Fusion<br/>top 5, smoothing=60"]
-    end
+<p align="center"><img src="docs/images/rag_question.png" alt="RAG question pipeline, run on every question" width="880"></p>
 
-    subgraph Answer["Answer generation"]
-        Router{"Casual message,<br/>or no sources yet?"}
-        Conv["Conversational response<br/>Gemini, no retrieval"]
-        Rewriter["Query rewriter<br/>only when history exists"]
-        Gen["Gemini · grounded QA prompt<br/>refuses on insufficient context"]
-    end
-
-    Upload --> Loader --> Chunker
-    Repo --> RepoIngest --> Chunker
-    Chunker --> Embed --> Chroma
-    Chroma --> BM25
-    Chroma --> MMR
-    BM25 --> Lex
-    MMR --> RRF
-    Lex --> RRF
-    Router -- yes --> Conv
-    Router -- no --> Rewriter
-    Rewriter --> MMR
-    RRF --> Gen
-    Gen --> Cite["Answer + citations<br/>page · slide · file.py:line"]
-    Conv --> Cite
-```
+Blue boxes are code, orange boxes are model calls.
 
 **Call budget per question.** A casual message, or a question in a chat with no sources yet, costs one Gemini call. A first RAG question in a chat costs one call (retrieval plus generation; the rewriter is skipped when there is no history); a follow-up costs two — one to rewrite the query, one to answer. Retrieval itself costs nothing. Independently of routing, the very first message in a new chat triggers one additional call to generate a short chat title.
 
