@@ -44,7 +44,7 @@ load_dotenv()
 
 # ── Page config ───────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="Document QA System",
+    page_title="Hybrid-Retrieval RAG",
     layout="wide",
 )
 
