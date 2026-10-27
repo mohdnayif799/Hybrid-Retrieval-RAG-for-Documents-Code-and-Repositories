@@ -1,22 +1,26 @@
 name: CI
 
-# Every push to any branch, and every pull request. CI only: nothing here
-# deploys - the image is built and tested, then thrown away.
+# Every push to any branch, and every pull request. Only a push to main also
+# deploys (the deploy job at the end); everywhere else the image is built and
+# tested, then thrown away.
 on:
   push:
   pull_request:
 
 # Least privilege: the jobs only read the repository. No secrets are used -
 # the test suite needs no API key, and the Docker job only checks that the
-# image starts and that its models load offline.
+# image starts and that its models load offline. The deploy job alone also
+# gets id-token: write, to exchange GitHub's OIDC token for short-lived Google
+# credentials (Workload Identity Federation, no stored keys).
 permissions:
   contents: read
 
-# A newer push to the same branch cancels the run still going for the old
-# one, so a quick fix-up commit doesn't queue behind a stale build.
+# On a branch, a newer push cancels the run still going for the old one, so a
+# quick fix-up commit doesn't queue behind a stale build. On main nothing is
+# cancelled: cancelling there could stop a deploy halfway through.
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   test:
@@ -120,3 +124,197 @@ jobs:
       - name: Container logs
         if: always()
         run: docker logs rag-qa
+
+  # Continuous deployment to Cloud Run. Runs only for a push to main, and only
+  # after both jobs above pass. A pull request or a push to another branch
+  # never reaches it (the `if` below), and Google would refuse it anyway: the
+  # Workload Identity provider accepts only push events on refs/heads/main.
+  deploy:
+    name: Deploy to Cloud Run
+    needs: [test, docker]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    # Build about 2 min, push of a ~950 MB image a few minutes, rollout and
+    # live checks up to ~6 min. 45 leaves room for a slow registry.
+    timeout-minutes: 45
+    # id-token: write lets the job ask GitHub for an OIDC token, which
+    # google-github-actions/auth exchanges for short-lived credentials.
+    permissions:
+      contents: read
+      id-token: write
+    # Only one deployment runs at a time. An in-progress deployment is not
+    # cancelled, but GitHub may replace an older pending run with a newer one.
+    concurrency:
+      group: rag-production
+      cancel-in-progress: false
+    env:
+      REGION: asia-south1
+      SERVICE: rag-qa
+      # Tagged with the commit, so every image in the registry traces back to
+      # the exact source it was built from.
+      IMAGE: asia-south1-docker.pkg.dev/text-to-sql-demo/cloud-run-source-deploy/rag-qa:${{ github.sha }}
+      LIVE_URL: https://rag-qa-732702710111.asia-south1.run.app
+      # The port Cloud Run uses for this service.
+      PORT: 8080
+    steps:
+      # persist-credentials: false keeps the GitHub token out of .git/config,
+      # so nothing later in this job can push to the repository.
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      # The image is large (CPU-only PyTorch plus two baked-in models, about
+      # 2.7 GB unpacked), so free disk is logged before and after the build;
+      # a "no space left on device" failure is then easy to see coming.
+      - name: Disk space before the build
+        run: df -h /
+
+      # Built BEFORE authenticating: the credentials file the auth step writes
+      # into the workspace does not exist yet, so it cannot reach the build
+      # context (.dockerignore also excludes gha-creds-*.json, as a second guard).
+      - name: Build the image
+        run: docker build -t "$IMAGE" .
+
+      - name: Disk space and image size after the build
+        run: |
+          df -h /
+          docker image ls "${IMAGE%:*}"
+
+      # The same checks as the docker job, on the exact image that will be
+      # pushed, so a broken image never leaves this runner.
+      - name: Start the container
+        run: docker run -d --name rag-qa -e PORT="$PORT" -p "$PORT:$PORT" "$IMAGE"
+
+      - name: Wait for the health endpoint
+        run: |
+          for attempt in $(seq 1 90); do
+            if curl -fsS "http://localhost:$PORT/_stcore/health"; then
+              echo
+              echo "Healthy after ${attempt} attempt(s)."
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "The app did not answer /_stcore/health within 90 seconds."
+          exit 1
+
+      - name: Check the image
+        run: |
+          set -eu
+          test "$(docker exec rag-qa id -u)" = "10001"
+          docker exec rag-qa python -c "from src.vector_store import get_embeddings; assert len(get_embeddings().embed_query('ok')) == 384"
+          docker exec rag-qa python -c "from src.data_ingestion import get_ocr_reader; get_ocr_reader()"
+          docker exec rag-qa python -c "
+          from streamlit.testing.v1 import AppTest
+          at = AppTest.from_file('app.py', default_timeout=120).run()
+          assert not at.exception, at.exception
+          assert 'pallets/itsdangerous' in at.button(key='example_repo').label
+          print('app.py renders, example chip present')
+          "
+
+      - name: Container logs
+        if: always()
+        run: docker logs rag-qa
+
+      - name: Stop the container
+        run: docker rm -f rag-qa
+
+      # Keyless: GitHub's OIDC token is exchanged for credentials of the
+      # github-deployer-rag service account, which can only push images,
+      # update the rag-qa service and run it as rag-runtime. The provider path
+      # and the account email are identifiers, not secrets.
+      - name: Authenticate to Google Cloud
+        # Third-party actions are pinned to a full commit SHA (the version is
+        # in the comment): this job can mint deploy credentials, so a moved
+        # tag must not be able to change the code that runs here.
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+        with:
+          project_id: text-to-sql-demo
+          workload_identity_provider: projects/732702710111/locations/global/workloadIdentityPools/github-pool/providers/github-provider
+          service_account: github-deployer-rag@text-to-sql-demo.iam.gserviceaccount.com
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3.0.1
+
+      # The registry is asked which sha256 digest the pushed tag points to, and
+      # the deploy and the checks below use that immutable digest, not the tag,
+      # which could in principle be moved to another image.
+      - name: Push the image
+        run: |
+          gcloud auth configure-docker "${REGION}-docker.pkg.dev" --quiet
+          docker push "$IMAGE"
+          digest="$(gcloud artifacts docker images describe "$IMAGE" --format='value(image_summary.digest)')"
+          if [[ ! "$digest" =~ ^sha256:[0-9a-f]{64}$ ]]; then
+            echo "Unexpected digest for $IMAGE: '$digest'"
+            exit 1
+          fi
+          pushed="${IMAGE%:*}@${digest}"
+          echo "Pushed $IMAGE as $pushed"
+          echo "PUSHED_IMAGE=$pushed" >> "$GITHUB_ENV"
+
+      # Only the image changes. Every other setting (CPU, memory, concurrency,
+      # timeout, instance limits, port, session affinity, startup CPU boost,
+      # public access, runtime service account, the Secret Manager reference
+      # for GOOGLE_API_KEY) is kept from the current service.
+      # gcloud waits for the new revision and fails if it does not start.
+      # There is no automatic rollback: a failed deploy leaves the previous
+      # revision serving, and rolling back is a deliberate manual step.
+      - name: Deploy
+        run: gcloud run services update "$SERVICE" --region="$REGION" --image="$PUSHED_IMAGE"
+
+      # Fails the job unless the service now runs the pushed digest on a
+      # ready revision that receives 100% of traffic. A manual rollback pins
+      # traffic to an older revision; that is reported here, not overridden.
+      - name: Verify the deployed revision
+        run: |
+          json="$RUNNER_TEMP/service.json"
+          gcloud run services describe "$SERVICE" --region="$REGION" --format=json > "$json"
+          deployed="$(jq -r '.spec.template.spec.containers[0].image' "$json")"
+          ready="$(jq -r '.status.latestReadyRevisionName' "$json")"
+          created="$(jq -r '.status.latestCreatedRevisionName' "$json")"
+          echo "Deployed image:  $deployed"
+          echo "Latest created:  $created"
+          echo "Latest ready:    $ready"
+          echo "Traffic:"
+          jq -c '.status.traffic[]' "$json"
+
+          # Compare digests, not tag strings: Cloud Run may report an image
+          # by digest even when it was given a tag.
+          if [[ "$deployed" != *@sha256:* || "${deployed##*@}" != "${PUSHED_IMAGE##*@}" ]]; then
+            echo "The service image is not the pushed digest ${PUSHED_IMAGE##*@}."
+            exit 1
+          fi
+          if [ "$(jq -r '.metadata.generation' "$json")" != "$(jq -r '.status.observedGeneration' "$json")" ] \
+             || [ "$(jq -r '.status.conditions[] | select(.type == "Ready") | .status' "$json")" != "True" ] \
+             || [ "$ready" != "$created" ]; then
+            echo "The newest revision is not ready, or the service has not caught up with this deploy."
+            exit 1
+          fi
+          # Exactly one revision serves traffic: the newest one, at 100%,
+          # following the latest revision rather than pinned by name.
+          serving="$(jq -c '[.status.traffic[] | select((.percent // 0) > 0)]' "$json")"
+          if [ "$(jq 'length' <<< "$serving")" != "1" ] \
+             || [ "$(jq -r '.[0].percent' <<< "$serving")" != "100" ] \
+             || [ "$(jq -r '.[0].revisionName' <<< "$serving")" != "$ready" ] \
+             || [ "$(jq -r '.[0].latestRevision // false' <<< "$serving")" != "true" ]; then
+            echo "Traffic is not 100% on the latest revision $ready (it may be pinned to an older revision)."
+            echo "To send traffic to the latest revision again: gcloud run services update-traffic $SERVICE --region=$REGION --to-latest"
+            exit 1
+          fi
+          echo "Revision $ready runs ${PUSHED_IMAGE##*@} and serves 100% of traffic."
+
+      # A server-readiness check through the public URL, with time for a cold
+      # start (min instances is 0). It does not ask a question; that is
+      # checked by hand.
+      - name: Check the live URL
+        run: |
+          for attempt in $(seq 1 30); do
+            if curl -fsS --max-time 10 "$LIVE_URL/_stcore/health"; then
+              echo
+              echo "Live after ${attempt} attempt(s)."
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "$LIVE_URL/_stcore/health did not return 200 within about 5 minutes."
+          exit 1
