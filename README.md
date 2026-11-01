@@ -86,7 +86,7 @@ The production demo is containerized with Docker and deployed to **Google Cloud 
 - **Max instances: 1** for cost control.
 - **Concurrency: 10**.
 - **Session affinity enabled** for the Streamlit app.
-- GitHub Actions currently provides **CI only**; deployment is still manual.
+- **Continuous deployment:** on every push to `main`, after the lint/test and Docker smoke-test jobs pass, GitHub Actions builds and checks the image, pushes it to Artifact Registry and deploys it to Cloud Run by digest, then verifies the new revision and the live health endpoint. It authenticates with Workload Identity Federation (no stored keys) as a separate deployer service account, `github-deployer-rag`. Pull requests and other branches run CI only.
 
 
 ## What the system does
@@ -265,27 +265,35 @@ Blue boxes are code, orange boxes are model calls.
 
 ## Testing
 
-The suite runs without a Streamlit runtime, without ChromaDB, without the embedding model and without an API key. The ranking, ingestion, chunking and citation logic is deliberately kept in modules that import none of those, so the tests are fast and cost no API quota.
+No test needs an API key or downloads a model, so the suite is fast and costs no API quota. The ranking, ingestion, chunking and citation logic is deliberately kept in modules that import neither Streamlit, ChromaDB nor the embedding model. The files that exercise the Streamlit UI, real ChromaDB store eviction and the lazy OCR import need the full requirements installed and skip themselves without them; CI installs everything, so nothing is skipped there.
 
 ```bash
 python -m pytest tests/ -q
-# 240 passed, 58 subtests
+# 306 passed, 58 subtests passed
 ```
 
-| Test file | Test functions | Covers |
-|---|---|---|
-| `test_hybrid_retrieval.py` | 48 | Tokenization including camelCase and PascalCase, BM25 scoring and candidacy, RRF fusion and dedup, retriever fallback and determinism |
-| `test_repo_ingestion.py` | 22 | URL parsing and rejection, path traversal, symlink entries, archive filtering, size/count/bomb limits, repository metadata |
-| `test_citations.py` | 25 | Location formatting per source type, path-vs-basename grouping, Markdown-safe rendering, location ordering |
-| `test_chunking.py` | 13 | Language dispatch, line-number accuracy, and a regression test asserting document chunking is byte-identical to the pre-change implementation |
-| `test_repo_pipeline.py` | 11 | End-to-end archive → documents → chunks → hybrid retrieval → citations, plus Chroma metadata-type compatibility |
-| `test_store_paths.py` | 8 | Store-directory namespacing and cleanup isolation |
-| `test_casual_detection.py` | 11 (+58 subtests) | Casual-message classification and, critically, that compound messages are not misrouted |
-| `test_benchmark_metrics.py` | 35 | `benchmark.metrics` — Hit@K, MRR@K, Recall@K — against synthetic fixtures |
-| `test_benchmark_specs.py` | 26 | Benchmark ground-truth and specification handling introduced for the range-level document scoring in evaluation v2 |
-| `test_benchmark_sweep.py` | 16 | Configuration-sweep harness wiring for the tested-but-not-shipped configurations in [Evaluation](#evaluation) |
+| Test file | Tests run | Test functions | Covers |
+|---|---|---|---|
+| `test_hybrid_retrieval.py` | 48 | 48 | Tokenization including camelCase and PascalCase, BM25 scoring and candidacy, RRF fusion and dedup, retriever fallback and determinism |
+| `test_repo_ingestion.py` | 47 | 22 | URL parsing and rejection, path traversal, symlink entries, archive filtering, size/count/bomb limits, repository metadata |
+| `test_citations.py` | 25 | 25 | Location formatting per source type, path-vs-basename grouping, Markdown-safe rendering, location ordering |
+| `test_chunking.py` | 13 | 13 | Language dispatch, line-number accuracy, and a regression test asserting document chunking is byte-identical to the pre-change implementation |
+| `test_repo_pipeline.py` | 11 | 11 | End-to-end archive → documents → chunks → hybrid retrieval → citations, plus Chroma metadata-type compatibility |
+| `test_store_paths.py` | 8 | 8 | Store-directory namespacing and cleanup isolation |
+| `test_casual_detection.py` | 11 (+58 subtests) | 11 | Casual-message classification and, critically, that compound messages are not misrouted |
+| `test_benchmark_metrics.py` | 37 | 35 | `benchmark.metrics` — Hit@K, MRR@K, Recall@K — against synthetic fixtures |
+| `test_benchmark_specs.py` | 28 | 26 | Benchmark ground-truth and specification handling introduced for the range-level document scoring in evaluation v2 |
+| `test_benchmark_sweep.py` | 22 | 16 | Configuration-sweep harness wiring for the tested-but-not-shipped configurations in [Evaluation](#evaluation) |
+| `test_store_registry.py` | 14 | 11 | Chat-store eviction policy: idle timeout, count and size budgets, least-recently-used order, never evicting the store in use, settings from environment variables |
+| `test_app_ui.py` | 13 | 13 | Headless Streamlit `AppTest` runs of `app.py`: demo-key counter and limit, quota and failure messages, model choice, the example chip, the evicted-store notice |
+| `test_example_repo.py` | 12 | 9 | Bundled example tarball checksum and offline loading, local archive ingestion, repository limits from environment variables |
+| `test_query_log.py` | 7 | 7 | Per-query log line, Gemini quota-error detection, key redaction, Gemini call counting through the RAG chain |
+| `test_demo_key.py` | 3 | 2 | Shared demo key detection |
+| `test_store_dir_env.py` | 3 | 3 | `RAG_STORE_DIR` placement of per-chat stores |
+| `test_store_eviction.py` | 3 | 3 | Eviction against real ChromaDB: stops Chroma, closes its files, deletes the store, drops stale BM25 entries |
+| `test_lazy_ocr_import.py` | 1 | 1 | EasyOCR is not imported until a page actually needs OCR |
 
-Test-function counts above were counted directly from the current source (`def test_*`, including class-based methods). Running the full suite reports more passes than that sum — `test_repo_ingestion.py` and three of the benchmark files use `@pytest.mark.parametrize` to run one function over several cases, and `test_casual_detection.py`'s `subTest` blocks report separately — which is why `pytest -q` totals 240 passed with 58 subtests rather than 215.
+"Tests run" comes from an actual `python -m pytest tests/ -q` run; "Test functions" is counted from the current source (`def test_*`, including class-based methods). The run reports more passes than functions because `test_repo_ingestion.py`, three of the benchmark files, `test_store_registry.py`, `test_example_repo.py` and `test_demo_key.py` use `@pytest.mark.parametrize` to run one function over several cases, and `test_casual_detection.py`'s `subTest` blocks report separately. That is why `pytest -q` totals 306 passed with 58 subtests from 264 test functions.
 
 None of the benchmark tests assert on a measured, corpus-dependent number: they exercise the scoring and configuration code against fixed synthetic fixtures, since the actual benchmark numbers in [Evaluation](#evaluation) are measurements, not invariants, and move if the corpus does.
 
@@ -358,7 +366,7 @@ Hybrid-Retrieval-RAG-for-Documents-Code-and-Repositories/
 │   ├── blind_audit_log.md        # Ground-truth quality audit, logged before outcomes were known
 │   └── corpus_manifest.json      # Pinned corpus: repo commit SHA, document hashes, chunk counts
 │
-├── tests/                        # 240 passed, 58 subtests — no API key or ML stack required
+├── tests/                        # 306 passed, 58 subtests — no API key required
 │
 └── chroma_db_*/                  # Per-chat vector stores (auto-created, gitignored)
     chroma_eval_*/                # Evaluation stores (separate namespace)
