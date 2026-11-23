@@ -269,7 +269,7 @@ No test needs an API key or downloads a model, so the suite is fast and costs no
 
 ```bash
 python -m pytest tests/ -q
-# 341 passed, 1 skipped, 58 subtests passed
+# 350 passed, 58 subtests passed
 ```
 
 | Test file | Tests run | Test functions | Covers |
@@ -284,7 +284,7 @@ python -m pytest tests/ -q
 | `test_benchmark_metrics.py` | 37 | 35 | `benchmark.metrics` — Hit@K, MRR@K, Recall@K — against synthetic fixtures |
 | `test_benchmark_specs.py` | 28 | 26 | Benchmark ground-truth and specification handling introduced for the range-level document scoring in evaluation v2 |
 | `test_benchmark_sweep.py` | 22 | 16 | Configuration-sweep harness wiring for the tested-but-not-shipped configurations in [Evaluation](#evaluation) |
-| `test_benchmark_v3.py` | 35 (+1 skipped) | 36 | v3 benchmark: span gold resolution and evidence checks, near-duplicate rules, rank metrics, paired bootstrap, query-file structure, the harness end to end on the production retrieval path (fake embedder), the refusal to score an unfrozen set, and freshness of committed v3 results (skipped until results exist) |
+| `test_benchmark_v3.py` | 44 | 44 | v3 benchmark: span gold resolution and evidence checks, near-duplicate rules, rank and coverage metrics, paired bootstrap, the stratified split and freeze verification, the harness end to end on the production retrieval path (fake embedder), the refusal to score an unfrozen set, and that the committed frozen files and baseline results still match the code |
 | `test_store_registry.py` | 14 | 11 | Chat-store eviction policy: idle timeout, count and size budgets, least-recently-used order, never evicting the store in use, settings from environment variables |
 | `test_app_ui.py` | 13 | 13 | Headless Streamlit `AppTest` runs of `app.py`: demo-key counter and limit, quota and failure messages, model choice, the example chip, the evicted-store notice |
 | `test_example_repo.py` | 12 | 9 | Bundled example tarball checksum and offline loading, local archive ingestion, repository limits from environment variables |
@@ -294,7 +294,7 @@ python -m pytest tests/ -q
 | `test_store_eviction.py` | 3 | 3 | Eviction against real ChromaDB: stops Chroma, closes its files, deletes the store, drops stale BM25 entries |
 | `test_lazy_ocr_import.py` | 1 | 1 | EasyOCR is not imported until a page actually needs OCR |
 
-"Tests run" comes from an actual `python -m pytest tests/ -q` run; "Test functions" is counted from the current source (`def test_*`, including class-based methods). The run reports more passes than functions because `test_repo_ingestion.py`, three of the benchmark files, `test_store_registry.py`, `test_example_repo.py` and `test_demo_key.py` use `@pytest.mark.parametrize` to run one function over several cases, and `test_casual_detection.py`'s `subTest` blocks report separately. That is why `pytest -q` totals 341 passed (1 skipped) with 58 subtests from 300 test functions.
+"Tests run" comes from an actual `python -m pytest tests/ -q` run; "Test functions" is counted from the current source (`def test_*`, including class-based methods). The run reports more passes than functions because `test_repo_ingestion.py`, three of the benchmark files, `test_store_registry.py`, `test_example_repo.py` and `test_demo_key.py` use `@pytest.mark.parametrize` to run one function over several cases, and `test_casual_detection.py`'s `subTest` blocks report separately. That is why `pytest -q` totals 350 passed with 58 subtests from 308 test functions.
 
 None of the benchmark tests assert on a measured, corpus-dependent number: they exercise the scoring and configuration code against fixed synthetic fixtures, since the actual benchmark numbers in [Evaluation](#evaluation) are measurements, not invariants, and move if the corpus does.
 
@@ -362,13 +362,13 @@ Hybrid-Retrieval-RAG-for-Documents-Code-and-Repositories/
 │   └── rag_chain.py             # Routing, query rewriting, grounded generation
 │
 ├── benchmark/                    # Controlled retrieval evaluation (see Evaluation)
-│   ├── v3/                       # Production-path evaluation, span-level gold (query set under review)
+│   ├── v3/                       # Production-path evaluation, span-level gold, frozen query set + baseline
 │   ├── RESULTS_V2.md             # v2 results: 93 queries, 1,222 chunks (predates the README pin)
 │   ├── TUNING.md                 # Pre-registered configuration sweep
 │   ├── blind_audit_log.md        # Ground-truth quality audit, logged before outcomes were known
 │   └── corpus_manifest.json      # Pinned corpus: repo commit SHA, document hashes, chunk counts
 │
-├── tests/                        # 341 passed, 58 subtests — no API key required
+├── tests/                        # 350 passed, 58 subtests — no API key required
 │
 └── chroma_db_*/                  # Per-chat vector stores (auto-created, gitignored)
     chroma_eval_*/                # Evaluation stores (separate namespace)
@@ -444,8 +444,10 @@ Documents and repositories can be combined in one chat.
 > contains. Measured on the shipped code, the pin fires on 41 of 83 answerable
 > queries and hybrid Hit@5 is 71/83, not the 72/83 reported below. A v3
 > evaluation that scores the production retrieval path itself, against
-> span-level ground truth, is being set up in [`benchmark/v3/`](benchmark/v3/README.md);
-> its query set is under review and not yet frozen or scored.
+> span-level ground truth, is in [`benchmark/v3/`](benchmark/v3/README.md): 162 answerable
+> and 19 unanswerable queries, frozen into a 70/30 dev/holdout split before scoring.
+> Its baseline ([`benchmark/v3/RESULTS.md`](benchmark/v3/RESULTS.md)) supersedes the v2
+> figures below as the reference for retrieval changes.
 
 The retrieval architecture above states what dense search and BM25 are each good at; this section measures it, on a real corpus, with a labelled query set and standard statistical tests — rather than leaving it as a design argument.
 
@@ -550,12 +552,12 @@ It does not show that hybrid retrieval beats dense-only on code (p = 1.0), that 
 
 ### Reproducing
 
-v3 (production retrieval path, span-level gold; scoring requires the frozen query set):
+v3 (production retrieval path, span-level gold, frozen query set):
 
 ```bash
-python -m benchmark.v3.dataset
-python -m benchmark.v3.review
+python -m benchmark.v3.freeze --verify
 python -m benchmark.v3.evaluate --fidelity
+python -m benchmark.v3.report
 ```
 
 v2, as reported in this section:
