@@ -1,6 +1,21 @@
 #!/usr/bin/env python3
 """
-Retrieval-only evaluation harness. API-FREE by construction.
+Retrieval-only evaluation harness, v1/v2. API-FREE by construction.
+
+LEGACY. Superseded by ``python -m benchmark.v3.evaluate`` (benchmark/v3/README.md),
+which scores the production retrieval path against span-level gold. Kept so the
+v1/v2 numbers stay reproducible by the code that produced them. Two facts to
+read those numbers with:
+
+* benchmark/results.json PREDATES the README pin
+  (HybridRetriever._surface_readme_if_missing). It was produced by a
+  src/hybrid_retrieval.py whose hash (RESULTS_V2.md: e889e6bb...) matches no
+  committed version, and none of its 83 hybrid rankings carries the pin's
+  "readme_boost" provenance. The pin is in every committed version, so this
+  harness now measures a different hybrid than the stored results describe.
+* "dense_only" is NOT a ranking produced by MMR. LangChain's
+  Chroma.max_marginal_relevance_search_by_vector keeps the MMR *selection* but
+  returns it in plain similarity order (see build_arms below).
 
 Kept separate from any answer-quality evaluation on purpose: this measures
 retrieval, which happens entirely before generation, so it needs no model
@@ -63,17 +78,25 @@ def build_arms(chroma_dir: str):
     Construct all three arms from ONE shared MMR retriever.
 
     The dense-only arm is not a re-parameterised second retriever; it is the
-    same object the hybrid consumes, truncated. MMR selects greedily from a
-    fetch_k pool, so the first FINAL_K of a k=VECTOR_CANDIDATE_K selection are
-    exactly the k=FINAL_K selection *provided fetch_k is unchanged*. Sharing
-    the object makes fetch_k and lambda_mult identical by construction rather
-    than by two call sites that agree today and drift tomorrow.
+    same object the hybrid consumes, truncated to FINAL_K. Sharing the object
+    makes fetch_k and lambda_mult identical by construction.
+
+    CORRECTION (2026-11): an earlier version of this docstring claimed that the
+    first FINAL_K of a k=VECTOR_CANDIDATE_K selection equal the k=FINAL_K
+    selection. That is false for the retriever actually used.
+    langchain_community's Chroma.max_marginal_relevance_search_by_vector
+    returns ``[r for i, r in enumerate(candidates) if i in mmr_selected]``:
+    MMR decides WHICH k of the fetch_k candidates survive, but they come back
+    in similarity order, not in MMR selection order. So the dense-only arm is
+    "the 5 most similar of the 10 chunks MMR kept from the top 30", which is
+    neither an MMR ranking nor what MMR with k=5 would select.
     """
     from src.vector_store import count_chunks, export_chunks, load_vector_store
 
     store = load_vector_store(chroma_dir)
 
-    # The single dense retriever. Identical to build_hybrid_retriever's.
+    # The single dense retriever. Same settings as build_hybrid_retriever's,
+    # but this harness assembles the hybrid itself rather than calling it.
     vector_retriever = store.as_retriever(
         search_type="mmr",
         search_kwargs={
@@ -93,7 +116,8 @@ def build_arms(chroma_dir: str):
     )
 
     def dense_only(query: str):
-        # Truncation of the shared fetch_k=30 selection, not a second call.
+        # The first FINAL_K, in similarity order, of the 10 chunks MMR kept
+        # from the fetch_k=30 pool (see the docstring above). Not a second call.
         return vector_retriever.invoke(query)[:FINAL_K]
 
     def bm25_only(query: str):

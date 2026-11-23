@@ -1,0 +1,13 @@
+{
+ "frozen_at": "2026-11-23T21:51:00+00:00",
+ "files": {
+  "benchmark/v3/queries.yaml": "6c3712ab52b9d3ca029be726e493166e376dabdfa0fef94bea627a8a57259d54",
+  "benchmark/v3/split.json": "19f2ab87c1ed66fce580d71bf1098c6d10f828528ad46f4cc919c37d4e4dceaf",
+  "benchmark/v3/gold.py": "6aa0c226c819b79d3fd65b4be74ad4b53ec73b65b98918a52dd3a31da6bec734"
+ },
+ "manifest_sha256": "3f23a54f7ef6d4e38d95e0e5f20ec327d095dd86f91403d388aee711372cdfa8",
+ "n_queries": 181,
+ "n_dev": 127,
+ "n_holdout": 54,
+ "history": []
+}

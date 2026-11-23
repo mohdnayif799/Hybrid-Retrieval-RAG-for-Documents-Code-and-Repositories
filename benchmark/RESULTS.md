@@ -1,5 +1,11 @@
 # Retrieval Evaluation — Results
 
+> **Note (added 2026-11):** like v2, these hybrid figures were measured before
+> the README pin (`HybridRetriever._surface_readme_if_missing`) was in the
+> code; no stored ranking carries its `readme_boost` provenance. See the notice
+> at the top of [RESULTS_V2.md](RESULTS_V2.md) and the v3 evaluation in
+> [`benchmark/v3/`](v3/README.md).
+
 > **SUPERSEDED BY [RESULTS_V2.md](RESULTS_V2.md).** This document records the
 > v1 measurement (n=56, 1123-chunk corpus) and remains accurate for that
 > corpus and query set. v2 expands to 93 queries and 1222 chunks, and
