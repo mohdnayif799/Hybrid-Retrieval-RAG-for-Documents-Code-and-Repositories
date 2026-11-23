@@ -1,5 +1,28 @@
 # Retrieval Evaluation v2 — Expanded Corpus and Query Set
 
+> **READ FIRST (added 2026-11): these numbers predate the README pin and are
+> not the shipped retriever.**
+>
+> * `results.json` was produced by a `src/hybrid_retrieval.py` with SHA-256
+>   prefix `e889e6bb…` (recorded below). That hash matches no committed version
+>   of the file. Every committed version contains the README pin
+>   (`HybridRetriever._surface_readme_if_missing`), and **none** of the 83
+>   hybrid rankings in `results.json`, `sweep_results.json` or
+>   `sweep_v2_results.json` carries its `readme_boost` provenance.
+> * Re-running the committed code on the same corpus: with the pin removed, the
+>   current fusion reproduces the stored hybrid top-5 on 78–79 of 83 queries (the
+>   rest is HNSW build-to-build variation). With the pin, as shipped, it fires
+>   on 41 of 83 answerable and 3 of 10 unanswerable queries, replaces a result
+>   that matched the v2 gold 10 times, is never itself gold, and hybrid Hit@5
+>   is **71/83, not 72/83**.
+> * `dense_only` is not an MMR ranking. LangChain's Chroma MMR keeps the MMR
+>   *selection* (10 of the top 30) but returns it in similarity order; see the
+>   corrected docstring in `evaluate_retrieval.py`.
+>
+> The v3 evaluation (`benchmark/v3/`) scores the production path itself, with
+> the pin, against span-level gold. Treat the hybrid figures below as a
+> measurement of the pre-pin fusion only.
+
 Supersedes the measurements in [RESULTS.md](RESULTS.md) (v1, n=56), which is
 preserved verbatim as [RESULTS_v1_n56.md](RESULTS_v1_n56.md) with its raw data
 in `results_v1_n56.json`. Configuration work from v1 is in

@@ -1,5 +1,11 @@
 # Configuration Sweep — Testing the Diagnosed RRF Mechanism
 
+> **Note (added 2026-11):** like v2, these hybrid figures were measured before
+> the README pin (`HybridRetriever._surface_readme_if_missing`) was in the
+> code; no stored ranking carries its `readme_boost` provenance. See the notice
+> at the top of [RESULTS_V2.md](RESULTS_V2.md) and the v3 evaluation in
+> [`benchmark/v3/`](v3/README.md).
+
 Supplement to [RESULTS.md](RESULTS.md). Extends §3.5 (harm analysis) and §3.6
 (the interleaving mechanism).
 

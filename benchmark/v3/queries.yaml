@@ -1,0 +1,2976 @@
+# Retrieval benchmark v3 - span-level ground truth.
+#
+# Corpus: unchanged from v2 (psf/requests @ dae7ef63, 95 files, 1111 chunks;
+# the PDF, .txt and .docx documents, 111 chunks; 1222 chunks in total).
+#
+# Fields
+#   qtype   exact_identifier | keyword | paraphrase | multi_hop | misspelled |
+#           list_all | repo_identity | unanswerable   (stratification + reporting)
+#   domain  code (anything from the repository) | docs (uploaded documents)
+#   origin  v2 (carried over, wording unchanged) | v3 (new in this set)
+#   gold    span-level ground truth - see benchmark/v3/gold.py for the format.
+#           Anchors are verbatim text located in the real parent file at load
+#           time; `evidence` (the answer itself) must occur inside the span.
+#   relevant  v2's file-level locators, kept for the secondary file-level
+#           metric on code queries.
+#
+# Status: DRAFT for review. Nothing here is frozen until the dev/holdout split
+# and its SHA-256 manifest are written (benchmark/v3/split.json).
+
+version: 3
+queries:
+- id: eid-01
+  category: exact_identifier
+  qtype: exact_identifier
+  domain: code
+  origin: v2
+  question: CaseInsensitiveDict
+  gold:
+  - file: src/requests/structures.py
+    anchor: 'class CaseInsensitiveDict(MutableMapping[str, _VT], Generic[_VT]):'
+    evidence: class CaseInsensitiveDict
+  relevant:
+  - src/requests/structures.py
+  notes: The class is defined in structures.py; other files import it but do not define it.
+- id: eid-02
+  category: exact_identifier
+  qtype: exact_identifier
+  domain: code
+  origin: v2
+  question: resolve_redirects
+  gold:
+  - file: src/requests/sessions.py
+    anchor: '    def resolve_redirects('
+    evidence: resolve_redirects
+  relevant:
+  - src/requests/sessions.py
+  notes: SessionRedirectMixin.resolve_redirects is the generator that walks the redirect chain.
+- id: eid-03
+  category: exact_identifier
+  qtype: exact_identifier
+  domain: code
+  origin: v2
+  question: extract_zipped_paths
+  gold:
+  - file: src/requests/utils.py
+    anchor: 'def extract_zipped_paths(path: str) -> str:'
+    evidence: extract_zipped_paths
+  relevant:
+  - src/requests/utils.py
+  notes: Utility that materialises a path living inside a zip archive.
+- id: eid-04
+  category: exact_identifier
+  qtype: exact_identifier
+  domain: code
+  origin: v2
+  question: TooManyRedirects
+  gold:
+  - file: src/requests/exceptions.py
+    anchor: 'class TooManyRedirects(RequestException):'
+    evidence: TooManyRedirects
+  relevant:
+  - src/requests/exceptions.py
+  notes: Exception class definition. sessions.py raises it but exceptions.py defines it.
+- id: eid-05
+  category: exact_identifier
+  qtype: exact_identifier
+  domain: code
+  origin: v2
+  question: HTTPDigestAuth
+  gold:
+  - file: src/requests/auth.py
+    anchor: 'class HTTPDigestAuth(AuthBase):'
+    evidence: HTTPDigestAuth
+  relevant:
+  - src/requests/auth.py
+  notes: Digest authentication handler.
+- id: eid-06
+  category: exact_identifier
+  qtype: exact_identifier
+  domain: code
+  origin: v2
+  question: cookiejar_from_dict
+  gold:
+  - file: src/requests/cookies.py
+    anchor: ':param overwrite: (optional) If False, will not replace cookies'
+    evidence: overwrite
+  relevant:
+  - src/requests/cookies.py
+  notes: Builds a RequestsCookieJar from a plain dict.
+- id: eid-07
+  category: exact_identifier
+  qtype: exact_identifier
+  domain: code
+  origin: v2
+  question: init_poolmanager
+  gold:
+  - file: src/requests/adapters.py
+    anchor: '    def init_poolmanager('
+    evidence: init_poolmanager
+  relevant:
+  - src/requests/adapters.py
+  notes: HTTPAdapter hook that constructs the urllib3 PoolManager.
+- id: eid-08
+  category: exact_identifier
+  qtype: exact_identifier
+  domain: code
+  origin: v2
+  question: get_encoding_from_headers
+  gold:
+  - file: src/requests/utils.py
+    anchor: 'def get_encoding_from_headers(headers: CaseInsensitiveDict[str]) -> str | None:'
+    evidence: get_encoding_from_headers
+  relevant:
+  - src/requests/utils.py
+  notes: Derives a charset from the Content-Type header.
+- id: par-01
+  category: paraphrase
+  qtype: paraphrase
+  domain: code
+  origin: v2
+  question: Can I reuse one network connection across many calls to the same website instead of opening a new one every time?
+  gold:
+  - file: docs/user/advanced.rst
+    anchor: connection will be reused, which can result in a significant performance
+    evidence: connection will be reused
+    part: reuse
+  - file: docs/user/advanced.rst
+    anchor: keep-alive is 100% automatic within a session!
+    evidence: 100% automatic
+    part: reuse
+  - file: src/requests/sessions.py
+    anchor: Provides cookie persistence, connection-pooling, and configuration.
+    evidence: connection-pooling
+    part: reuse
+  relevant:
+  - src/requests/sessions.py
+  - src/requests/adapters.py
+  - docs/user/advanced.rst
+  notes: Connection reuse is provided by Session plus the adapter's urllib3 pool. Question avoids "session", "adapter" and
+    "pool".
+- id: par-02
+  category: paraphrase
+  qtype: paraphrase
+  domain: code
+  origin: v2
+  question: How do I read a very large reply gradually rather than pulling all of it into memory at once?
+  gold:
+  - file: src/requests/models.py
+    anchor: request, this avoids reading the content at once into memory for
+    evidence: avoids reading the content at once into memory
+    part: stream
+  - file: docs/user/quickstart.rst
+    anchor: Using ``Response.iter_content`` will handle a lot of what you would otherwise
+    until: download, the above is the preferred and recommended way to retrieve the
+    evidence: preferred and recommended way
+    part: stream
+  - file: docs/user/advanced.rst
+    anchor: set ``stream`` to ``True`` and iterate over the response with
+    evidence: stream
+    part: stream
+  - file: src/requests/models.py
+    anchor: stream=True is set on the request, this avoids reading the
+    evidence: avoids reading the
+    part: stream
+  relevant:
+  - src/requests/models.py
+  - docs/user/advanced.rst
+  - docs/user/quickstart.rst
+  notes: iter_content plus the streaming flag. Question avoids "stream", "chunk" and "iter_content".
+- id: par-03
+  category: paraphrase
+  qtype: paraphrase
+  domain: code
+  origin: v2
+  question: What stops my program hanging forever when a server never replies?
+  gold:
+  - file: docs/user/quickstart.rst
+    anchor: seconds with the ``timeout`` parameter. Nearly all production code should use
+    until: 'to hang indefinitely::'
+    evidence: hang indefinitely
+    part: timeout
+  - file: docs/user/advanced.rst
+    anchor: server is not responding in a timely manner. By default, requests do not time
+    evidence: do not time
+    part: timeout
+  - file: src/requests/adapters.py
+    anchor: '        :param timeout: (optional) How long to wait for the server to send'
+    occurrence: 1
+    evidence: How long to wait
+    part: timeout
+  - file: src/requests/adapters.py
+    anchor: '        :param timeout: (optional) How long to wait for the server to send'
+    occurrence: 2
+    evidence: How long to wait
+    part: timeout
+  relevant:
+  - src/requests/adapters.py
+  - docs/user/quickstart.rst
+  - docs/user/advanced.rst
+  notes: The timeout argument. Question avoids the word "timeout".
+- id: par-04
+  category: paraphrase
+  qtype: paraphrase
+  domain: code
+  origin: v2
+  question: After being bounced through several forwarding hops, can I still inspect the earlier replies?
+  gold:
+  - file: src/requests/models.py
+    anchor: '#: the history of the Request. Any redirect responses will end'
+    evidence: history
+    part: history
+  - file: docs/user/quickstart.rst
+    anchor: We can use the ``history`` property of the Response object to track redirection.
+    evidence: '``history`` property'
+    part: history
+  relevant:
+  - src/requests/models.py
+  - src/requests/sessions.py
+  - docs/user/quickstart.rst
+  notes: Response.history. Question avoids "redirect" and "history".
+- id: par-05
+  category: paraphrase
+  qtype: paraphrase
+  domain: code
+  origin: v2
+  question: How do I attach an image alongside ordinary form fields in one submission?
+  gold:
+  - file: docs/user/quickstart.rst
+    anchor: 'Requests makes it simple to upload Multipart-encoded files::'
+    evidence: Multipart-encoded files
+    part: multipart
+  - file: docs/user/advanced.rst
+    anchor: You can send multiple files in one request. For example, suppose you want to
+    evidence: multiple files in one request
+    part: multipart
+  - file: src/requests/models.py
+    anchor: '"""Build the body for a multipart/form-data request.'
+    evidence: multipart/form-data
+    part: multipart
+  relevant:
+  - src/requests/models.py
+  - docs/user/quickstart.rst
+  - docs/user/advanced.rst
+  notes: Multipart body preparation. Question avoids "file", "upload" and "multipart".
+- id: par-06
+  category: paraphrase
+  qtype: paraphrase
+  domain: code
+  origin: v2
+  question: If a site sends me to a different host, does the library still hand over my username and password?
+  gold:
+  - file: src/requests/sessions.py
+    anchor: '# If we get redirected to a new host, we should strip out any'
+    evidence: strip out any
+    part: strip
+  - file: src/requests/sessions.py
+    anchor: 'if old_parsed.hostname != new_parsed.hostname:'
+    evidence: hostname != new_parsed.hostname
+    part: strip
+  relevant:
+  - src/requests/sessions.py
+  notes: rebuild_auth strips credentials on cross-host hops. Question avoids "auth" and "redirect".
+- id: par-07
+  category: paraphrase
+  qtype: paraphrase
+  domain: code
+  origin: v2
+  question: How can I let the library talk to a server whose certificate my machine does not trust?
+  gold:
+  - file: docs/user/advanced.rst
+    anchor: 'You can pass ``verify`` the path to a CA_BUNDLE file or directory with certificates of trusted CAs::'
+    evidence: CA_BUNDLE
+    part: verify
+  - file: docs/user/advanced.rst
+    anchor: 'Requests can also ignore verifying the SSL certificate if you set ``verify`` to False::'
+    evidence: '``verify`` to False'
+    part: verify
+  - file: src/requests/adapters.py
+    anchor: conn.cert_reqs = "CERT_NONE"
+    evidence: CERT_NONE
+    part: verify
+  relevant:
+  - src/requests/adapters.py
+  - docs/user/advanced.rst
+  - src/requests/sessions.py
+  notes: The verify parameter and CA bundle handling.
+- id: par-08
+  category: paraphrase
+  qtype: paraphrase
+  domain: code
+  origin: v2
+  question: How do I stay logged in across a sequence of calls without re-sending my credentials each time?
+  gold:
+  - file: docs/user/advanced.rst
+    anchor: '    s.auth = (''user'', ''pass'')'
+    occurrence: 1
+    evidence: s.auth
+    part: persist
+  - file: docs/user/advanced.rst
+    anchor: requests. It also persists cookies across all requests made from the
+    evidence: persists cookies
+    part: persist
+  - file: src/requests/sessions.py
+    anchor: '#: Default Authentication tuple or object to attach to'
+    evidence: Default Authentication
+    part: persist
+  relevant:
+  - src/requests/sessions.py
+  - src/requests/cookies.py
+  - docs/user/advanced.rst
+  notes: Cookie persistence on the Session. Question avoids "cookie" and "session".
+- id: con-01
+  category: conceptual
+  qtype: paraphrase
+  domain: code
+  origin: v2
+  question: How does the library decide whether a particular address should go through a proxy?
+  gold:
+  - file: src/requests/utils.py
+    anchor: '    # First check whether no_proxy is defined. If it is, check that the URL'
+    evidence: no_proxy
+    part: bypass
+  - file: src/requests/utils.py
+    anchor: 'if trust_env and not should_bypass_proxies(url, no_proxy=no_proxy):'
+    evidence: should_bypass_proxies
+    part: bypass
+  - file: src/requests/utils.py
+    anchor: '    proxy_keys = ['
+    until: '        "all",'
+    evidence: all://
+    part: select
+  - file: docs/user/advanced.rst
+    anchor: environment variables ``http_proxy``, ``https_proxy``, ``no_proxy``,
+    evidence: no_proxy
+    part:
+    - bypass
+    - select
+  relevant:
+  - src/requests/utils.py
+  - src/requests/sessions.py
+  - src/requests/adapters.py
+  notes: Environment lookup, no_proxy bypass rules, then adapter selection.
+- id: con-02
+  category: conceptual
+  qtype: paraphrase
+  domain: code
+  origin: v2
+  question: How is a user's request turned into the exact bytes that go out on the wire?
+  gold:
+  - file: src/requests/models.py
+    anchor: '        self.prepare_method(method)'
+    until: '        self.prepare_hooks(hooks)'
+    evidence: prepare_body
+    part: prepare
+  relevant:
+  - src/requests/models.py
+  notes: PreparedRequest.prepare and the prepare_* methods.
+- id: con-03
+  category: conceptual
+  qtype: paraphrase
+  domain: code
+  origin: v2
+  question: How does the retry behaviour work when a connection attempt fails?
+  gold:
+  - file: src/requests/adapters.py
+    anchor: ':param max_retries: The maximum number of retries each connection'
+    evidence: max_retries
+    part: retries
+  - file: docs/user/advanced.rst
+    anchor: By default, Requests does not retry failed connections. However, it is possible
+    evidence: does not retry
+    part: retries
+  - file: src/requests/adapters.py
+    anchor: self.max_retries = Retry(0, read=False)
+    evidence: Retry(0
+    part: retries
+  relevant:
+  - src/requests/adapters.py
+  notes: max_retries passed through to urllib3's Retry.
+- id: con-04
+  category: conceptual
+  qtype: paraphrase
+  domain: code
+  origin: v2
+  question: How does the library work out which character set a reply is written in?
+  gold:
+  - file: src/requests/utils.py
+    anchor: '    if "charset" in params:'
+    evidence: charset
+    part: header
+  - file: src/requests/models.py
+    anchor: '        # Fallback to auto-detected encoding.'
+    evidence: auto-detected
+    part: fallback
+  - file: docs/user/advanced.rst
+    anchor: <requests.Response.text>` attribute. Requests will first check for an
+    until: guess the encoding.
+    evidence: check for an
+    part:
+    - header
+    - fallback
+  relevant:
+  - src/requests/models.py
+  - src/requests/utils.py
+  notes: Content-Type header first, then charset detection as a fallback.
+- id: con-05
+  category: conceptual
+  qtype: paraphrase
+  domain: code
+  origin: v2
+  question: How are cookies carried from one call to the next within a single conversation?
+  gold:
+  - file: src/requests/sessions.py
+    anchor: '        extract_cookies_to_jar(self.cookies, request, r.raw)'
+    evidence: extract_cookies_to_jar
+    part: store
+  - file: src/requests/sessions.py
+    anchor: '        # Merge with session cookies'
+    evidence: Merge with session cookies
+    part: replay
+  - file: docs/user/advanced.rst
+    anchor: requests. It also persists cookies across all requests made from the
+    evidence: persists cookies
+    part:
+    - store
+    - replay
+  relevant:
+  - src/requests/cookies.py
+  - src/requests/sessions.py
+  notes: extract_cookies_to_jar on the response, merge into the jar, replay on the next request.
+- id: con-06
+  category: conceptual
+  qtype: paraphrase
+  domain: code
+  origin: v2
+  question: How does the callback mechanism let me alter a reply before my own code sees it?
+  gold:
+  - file: src/requests/hooks.py
+    anchor: '            _hook_data = hook(hook_data, **kwargs)'
+    evidence: _hook_data
+    part: hooks
+  - file: docs/user/advanced.rst
+    anchor: If the callback function returns a value, it is assumed that it is to
+    evidence: returns a value
+    part: hooks
+  - file: src/requests/sessions.py
+    anchor: r = dispatch_hook("response", hooks, r, **kwargs)
+    evidence: dispatch_hook
+    part: hooks
+  relevant:
+  - src/requests/hooks.py
+  - src/requests/sessions.py
+  - src/requests/models.py
+  notes: dispatch_hook and the response hook point.
+- id: con-07
+  category: conceptual
+  qtype: paraphrase
+  domain: code
+  origin: v2
+  question: How is the length of an outgoing body calculated before it is sent?
+  gold:
+  - file: src/requests/models.py
+    anchor: '"""Prepare Content-Length header based on request method and body"""'
+    evidence: Content-Length
+    part: header
+  - file: src/requests/utils.py
+    anchor: 'def super_len(o: Any) -> int:'
+    evidence: super_len
+    part: measure
+  relevant:
+  - src/requests/models.py
+  - src/requests/utils.py
+  notes: prepare_content_length plus super_len, which handles files, streams and strings.
+- id: con-08
+  category: conceptual
+  qtype: paraphrase
+  domain: code
+  origin: v2
+  question: How do settings given on a single call combine with the ones already configured for the whole conversation?
+  gold:
+  - file: src/requests/sessions.py
+    anchor: '"""Determines appropriate setting for a given request, taking into account'
+    evidence: appropriate setting
+    part: merge
+  - file: docs/user/advanced.rst
+    anchor: Any dictionaries that you pass to a request method will be merged with the
+    evidence: merged
+    part: merge
+  relevant:
+  - src/requests/sessions.py
+  notes: merge_setting merges dict-like settings and lets None delete a key.
+- id: lit-01
+  category: literal_string
+  qtype: keyword
+  domain: code
+  origin: v2
+  question: Exceeded 30 redirects.
+  gold:
+  - file: src/requests/sessions.py
+    anchor: f"Exceeded {self.max_redirects} redirects."
+    evidence: Exceeded
+  relevant:
+  - src/requests/sessions.py
+  notes: The TooManyRedirects message is an f-string "Exceeded {self.max_redirects} redirects." in sessions.py.
+- id: lit-02
+  category: literal_string
+  qtype: exact_identifier
+  domain: code
+  origin: v2
+  question: DEFAULT_REDIRECT_LIMIT
+  gold:
+  - file: src/requests/models.py
+    anchor: 'DEFAULT_REDIRECT_LIMIT: int = 30'
+    evidence: '30'
+    part: limit
+  - file: src/requests/sessions.py
+    anchor: self.max_redirects = DEFAULT_REDIRECT_LIMIT
+    evidence: DEFAULT_REDIRECT_LIMIT
+    part: limit
+  relevant:
+  - src/requests/models.py
+  - src/requests/sessions.py
+  notes: Defined in models.py, imported and applied in sessions.py. Both are legitimate answers.
+- id: lit-03
+  category: literal_string
+  qtype: keyword
+  domain: code
+  origin: v2
+  question: 'Invalid URL: No scheme supplied'
+  gold:
+  - file: src/requests/models.py
+    anchor: 'f"Invalid URL {url!r}: No scheme supplied. "'
+    evidence: No scheme supplied
+  relevant:
+  - src/requests/models.py
+  notes: MissingSchema message raised from PreparedRequest.prepare_url.
+- id: lit-04
+  category: literal_string
+  qtype: exact_identifier
+  domain: code
+  origin: v2
+  question: CONTENT_CHUNK_SIZE
+  gold:
+  - file: src/requests/models.py
+    anchor: 'CONTENT_CHUNK_SIZE: int = 10 * 1024'
+    evidence: 10 * 1024
+  relevant:
+  - src/requests/models.py
+  notes: Module-level constant in models.py.
+- id: lit-05
+  category: literal_string
+  qtype: exact_identifier
+  domain: code
+  origin: v2
+  question: DEFAULT_POOLSIZE
+  gold:
+  - file: src/requests/adapters.py
+    anchor: DEFAULT_POOLSIZE = 10
+    evidence: '10'
+  relevant:
+  - src/requests/adapters.py
+  notes: Adapter pool sizing constant.
+- id: lit-06
+  category: literal_string
+  qtype: exact_identifier
+  domain: code
+  origin: v2
+  question: REDIRECT_STATI
+  gold:
+  - file: src/requests/models.py
+    anchor: 'REDIRECT_STATI: Final[tuple[int, ...]] = ('
+    evidence: REDIRECT_STATI
+  relevant:
+  - src/requests/models.py
+  - src/requests/sessions.py
+  notes: Tuple of redirect status codes defined in models.py, imported by sessions.py.
+- id: lit-07
+  category: literal_string
+  qtype: exact_identifier
+  domain: code
+  origin: v2
+  question: DEFAULT_CA_BUNDLE_PATH
+  gold:
+  - file: src/requests/utils.py
+    anchor: 'DEFAULT_CA_BUNDLE_PATH: str = certs.where()'
+    evidence: certs.where()
+    part: path
+  - file: docs/user/advanced.rst
+    anchor: '    from requests.utils import DEFAULT_CA_BUNDLE_PATH'
+    evidence: DEFAULT_CA_BUNDLE_PATH
+    part: path
+  relevant:
+  - src/requests/adapters.py
+  - docs/user/advanced.rst
+  - src/requests/utils.py
+  notes: Re-exported through utils, consumed in adapters, shown in the advanced docs.
+- id: lit-08
+  category: literal_string
+  qtype: keyword
+  domain: code
+  origin: v2
+  question: 'Invalid URL: No host supplied'
+  gold:
+  - file: src/requests/models.py
+    anchor: 'raise InvalidURL(f"Invalid URL {url!r}: No host supplied")'
+    evidence: No host supplied
+  relevant:
+  - src/requests/models.py
+  notes: InvalidURL message, also raised from prepare_url.
+- id: crs-01
+  category: cross_file
+  qtype: multi_hop
+  domain: code
+  origin: v2
+  question: Which exception is raised when a request is forwarded too many times, and where is that ceiling actually set?
+  gold:
+  - file: src/requests/exceptions.py
+    anchor: 'class TooManyRedirects(RequestException):'
+    evidence: TooManyRedirects
+    part: exception
+  - file: src/requests/models.py
+    anchor: 'DEFAULT_REDIRECT_LIMIT: int = 30'
+    evidence: '30'
+    part: limit
+  - file: src/requests/sessions.py
+    anchor: '#: This defaults to requests.models.DEFAULT_REDIRECT_LIMIT, which is'
+    evidence: DEFAULT_REDIRECT_LIMIT
+    part: limit
+  - file: src/requests/sessions.py
+    anchor: 'if len(resp.history) >= self.max_redirects:'
+    evidence: max_redirects
+    part: enforce
+  relevant:
+  - src/requests/exceptions.py
+  - src/requests/models.py
+  - src/requests/sessions.py
+  notes: Exception in exceptions.py, limit constant in models.py, enforcement in sessions.py.
+- id: crs-02
+  category: cross_file
+  qtype: multi_hop
+  domain: code
+  origin: v2
+  question: How does a proxy set in an environment variable end up changing which connection pool is used?
+  gold:
+  - file: src/requests/utils.py
+    anchor: 'def get_environ_proxies(url: str, no_proxy: str | None = None) -> dict[str, str]:'
+    evidence: get_environ_proxies
+    part: environment
+  - file: src/requests/sessions.py
+    anchor: env_proxies = get_environ_proxies(url, no_proxy=no_proxy)
+    evidence: env_proxies
+    part: merge
+  - file: src/requests/adapters.py
+    anchor: '        proxy = select_proxy(request.url, proxies)'
+    occurrence: 1
+    evidence: select_proxy
+    part: pool
+  - file: src/requests/adapters.py
+    anchor: '    def proxy_manager_for(self, proxy: str, **proxy_kwargs: Any) -> Any:'
+    evidence: proxy_manager_for
+    part: pool
+  relevant:
+  - src/requests/utils.py
+  - src/requests/sessions.py
+  - src/requests/adapters.py
+  notes: utils reads the environment, sessions merges it, adapters selects a proxy manager.
+- id: crs-03
+  category: cross_file
+  qtype: multi_hop
+  domain: code
+  origin: v2
+  question: What identifying string does the library announce itself with, and where does the version inside it come from?
+  gold:
+  - file: src/requests/utils.py
+    anchor: return f"{name}/{__version__}"
+    evidence: __version__
+    part: agent
+  - file: src/requests/__version__.py
+    anchor: __version__ = "2.34.2"
+    evidence: 2.34.2
+    part: version
+  relevant:
+  - src/requests/utils.py
+  - src/requests/__version__.py
+  notes: default_user_agent in utils.py interpolates __version__ from __version__.py.
+- id: crs-04
+  category: cross_file
+  qtype: multi_hop
+  domain: code
+  origin: v2
+  question: Which bundle of trusted certificates is used by default, and how is its location found?
+  gold:
+  - file: src/requests/certs.py
+    anchor: only one — the one from the certifi package.
+    evidence: certifi
+    part: bundle
+  - file: docs/user/advanced.rst
+    anchor: Requests uses certificates from the package `certifi`_. This allows for users
+    evidence: certifi
+    part: bundle
+  - file: src/requests/utils.py
+    anchor: 'DEFAULT_CA_BUNDLE_PATH: str = certs.where()'
+    evidence: certs.where()
+    part: location
+  - file: src/requests/adapters.py
+    anchor: cert_loc = DEFAULT_CA_BUNDLE_PATH
+    evidence: DEFAULT_CA_BUNDLE_PATH
+    part: location
+  relevant:
+  - src/requests/certs.py
+  - src/requests/adapters.py
+  - src/requests/utils.py
+  notes: certs.py resolves the bundle path, utils re-exports it, adapters consumes it.
+- id: crs-05
+  category: cross_file
+  qtype: multi_hop
+  domain: code
+  origin: v2
+  question: How does a readable status name like not_found relate to the numeric code, and what raises an error from it?
+  gold:
+  - file: src/requests/status_codes.py
+    anchor: '404: ("not_found", "-o-"),'
+    evidence: not_found
+    part: mapping
+  - file: src/requests/status_codes.py
+    anchor: '            setattr(codes, title, code)'
+    evidence: setattr
+    part: mapping
+  - file: src/requests/models.py
+    anchor: '        if 400 <= self.status_code < 500:'
+    evidence: Client Error
+    until: 'f"{self.status_code} Client Error: {reason} for url: {self.url}"'
+    part: raise
+  relevant:
+  - src/requests/status_codes.py
+  - src/requests/models.py
+  notes: status_codes.py builds the lookup table; models.py raise_for_status turns codes into exceptions.
+- id: crs-06
+  category: cross_file
+  qtype: multi_hop
+  domain: code
+  origin: v2
+  question: What happens between the top-level one-line call and the point where something is actually sent?
+  gold:
+  - file: src/requests/api.py
+    anchor: '    with sessions.Session() as session:'
+    evidence: session.request
+    until: return session.request(method=method, url=url, **kwargs)
+    part: entry
+  - file: src/requests/sessions.py
+    anchor: '        prep = self.prepare_request(req)'
+    evidence: prepare_request
+    part: prepare
+  - file: src/requests/sessions.py
+    anchor: '        r = adapter.send(request, **kwargs)'
+    evidence: adapter.send
+    part: dispatch
+  - file: src/requests/adapters.py
+    anchor: '            resp = conn.urlopen('
+    evidence: urlopen
+    part: dispatch
+  relevant:
+  - src/requests/api.py
+  - src/requests/sessions.py
+  - src/requests/adapters.py
+  notes: api.py opens a Session, sessions.py prepares and dispatches, adapters.py sends.
+- id: crs-07
+  category: cross_file
+  qtype: multi_hop
+  domain: code
+  origin: v2
+  question: How does an authentication handler get attached to an outgoing request during preparation?
+  gold:
+  - file: src/requests/auth.py
+    anchor: r.headers["Authorization"] = _basic_auth_str(self.username, self.password)
+    evidence: Authorization
+    part: handler
+  - file: src/requests/models.py
+    anchor: '            # Allow auth to make its changes.'
+    evidence: Allow auth
+    until: r = auth_handler(self)
+    part: invoke
+  - file: src/requests/sessions.py
+    anchor: '            auth=merge_setting(auth, self.auth),'
+    evidence: merge_setting(auth
+    part: supply
+  relevant:
+  - src/requests/auth.py
+  - src/requests/models.py
+  - src/requests/sessions.py
+  notes: auth.py defines callables, models.py prepare_auth invokes them, sessions.py supplies them.
+- id: dfa-01
+  category: doc_factual
+  qtype: keyword
+  domain: docs
+  origin: v2
+  question: What output range does the tanh activation produce?
+  gold:
+  - file: Deep_Learning_Unit1_Quick_Notes.pdf
+    page: 0
+    anchor: 'Tanh: -1 to 1.'
+    evidence: -1 to 1
+  relevant:
+  - file: Deep_Learning_Unit1_Quick_Notes.pdf
+    page: 0
+  notes: Listed in the activation functions rundown on the first PDF page.
+- id: dfa-02
+  category: doc_factual
+  qtype: keyword
+  domain: docs
+  origin: v2
+  question: Which gradient descent variants are named as common optimisation methods?
+  gold:
+  - file: Deep_Learning_Unit1_Quick_Notes.pdf
+    page: 1
+    anchor: Gradient Descent, Stochastic Gradient Descent and Mini-batch Gradient Descent are widely used
+    evidence: Stochastic Gradient Descent
+  relevant:
+  - file: Deep_Learning_Unit1_Quick_Notes.pdf
+    page: 1
+  notes: The optimisation section is on the second PDF page.
+- id: dfa-03
+  category: doc_factual
+  qtype: keyword
+  domain: docs
+  origin: v2
+  question: How long ago did the Solar System form?
+  gold:
+  - file: space_planets_moons_advanced.txt
+    anchor: The Solar System formed approximately 4.57 billion years ago from the
+    evidence: 4.57 billion years
+  relevant:
+  - file: space_planets_moons_advanced.txt
+    page: 0
+  notes: Opening section states 4.57 billion years.
+- id: dfa-04
+  category: doc_factual
+  qtype: keyword
+  domain: docs
+  origin: v2
+  question: How tall is the largest volcano in the Solar System?
+  gold:
+  - file: space_planets_moons_advanced.txt
+    anchor: Olympus Mons is the tallest volcano in the Solar System, rising about 22
+    until: km above the surrounding plains.
+    evidence: 22 km
+  relevant:
+  - file: space_planets_moons_advanced.txt
+    page: 0
+  notes: Mars section, about 22 km.
+- id: dfa-05
+  category: doc_factual
+  qtype: keyword
+  domain: docs
+  origin: v2
+  question: How quickly is the Moon receding from Earth each year?
+  gold:
+  - file: space_planets_moons_advanced.txt
+    anchor: causes ocean tides and is gradually moving away from Earth at
+    until: approximately 3.8 cm per year.
+    evidence: 3.8 cm per year
+  relevant:
+  - file: space_planets_moons_advanced.txt
+    page: 0
+  notes: Earth's Moon section, about 3.8 cm per year.
+- id: dco-01
+  category: doc_conceptual
+  qtype: paraphrase
+  domain: docs
+  origin: v2
+  question: How do artificial intelligence, machine learning and deep learning relate to one another in scope?
+  gold:
+  - file: Deep_Learning_Unit1_Quick_Notes.pdf
+    page: 0
+    anchor: AI is the broad field, ML is a subset of AI and Deep Learning is a subset of
+    evidence: ML is a subset of AI
+  relevant:
+  - file: Deep_Learning_Unit1_Quick_Notes.pdf
+    page: 0
+  notes: Stated as nested subsets on the first PDF page.
+- id: dco-02
+  category: doc_conceptual
+  qtype: paraphrase
+  domain: docs
+  origin: v2
+  question: What does backpropagation actually compute, and what is it used for?
+  gold:
+  - file: Deep_Learning_Unit1_Quick_Notes.pdf
+    page: 0
+    anchor: Computes gradients using the chain rule and updates weights with gradient descent to minimize
+    evidence: chain rule
+  relevant:
+  - file: Deep_Learning_Unit1_Quick_Notes.pdf
+    page: 0
+  notes: Chain rule gradients feeding gradient descent.
+- id: dco-03
+  category: doc_conceptual
+  qtype: paraphrase
+  domain: docs
+  origin: v2
+  question: What separates learning from labelled data from learning without labels?
+  gold:
+  - file: Deep_Learning_Unit1_Quick_Notes.pdf
+    page: 0
+    anchor: 'Machine Learning enables systems to learn patterns from data. Types: Supervised Learning'
+    until: (labeled data), Unsupervised Learning (unlabeled data) and Reinforcement Learning
+    evidence: Unsupervised Learning (unlabeled data)
+  relevant:
+  - file: Deep_Learning_Unit1_Quick_Notes.pdf
+    page: 0
+  notes: Supervised vs unsupervised, in the machine learning section.
+- id: dco-04
+  category: doc_conceptual
+  qtype: paraphrase
+  domain: docs
+  origin: v2
+  question: Why is one of Jupiter's moons regarded as a promising place to look for life?
+  gold:
+  - file: space_planets_moons_advanced.txt
+    anchor: Europa possesses a global subsurface ocean beneath an icy crust
+    until: microbial life.
+    evidence: subsurface ocean
+    part: europa
+  - file: space_planets_moons_advanced.txt
+    anchor: Europa and Enceladus are leading candidates in the search for
+    evidence: leading candidates
+    part: europa
+  relevant:
+  - file: space_planets_moons_advanced.txt
+    page: 0
+  notes: Europa's subsurface ocean, in the Jovian moons section.
+- id: dco-05
+  category: doc_conceptual
+  qtype: paraphrase
+  domain: docs
+  origin: v2
+  question: What has to happen to a star for a black hole to form?
+  gold:
+  - file: space_planets_moons_advanced.txt
+    anchor: A black hole forms when a sufficiently massive star collapses under
+    until: gravity after exhausting its nuclear fuel.
+    evidence: exhausting its nuclear fuel
+  relevant:
+  - file: space_planets_moons_advanced.txt
+    page: 0
+  notes: 'Black Holes section, gravitational collapse after fuel exhaustion. REVIEWED: the bias audit flags this at 0.60 overlap.
+    Inspected and kept. The overlap is carried by "black", "hole" and "star" - the entity''s own name, which no natural phrasing
+    of this question can avoid - not by inherited sentence structure. Rewording to dodge the flag would make the question
+    contrived and less realistic, which is the worse error.
+
+    '
+- id: una-01
+  category: unanswerable
+  qtype: unanswerable
+  domain: code
+  origin: v2
+  question: How do I enable HTTP/3 or QUIC support?
+  relevant: []
+  notes: Verified - "HTTP/3" appears nowhere in the corpus. requests has no HTTP/3 support.
+- id: una-02
+  category: unanswerable
+  qtype: unanswerable
+  domain: code
+  origin: v2
+  question: How do I consume a server-sent events (SSE) stream?
+  relevant: []
+  notes: 'Verified - "server-sent" and "SSE" appear nowhere in the corpus. REPLACES an earlier async/await question that the
+    bias audit caught as ANSWERABLE: docs/community/recommended.rst discusses ``async``/``await`` via Twisted, which a grep
+    for "await " with a trailing space had missed. Recorded here because the original error is the more instructive fact.
+
+    '
+- id: una-03
+  category: unanswerable
+  qtype: unanswerable
+  domain: code
+  origin: v2
+  question: How do I open a WebSocket connection?
+  relevant: []
+  notes: Verified - "websocket" appears nowhere in the corpus.
+- id: una-04
+  category: unanswerable
+  qtype: unanswerable
+  domain: docs
+  origin: v2
+  question: Which activation function does the material recommend for transformer attention layers?
+  relevant: []
+  notes: Verified - "transformer" and "attention" appear zero times in the PDF.
+- id: una-05
+  category: unanswerable
+  qtype: unanswerable
+  domain: docs
+  origin: v2
+  question: What does the material say about dropout and batch normalisation as regularisation?
+  relevant: []
+  notes: Verified - "dropout" and "batch normalization" appear zero times in the PDF.
+- id: una-06
+  category: unanswerable
+  qtype: unanswerable
+  domain: docs
+  origin: v2
+  question: What is the orbital period of Proxima Centauri b?
+  relevant: []
+  notes: Verified - "Proxima Centauri" appears zero times in the .txt (earlier substring hits were "approximately").
+- id: una-07
+  category: unanswerable
+  qtype: unanswerable
+  domain: docs
+  origin: v2
+  question: What did the Voyager probes discover about the outer planets?
+  relevant: []
+  notes: Verified - "Voyager" appears zero times in the .txt.
+- id: eid-09
+  category: exact_identifier
+  qtype: exact_identifier
+  domain: code
+  origin: v2
+  question: get_netrc_auth
+  gold:
+  - file: src/requests/utils.py
+    anchor: def get_netrc_auth(
+    evidence: get_netrc_auth
+  relevant:
+  - src/requests/utils.py
+  notes: Looks up credentials from the user's netrc file. Defined in utils.py.
+- id: eid-10
+  category: exact_identifier
+  qtype: exact_identifier
+  domain: code
+  origin: v2
+  question: guess_json_utf
+  gold:
+  - file: src/requests/utils.py
+    anchor: 'def guess_json_utf(data: bytes) -> str | None:'
+    evidence: guess_json_utf
+  relevant:
+  - src/requests/utils.py
+  notes: Detects the UTF variant of a JSON byte string from its BOM or null pattern.
+- id: lit-09
+  category: literal_string
+  qtype: exact_identifier
+  domain: code
+  origin: v2
+  question: DEFAULT_RETRIES
+  gold:
+  - file: src/requests/adapters.py
+    anchor: DEFAULT_RETRIES = 0
+    evidence: '0'
+  relevant:
+  - src/requests/adapters.py
+  notes: Adapter retry-count constant.
+- id: par-09
+  category: paraphrase
+  qtype: paraphrase
+  domain: code
+  origin: v2
+  question: How do I stop the library picking up sign-in details stored in a file in my home directory?
+  gold:
+  - file: docs/user/authentication.rst
+    anchor: Usage of netrc file can be disabled by setting `trust_env` to `False` in the
+    evidence: trust_env
+    part: netrc
+  - file: src/requests/sessions.py
+    anchor: 'if self.trust_env and not auth and not self.auth:'
+    evidence: trust_env
+    part: netrc
+  relevant:
+  - src/requests/utils.py
+  - src/requests/sessions.py
+  notes: 'netrc credential lookup and trust_env. Question avoids "netrc", "auth" and "credentials" so it does not hand BM25
+    the answer''s vocabulary.
+
+    '
+- id: crs-08
+  category: cross_file
+  qtype: multi_hop
+  domain: code
+  origin: v2
+  question: Which error is raised when a compressed reply body cannot be decoded, and where is the decoding actually attempted?
+  gold:
+  - file: src/requests/exceptions.py
+    anchor: 'class ContentDecodingError(RequestException, BaseHTTPError):'
+    evidence: ContentDecodingError
+    part: exception
+  - file: src/requests/models.py
+    anchor: '                except DecodeError as e:'
+    until: raise ContentDecodingError(e)
+    evidence: ContentDecodingError
+    part: decode
+  relevant:
+  - src/requests/exceptions.py
+  - src/requests/models.py
+  notes: ContentDecodingError is defined in exceptions.py; decoding happens in models.py iter_content.
+- id: dfa-06
+  category: doc_factual
+  qtype: keyword
+  domain: docs
+  origin: v2
+  question: How many parts does the material list for a formal report?
+  gold:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 6155
+    end: 7253
+    part: p0
+  relevant:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 6155
+    end: 7253
+  notes: The enumerated list of typical formal-report parts.
+- id: dfa-07
+  category: doc_factual
+  qtype: keyword
+  domain: docs
+  origin: v2
+  question: What headings does a memo-format report carry at the top?
+  gold:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 1483
+    end: 3057
+    part: p0
+  relevant:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 1483
+    end: 3057
+  notes: Memo format section - To, From, Date, Subject.
+- id: dfa-08
+  category: doc_factual
+  qtype: keyword
+  domain: docs
+  origin: v2
+  question: What items are listed as package contents in the AirPods example manual?
+  gold:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 50900
+    end: 51600
+    part: p0
+  relevant:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 50900
+    end: 51600
+  notes: Worked example; the document spells it "Air Pods".
+- id: dfa-09
+  category: doc_factual
+  qtype: keyword
+  domain: docs
+  origin: v2
+  question: Which four report types are introduced at the start of the unit?
+  gold:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 3057
+    end: 4151
+    part: p0
+  relevant:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 3057
+    end: 4151
+  notes: Progress, Project, Feasibility, Evaluation.
+- id: dfa-10
+  category: doc_factual
+  qtype: keyword
+  domain: docs
+  origin: v2
+  question: What information belongs on the title page of a user manual?
+  gold:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 40296
+    end: 42582
+    part: p0
+  relevant:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 40296
+    end: 42582
+  notes: First element of the user-manual list.
+- id: dfa-11
+  category: doc_factual
+  qtype: keyword
+  domain: docs
+  origin: v2
+  question: In the sample progress report, who is it addressed to and who sent it?
+  gold:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 13197
+    end: 14260
+    part: p0
+  relevant:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 13197
+    end: 14260
+  notes: Sample memo-style progress report header.
+- id: dco-06
+  category: doc_conceptual
+  qtype: multi_hop
+  domain: docs
+  origin: v2
+  question: How does a progress report differ from an evaluation report in purpose and timing?
+  gold:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 18495
+    end: 19212
+    part: p0
+  relevant:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 18495
+    end: 19212
+  notes: 'The comparison table. Docx2txtLoader flattens Word tables into alternating paragraphs, so row structure is implicit
+    but the content is intact. Labelled doc_conceptual, NOT cross_file - it is a comparison within one document, not a multi-file
+    information need.
+
+    '
+- id: dco-07
+  category: doc_conceptual
+  qtype: paraphrase
+  domain: docs
+  origin: v2
+  question: When would a short internal note be a better choice than a formal letter for reporting?
+  gold:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 1483
+    end: 3057
+    part: p0
+  relevant:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 1483
+    end: 3057
+  notes: Memo versus letter format rationale.
+- id: dco-08
+  category: doc_conceptual
+  qtype: paraphrase
+  domain: docs
+  origin: v2
+  question: What different kinds of viability does a proposal need to be assessed for before it goes ahead?
+  gold:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 27623
+    end: 28207
+    part: p0
+  relevant:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 27623
+    end: 28207
+  notes: 'Types of feasibility study - technical, economic, operational, legal, schedule. REWRITTEN after the bias audit:
+    the original phrasing ("What is a feasibility report for?") scored 1.00 overlap because its only two content tokens were
+    "feasibility" and "report", both literal section vocabulary - a doc_exact_term question wearing a conceptual label. The
+    replacement also targets a DIFFERENT section, avoiding a near-duplicate information need with dpa-02.
+
+    '
+- id: dco-09
+  category: doc_conceptual
+  qtype: paraphrase
+  domain: docs
+  origin: v2
+  question: Why is it worth writing down how to operate something instead of letting people work it out themselves?
+  gold:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 35524
+    end: 36200
+    part: p0
+  relevant:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 35524
+    end: 36200
+  notes: 'Significance of instructions and manuals. REWRITTEN after the bias audit: the original ("Why do instructions and
+    manuals matter in technical communication?") scored 0.60 by reusing the section heading''s own words.
+
+    '
+- id: dco-10
+  category: doc_conceptual
+  qtype: paraphrase
+  domain: docs
+  origin: v2
+  question: What part does body language play in how a message is received?
+  gold:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 62169
+    end: 67608
+    part: p0
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 67648
+    end: 73087
+    part: p0
+  relevant:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 62169
+    end: 67608
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 67648
+    end: 73087
+  notes: 'Answerable from either copy of the duplicated block. Both listed so a correct retrieval of the second copy is not
+    scored as a miss.
+
+    '
+- id: dpa-01
+  category: doc_paraphrase
+  qtype: paraphrase
+  domain: docs
+  origin: v2
+  question: How do I tell my supervisor how far along the work has got so far?
+  gold:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 11521
+    end: 13982
+    part: p0
+  relevant:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 11521
+    end: 13982
+  notes: Progress report. Question avoids "progress" and "report".
+- id: dpa-02
+  category: doc_paraphrase
+  qtype: paraphrase
+  domain: docs
+  origin: v2
+  question: Which document helps decide whether a proposed plan is actually worth doing?
+  gold:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 26668
+    end: 27623
+    part: p0
+  relevant:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 26668
+    end: 27623
+  notes: Feasibility report. Question avoids "feasibility".
+- id: dpa-03
+  category: doc_paraphrase
+  qtype: paraphrase
+  domain: docs
+  origin: v2
+  question: What paperwork explains to a buyer how to operate the thing they bought?
+  gold:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 39959
+    end: 42582
+    part: p0
+  relevant:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 39959
+    end: 42582
+  notes: User manual. Question avoids "user" and "manual".
+- id: dpa-05
+  category: doc_paraphrase
+  qtype: paraphrase
+  domain: docs
+  origin: v2
+  question: What written account judges how well a finished piece of work actually turned out?
+  gold:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 13982
+    end: 16482
+    part: p0
+  relevant:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 13982
+    end: 16482
+  notes: Evaluation report. Question avoids "evaluation".
+- id: dpa-06
+  category: doc_paraphrase
+  qtype: paraphrase
+  domain: docs
+  origin: v2
+  question: What should I think about beforehand so a talk holds the attention of the people listening?
+  gold:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 73160
+    end: 74712
+    part: p0
+  relevant:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 73160
+    end: 74712
+  notes: Presentation planning factors. Question avoids "presentation" and "audience".
+- id: dex-01
+  category: doc_exact_term
+  qtype: keyword
+  domain: docs
+  origin: v2
+  question: Kinesics
+  gold:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 62169
+    end: 67608
+    part: p0
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 67648
+    end: 73087
+    part: p0
+  relevant:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 62169
+    end: 67608
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 67648
+    end: 73087
+  notes: Unusual technical term, unlikely to appear by accident. Duplicated block.
+- id: dex-02
+  category: doc_exact_term
+  qtype: keyword
+  domain: docs
+  origin: v2
+  question: Air Pods User Manual
+  gold:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 50900
+    end: 51600
+    part: p0
+  relevant:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 50900
+    end: 51600
+  notes: Named worked example, spelled with a space in the source.
+- id: dex-03
+  category: doc_exact_term
+  qtype: keyword
+  domain: docs
+  origin: v2
+  question: Operational Manual
+  gold:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 45540
+    end: 47730
+    part: p0
+  relevant:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 45540
+    end: 47730
+  notes: Section title.
+- id: dex-04
+  category: doc_exact_term
+  qtype: keyword
+  domain: docs
+  origin: v2
+  question: Executive Summary
+  gold:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 16482
+    end: 16843
+    part: p0
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 30877
+    end: 31230
+    part: p0
+  relevant:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 16482
+    end: 16843
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 30877
+    end: 31230
+  notes: Appears as a numbered element in two different report structures; both valid.
+- id: dex-05
+  category: doc_exact_term
+  qtype: keyword
+  domain: docs
+  origin: v2
+  question: Manuscript Format
+  gold:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 2269
+    end: 2668
+    part: p0
+  relevant:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 2269
+    end: 2668
+  notes: One of the four common report formats.
+- id: ddi-01
+  category: doc_discrimination
+  qtype: keyword
+  domain: docs
+  origin: v2
+  question: What makes a feasibility report a good one specifically?
+  gold:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 28207
+    end: 28667
+    part: p0
+  relevant:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 28207
+    end: 28667
+  notes: 'Must be distinguished from three sibling sections - Characteristics of a Good Report, of a Report, and of a Project
+    Report.
+
+    '
+- id: ddi-02
+  category: doc_discrimination
+  qtype: keyword
+  domain: docs
+  origin: v2
+  question: Which qualities are listed as characteristic of a project report?
+  gold:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 22290
+    end: 22629
+    part: p0
+  relevant:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 22290
+    end: 22629
+  notes: Sibling of the other three "Characteristics of..." sections.
+- id: ddi-03
+  category: doc_discrimination
+  qtype: keyword
+  domain: docs
+  origin: v2
+  question: What features should any report have to be considered a good one?
+  gold:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 319
+    end: 504
+    part: p0
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 9854
+    end: 10496
+    part: p0
+  relevant:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 319
+    end: 504
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 9854
+    end: 10496
+  notes: 'The two GENERAL characteristics sections, as opposed to the project- and feasibility-specific ones. Both general
+    sections are valid answers.
+
+    '
+- id: ddi-04
+  category: doc_discrimination
+  qtype: keyword
+  domain: docs
+  origin: v2
+  question: Which elements make up a user manual?
+  gold:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 40296
+    end: 42582
+    part: p0
+  relevant:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 40296
+    end: 42582
+  notes: Must be distinguished from the product- and operational-manual element lists.
+- id: ddi-05
+  category: doc_discrimination
+  qtype: keyword
+  domain: docs
+  origin: v2
+  question: Which elements make up a product manual?
+  gold:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 43036
+    end: 45540
+    part: p0
+  relevant:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 43036
+    end: 45540
+  notes: Sibling of the user- and operational-manual element lists.
+- id: ddi-06
+  category: doc_discrimination
+  qtype: keyword
+  domain: docs
+  origin: v2
+  question: Which elements make up an operational manual?
+  gold:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 45917
+    end: 47730
+    part: p0
+  relevant:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 45917
+    end: 47730
+  notes: Sibling of the user- and product-manual element lists.
+- id: ddi-07
+  category: doc_discrimination
+  qtype: multi_hop
+  domain: docs
+  origin: v2
+  question: How do the three manual types differ from one another side by side?
+  gold:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 54094
+    end: 56381
+    part: p0
+  relevant:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 54094
+    end: 56381
+  notes: 'The ASCII comparison table. Verified to span THREE chunks (68, 69, 70), so no single chunk holds the whole comparison;
+    any overlapping chunk counts.
+
+    '
+- id: ddi-08
+  category: doc_discrimination
+  qtype: keyword
+  domain: docs
+  origin: v2
+  question: What is the stated purpose of a project report, as opposed to its structure?
+  gold:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 21863
+    end: 22290
+    part: p0
+  relevant:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    start: 21863
+    end: 22290
+  notes: Must be distinguished from the adjacent characteristics and structure subsections.
+- id: una-08
+  category: unanswerable
+  qtype: unanswerable
+  domain: docs
+  origin: v2
+  question: How should a Gantt chart be prepared for project scheduling?
+  relevant: []
+  notes: 'Verified - "gantt" appears 0 times across all three documents. Distinct failure mode: the document DOES cover visual
+    aids (bar charts, tree diagrams, flowcharts), so this is adjacent-but-absent, not off-domain.
+
+    '
+- id: una-09
+  category: unanswerable
+  qtype: unanswerable
+  domain: docs
+  origin: v2
+  question: How should minutes of a meeting be recorded and circulated?
+  relevant: []
+  notes: Verified - "minutes of meeting" appears 0 times. Plausible ETCE topic, absent.
+- id: una-10
+  category: unanswerable
+  qtype: unanswerable
+  domain: docs
+  origin: v2
+  question: What guidance is given on writing a resume or curriculum vitae?
+  relevant: []
+  notes: Verified - "resume" and "curriculum vitae" both appear 0 times.
+- id: isw-01
+  category: identifier_stopword
+  qtype: exact_identifier
+  domain: code
+  origin: v3
+  question: should_bypass_proxies
+  gold:
+  - file: src/requests/utils.py
+    anchor: 'def should_bypass_proxies(url: str, no_proxy: str | None) -> bool:'
+    evidence: should_bypass_proxies
+  relevant:
+  - src/requests/utils.py
+  notes: '"should" is a project stopword, so BM25 only sees "bypass proxies".'
+- id: isw-02
+  category: identifier_stopword
+  qtype: exact_identifier
+  domain: code
+  origin: v3
+  question: is_valid_cidr
+  gold:
+  - file: src/requests/utils.py
+    anchor: 'def is_valid_cidr(string_network: str) -> bool:'
+    evidence: is_valid_cidr
+  relevant:
+  - src/requests/utils.py
+  notes: '"is" is a stopword; "valid" and "cidr" survive.'
+- id: isw-03
+  category: identifier_stopword
+  qtype: exact_identifier
+  domain: code
+  origin: v3
+  question: address_in_network
+  gold:
+  - file: src/requests/utils.py
+    anchor: 'def address_in_network(ip: str, net: str) -> bool:'
+    evidence: address_in_network
+  relevant:
+  - src/requests/utils.py
+  notes: '"in" is a stopword.'
+- id: isw-04
+  category: identifier_stopword
+  qtype: exact_identifier
+  domain: code
+  origin: v3
+  question: get_auth_from_url
+  gold:
+  - file: src/requests/utils.py
+    anchor: 'def get_auth_from_url(url: str) -> tuple[str, str]:'
+    evidence: get_auth_from_url
+  relevant:
+  - src/requests/utils.py
+  notes: '"from" is a stopword; "get", "auth", "url" are very common tokens.'
+- id: isw-05
+  category: identifier_stopword
+  qtype: exact_identifier
+  domain: code
+  origin: v3
+  question: where is to_key_val_list defined
+  gold:
+  - file: src/requests/utils.py
+    anchor: dictionary. If it can be, return a list of tuples, e.g.,
+    evidence: return a list of tuples
+  relevant:
+  - src/requests/utils.py
+  notes: '"to" is a stopword. Span is the implementation''s docstring (the two typing overloads precede it).'
+- id: isw-06
+  category: identifier_stopword
+  qtype: exact_identifier
+  domain: code
+  origin: v3
+  question: from_key_val_list
+  gold:
+  - file: src/requests/utils.py
+    anchor: dictionary. Unless it can not be represented as such, return an
+    evidence: Unless it can not be represented
+  relevant:
+  - src/requests/utils.py
+  notes: '"from" is a stopword. Sibling of isw-05 with near-identical vocabulary.'
+- id: isw-07
+  category: identifier_stopword
+  qtype: exact_identifier
+  domain: code
+  origin: v3
+  question: prepend_scheme_if_needed
+  gold:
+  - file: src/requests/utils.py
+    anchor: 'def prepend_scheme_if_needed(url: str, new_scheme: str) -> str:'
+    evidence: prepend_scheme_if_needed
+  relevant:
+  - src/requests/utils.py
+  notes: '"if" is a stopword.'
+- id: isw-08
+  category: identifier_stopword
+  qtype: exact_identifier
+  domain: code
+  origin: v3
+  question: extract_cookies_to_jar
+  gold:
+  - file: src/requests/cookies.py
+    anchor: def extract_cookies_to_jar(
+    evidence: extract_cookies_to_jar
+  relevant:
+  - src/requests/cookies.py
+  notes: '"to" is a stopword; the function is called from many places, defined in cookies.py.'
+- id: isw-09
+  category: identifier_stopword
+  qtype: exact_identifier
+  domain: code
+  origin: v3
+  question: get_connection_with_tls_context
+  gold:
+  - file: src/requests/adapters.py
+    anchor: '    def get_connection_with_tls_context('
+    evidence: get_connection_with_tls_context
+  relevant:
+  - src/requests/adapters.py
+  notes: '"with" is a stopword.'
+- id: isw-10
+  category: identifier_stopword
+  qtype: exact_identifier
+  domain: code
+  origin: v3
+  question: what does proxy_manager_for return
+  gold:
+  - file: src/requests/adapters.py
+    anchor: '"""Return urllib3 ProxyManager for the given proxy.'
+    evidence: ProxyManager
+  relevant:
+  - src/requests/adapters.py
+  notes: '"for" is a stopword.'
+- id: isw-11
+  category: identifier_stopword
+  qtype: exact_identifier
+  domain: code
+  origin: v3
+  question: should_strip_auth
+  gold:
+  - file: src/requests/sessions.py
+    anchor: '    def should_strip_auth(self, old_url: str, new_url: str) -> bool:'
+    evidence: should_strip_auth
+  relevant:
+  - src/requests/sessions.py
+  notes: '"should" is a stopword.'
+- id: isw-12
+  category: identifier_stopword
+  qtype: exact_identifier
+  domain: code
+  origin: v3
+  question: is_permanent_redirect
+  gold:
+  - file: src/requests/models.py
+    anchor: '"""True if this Response one of the permanent versions of redirect."""'
+    evidence: permanent versions of redirect
+  relevant:
+  - src/requests/models.py
+  notes: '"is" is a stopword. Sibling of is_redirect in the same class.'
+- id: isw-13
+  category: identifier_stopword
+  qtype: exact_identifier
+  domain: code
+  origin: v3
+  question: dict_from_cookiejar
+  gold:
+  - file: src/requests/utils.py
+    anchor: 'def dict_from_cookiejar(cj: CookieJar) -> dict[str, str | None]:'
+    evidence: dict_from_cookiejar
+  relevant:
+  - src/requests/utils.py
+  notes: '"from" is a stopword; "cookiejar" is a whole token.'
+- id: msp-01
+  category: misspelled
+  qtype: misspelled
+  domain: code
+  origin: v3
+  question: CaseInsensitveDict
+  gold:
+  - file: src/requests/structures.py
+    anchor: 'class CaseInsensitiveDict(MutableMapping[str, _VT], Generic[_VT]):'
+    evidence: CaseInsensitiveDict
+  relevant:
+  - src/requests/structures.py
+  notes: Missing "i" in Insensitive. BM25 sees "case", "insensitve", "dict".
+- id: msp-02
+  category: misspelled
+  qtype: misspelled
+  domain: code
+  origin: v3
+  question: how do i set a timout on a reqest
+  gold:
+  - file: docs/user/quickstart.rst
+    anchor: You can tell Requests to stop waiting for a response after a given number of
+    until: seconds with the ``timeout`` parameter.
+    evidence: '``timeout`` parameter'
+    part: timeout
+  - file: docs/user/advanced.rst
+    anchor: '    r = requests.get(''https://github.com'', timeout=5)'
+    evidence: timeout=5
+    part: timeout
+  relevant:
+  - docs/user/advanced.rst
+  - docs/user/quickstart.rst
+  notes: Two typos; neither misspelled word exists in the corpus.
+- id: msp-03
+  category: misspelled
+  qtype: misspelled
+  domain: code
+  origin: v3
+  question: resolve_redirect
+  gold:
+  - file: src/requests/sessions.py
+    anchor: '    def resolve_redirects('
+    evidence: resolve_redirects
+  relevant:
+  - src/requests/sessions.py
+  notes: Singular for plural; the exact token "redirect" is common elsewhere.
+- id: msp-04
+  category: misspelled
+  qtype: misspelled
+  domain: code
+  origin: v3
+  question: toomanyredirects exeption
+  gold:
+  - file: src/requests/exceptions.py
+    anchor: 'class TooManyRedirects(RequestException):'
+    evidence: TooManyRedirects
+  relevant:
+  - src/requests/exceptions.py
+  notes: Lowercased identifier (no case boundaries to split on) plus a typo.
+- id: msp-05
+  category: misspelled
+  qtype: misspelled
+  domain: code
+  origin: v3
+  question: turn off ssl certifcate verfication
+  gold:
+  - file: docs/user/advanced.rst
+    anchor: 'Requests can also ignore verifying the SSL certificate if you set ``verify`` to False::'
+    evidence: '``verify`` to False'
+    part: verify
+  relevant:
+  - docs/user/advanced.rst
+  notes: Two typos.
+- id: msp-06
+  category: misspelled
+  qtype: misspelled
+  domain: code
+  origin: v3
+  question: digest authentcation exampel
+  gold:
+  - file: docs/user/authentication.rst
+    anchor: Another very popular form of HTTP Authentication is Digest Authentication,
+    until: '    >>> requests.get(url, auth=HTTPDigestAuth(''user'', ''pass''))'
+    evidence: HTTPDigestAuth
+    part: digest
+  relevant:
+  - docs/user/authentication.rst
+  notes: Two typos; "digest" survives intact.
+- id: msp-07
+  category: misspelled
+  qtype: misspelled
+  domain: docs
+  origin: v3
+  question: kinesis body langauge
+  gold:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    anchor: Key Aspects of Kinesics (Body Language)
+    occurrence: 1
+    evidence: Kinesics
+    part: kinesics
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    anchor: Key Aspects of Kinesics (Body Language)
+    occurrence: 2
+    evidence: Kinesics
+    part: kinesics
+  relevant: []
+  notes: '"kinesis" for "kinesics", "langauge" for "language". The section appears twice (duplicated block); either copy counts.'
+- id: msp-08
+  category: misspelled
+  qtype: misspelled
+  domain: docs
+  origin: v3
+  question: types of feasability study
+  gold:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    anchor: 2. Types of Feasibility Reports
+    until: Schedule Feasibility –
+    evidence: Technical Feasibility
+  relevant: []
+  notes: '"feasability". Same section as dco-08 but a keyword-style query, so it tests spelling, not paraphrase.'
+- id: msp-09
+  category: misspelled
+  qtype: misspelled
+  domain: docs
+  origin: v3
+  question: how hight is olympus mon
+  gold:
+  - file: space_planets_moons_advanced.txt
+    anchor: Olympus Mons is the tallest volcano in the Solar System, rising about 22
+    until: km above the surrounding plains.
+    evidence: 22 km
+  relevant: []
+  notes: '"hight", "mon". Overlaps dfa-04''s span by design: same fact, broken spelling.'
+- id: msp-10
+  category: misspelled
+  qtype: misspelled
+  domain: docs
+  origin: v3
+  question: wat does backpropogation do
+  gold:
+  - file: Deep_Learning_Unit1_Quick_Notes.pdf
+    page: 0
+    anchor: Computes gradients using the chain rule and updates weights with gradient descent to minimize
+    evidence: chain rule
+  relevant: []
+  notes: '"backpropogation" is a common misspelling; the source heading is "Backpropagation".'
+- id: msp-11
+  category: misspelled
+  qtype: misspelled
+  domain: code
+  origin: v3
+  question: which enviroment variables set a proxie
+  gold:
+  - file: docs/user/advanced.rst
+    anchor: environment variables ``http_proxy``, ``https_proxy``, ``no_proxy``,
+    evidence: '``https_proxy``'
+  relevant:
+  - docs/user/advanced.rst
+  notes: Two typos; "variables" and "set" are the only intact content words.
+- id: msp-12
+  category: misspelled
+  qtype: misspelled
+  domain: docs
+  origin: v3
+  question: progres report formatt
+  gold:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    anchor: Format of a Progress Report
+    until: 8. Conclusion
+    evidence: Work Completed
+  relevant: []
+  notes: Two typos.
+- id: lst-01
+  category: doc_list_all
+  qtype: list_all
+  domain: docs
+  origin: v3
+  question: List all the steps for writing a report, in order.
+  gold:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    anchor: Steps Involved in Report Writing
+    until: 7. Format and Finalize
+    evidence: Edit and Revise
+  relevant: []
+  notes: Seven numbered steps spanning ~1,000 characters, so likely two chunks.
+- id: lst-02
+  category: doc_list_all
+  qtype: list_all
+  domain: docs
+  origin: v3
+  question: What are all the reasons a report gets written, according to the notes?
+  gold:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    anchor: Purpose of Reports
+    until: 6. To Persuade
+    evidence: To Recommend Actions
+  relevant: []
+  notes: Six purposes.
+- id: lst-03
+  category: doc_list_all
+  qtype: list_all
+  domain: docs
+  origin: v3
+  question: Give me every point listed on why reports matter.
+  gold:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    anchor: Importance of Reports
+    until: 7. Promote Transparency
+    evidence: Support Accountability
+  relevant: []
+  notes: Seven points.
+- id: lst-04
+  category: doc_list_all
+  qtype: list_all
+  domain: docs
+  origin: v3
+  question: Enumerate the strategies the material gives for writing a report well.
+  gold:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    anchor: Writing Strategies of a Report
+    until: 11. Keep it Professional
+    evidence: Know the Audience
+  relevant: []
+  notes: Eleven strategies, ~1,900 characters, so several chunks; any overlapping chunk counts.
+- id: lst-05
+  category: doc_list_all
+  qtype: list_all
+  domain: docs
+  origin: v3
+  question: List the different ways of delivering a speech and what each one suits best.
+  gold:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    anchor: 1. Memorizing Method
+    until: 'Best for: Business presentations, debates, conferences'
+    evidence: Note-Making Method
+  relevant: []
+  notes: Four delivery methods, each with a best-for line.
+- id: lst-06
+  category: doc_list_all
+  qtype: list_all
+  domain: docs
+  origin: v3
+  question: What are all the guidelines for writing a manual?
+  gold:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    anchor: General Guidelines for Writing Manuals
+    until: 11. Include Index and References
+    evidence: Test the Manual
+  relevant: []
+  notes: Eleven guidelines.
+- id: lst-07
+  category: doc_list_all
+  qtype: list_all
+  domain: docs
+  origin: v3
+  question: List every do and every don't for passing information to others.
+  gold:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    anchor: Do’s of Information Transfer
+    until: Do Not Spread Unverified Information
+    evidence: Confirm Understanding
+  relevant: []
+  notes: Seven do's and seven don'ts.
+- id: lst-08
+  category: doc_list_all
+  qtype: list_all
+  domain: docs
+  origin: v3
+  question: Which kinds of charts and diagrams are covered, and what is each one used for?
+  gold:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    anchor: 1. Bar Charts
+    until: Facilitates communication among team members
+    evidence: Tree Diagrams
+  relevant: []
+  notes: Bar charts, tree diagrams, flowcharts, each with uses and benefits.
+- id: lst-09
+  category: doc_list_all
+  qtype: list_all
+  domain: docs
+  origin: v3
+  question: What comes in the box with the mobile phone in the example manual?
+  gold:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    anchor: User Manual – Mobile Phone
+    until: SIM eject tool
+    evidence: SIM eject tool
+  relevant: []
+  notes: Sibling of dfa-08 (AirPods package) and the laptop package list; retrieving a sibling is a miss.
+- id: lst-10
+  category: doc_list_all
+  qtype: list_all
+  domain: docs
+  origin: v3
+  question: List all the benefits of having an operational manual.
+  gold:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    anchor: Importance of an Operational Manual
+    until: Assists in Troubleshooting
+    evidence: Reduces Dependence on Supervisors
+  relevant: []
+  notes: Eight points.
+- id: mh-01
+  category: cross_file
+  qtype: multi_hop
+  domain: code
+  origin: v3
+  question: When a redirect turns my request into a GET, which status codes cause that, and is the request body kept?
+  gold:
+  - file: src/requests/sessions.py
+    anchor: '        # https://tools.ietf.org/html/rfc7231#section-6.4.4'
+    until: '        if response.status_code == codes.moved and method == "POST":'
+    evidence: codes.see_other
+    part: method
+  - file: src/requests/sessions.py
+    anchor: '                purged_headers = ("Content-Length", "Content-Type", "Transfer-Encoding")'
+    until: '                prepared_request.body = None'
+    evidence: prepared_request.body = None
+    part: body
+  relevant:
+  - src/requests/sessions.py
+  notes: rebuild_method (303/302/301 rules) and the body purge in resolve_redirects - two places in sessions.py.
+- id: mh-02
+  category: cross_file
+  qtype: multi_hop
+  domain: code
+  origin: v3
+  question: If proxies come from both my environment and the call itself, which one wins and where is that decided?
+  gold:
+  - file: src/requests/sessions.py
+    anchor: '                    proxies.setdefault(k, v)'
+    evidence: setdefault
+    part: merge
+  - file: docs/user/advanced.rst
+    anchor: '    To ensure the use of proxies in the presence of environmental proxies,'
+    until: '    explicitly specify the ``proxies`` argument on all individual requests as'
+    evidence: explicitly specify
+    part: rule
+  relevant:
+  - docs/user/advanced.rst
+  - src/requests/sessions.py
+  notes: Environment values only fill keys the call left empty (setdefault); the docs warn that session-level proxies are
+    overwritten.
+- id: mh-03
+  category: cross_file
+  qtype: multi_hop
+  domain: code
+  origin: v3
+  question: Which headers does a fresh session send by default, and where does the compression list in them come from?
+  gold:
+  - file: src/requests/utils.py
+    anchor: '            "User-Agent": default_user_agent(),'
+    until: '            "Connection": "keep-alive",'
+    evidence: Accept-Encoding
+    part: headers
+  - file: src/requests/utils.py
+    anchor: 'DEFAULT_ACCEPT_ENCODING: Final = ", ".join('
+    until: re.split(r",\s*", make_headers(accept_encoding=True)["accept-encoding"])
+    evidence: make_headers(accept_encoding=True)
+    part: encoding
+  relevant:
+  - src/requests/utils.py
+  notes: default_headers and the DEFAULT_ACCEPT_ENCODING constant, ~860 lines apart in utils.py.
+- id: mh-04
+  category: cross_file
+  qtype: multi_hop
+  domain: code
+  origin: v3
+  question: How does digest login react to a 401 challenge, and how does it hook itself into the response?
+  gold:
+  - file: src/requests/auth.py
+    anchor: 'if "digest" in s_auth.lower() and self._thread_local.num_401_calls < 2:'
+    evidence: num_401_calls < 2
+    part: challenge
+  - file: src/requests/auth.py
+    anchor: '        r.register_hook("response", self.handle_401)'
+    evidence: register_hook
+    part: hook
+  relevant:
+  - src/requests/auth.py
+  notes: handle_401 retries at most once; __call__ registers it as a response hook.
+- id: mh-05
+  category: cross_file
+  qtype: multi_hop
+  domain: code
+  origin: v3
+  question: If a file I'm uploading can't be wound back to the start during a redirect, what error do I get and where does
+    that happen?
+  gold:
+  - file: src/requests/exceptions.py
+    anchor: 'class UnrewindableBodyError(RequestException):'
+    evidence: UnrewindableBodyError
+    part: exception
+  - file: src/requests/utils.py
+    anchor: '                "An error occurred when rewinding request body for redirect."'
+    evidence: rewinding request body
+    part: raise
+  - file: src/requests/sessions.py
+    anchor: '            # Attempt to rewind consumed file-like object.'
+    until: '                rewind_body(prepared_request)'
+    evidence: rewind_body
+    part: raise
+  relevant:
+  - src/requests/exceptions.py
+  - src/requests/sessions.py
+  - src/requests/utils.py
+  notes: Exception class plus rewind_body (raises) and its call site in resolve_redirects.
+- id: mh-06
+  category: cross_file
+  qtype: multi_hop
+  domain: code
+  origin: v3
+  question: Where is the default size of the connection pool set, and how is it handed to urllib3?
+  gold:
+  - file: src/requests/adapters.py
+    anchor: DEFAULT_POOLSIZE = 10
+    evidence: '10'
+    part: value
+  - file: src/requests/adapters.py
+    anchor: '        self.poolmanager = PoolManager('
+    until: '            maxsize=maxsize,'
+    evidence: num_pools=connections
+    part: handoff
+  relevant:
+  - src/requests/adapters.py
+  notes: Constant at module top; PoolManager construction in init_poolmanager.
+- id: mh-07
+  category: cross_file
+  qtype: multi_hop
+  domain: code
+  origin: v3
+  question: What does checking .ok on a reply actually test, and which status codes make it false?
+  gold:
+  - file: src/requests/models.py
+    anchor: '"""Returns True if :attr:`status_code` is less than 400, False if not.'
+    evidence: less than 400
+    part: ok
+  - file: src/requests/models.py
+    anchor: '        if 400 <= self.status_code < 500:'
+    until: '        elif 500 <= self.status_code < 600:'
+    evidence: 500 <= self.status_code < 600
+    part: range
+  relevant:
+  - src/requests/models.py
+  notes: ok calls raise_for_status; the ranges live in raise_for_status.
+- id: mh-08
+  category: cross_file
+  qtype: multi_hop
+  domain: code
+  origin: v3
+  question: How is the right transport adapter picked for a URL, and how are mounted prefixes kept in order?
+  gold:
+  - file: src/requests/sessions.py
+    anchor: '            if url.lower().startswith(prefix.lower()):'
+    evidence: startswith
+    part: pick
+  - file: src/requests/sessions.py
+    anchor: '        Adapters are sorted in descending order by prefix length.'
+    evidence: descending order by prefix length
+    part: order
+  - file: docs/user/advanced.rst
+    anchor: '.. note:: The adapter will be chosen based on a longest prefix match. Be mindful'
+    evidence: longest prefix match
+    part:
+    - pick
+    - order
+  relevant:
+  - docs/user/advanced.rst
+  - src/requests/sessions.py
+  notes: get_adapter and mount in sessions.py; the docs note states both halves.
+- id: mh-09
+  category: doc_multi_hop
+  qtype: multi_hop
+  domain: docs
+  origin: v3
+  question: Compared with a project report, when is a feasibility report written and what decision does each one support?
+  gold:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    anchor: 'Comparison: Feasibility Report vs. Project Report'
+    until: Helps evaluate what was done and results achieved
+    evidence: Prepared before starting a project
+  relevant: []
+  notes: The flattened comparison table; timing and decision rows are both needed.
+- id: mh-10
+  category: doc_multi_hop
+  qtype: multi_hop
+  domain: docs
+  origin: v3
+  question: How many times more powerful is Jupiter's magnetism than ours, and what is the single biggest thing any planet
+    has around it?
+  gold:
+  - file: space_planets_moons_advanced.txt
+    anchor: that has persisted for centuries. Jupiter has a powerful magnetic field
+    until: approximately 20,000 times stronger than Earth’s.
+    evidence: 20,000 times
+    part: field
+  - file: space_planets_moons_advanced.txt
+    anchor: '-   Jupiter’s magnetosphere is the largest planetary structure in the'
+    evidence: largest planetary structure
+    part: structure
+  relevant: []
+  notes: Jupiter section plus the facts list at the end of the file.
+- id: mh-11
+  category: doc_multi_hop
+  qtype: multi_hop
+  domain: docs
+  origin: v3
+  question: In the school cleanliness evaluation, how much did the cleanliness score improve and what was recommended afterwards?
+  gold:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    anchor: Cleanliness score improved from 60% to 85%
+    evidence: 60% to 85%
+    part: findings
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    anchor: Conduct workshops on waste segregation
+    until: Extend the drive to include recycling activities
+    evidence: workshops on waste segregation
+    part: recommendations
+  relevant: []
+  notes: Findings and recommendations sections of the sample evaluation report.
+- id: mh-12
+  category: doc_multi_hop
+  qtype: multi_hop
+  domain: docs
+  origin: v3
+  question: How much water per hour does the solar pump in the sample project deliver, and what is suggested so it can run
+    at night?
+  gold:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    anchor: Pumps 500 liters per hour
+    evidence: 500 liters per hour
+    part: output
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    anchor: 'Estimated daily water output: 500 liters/hour'
+    evidence: 500 liters/hour
+    part: output
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    anchor: Add battery storage for nighttime operation
+    evidence: battery storage
+    part: night
+  relevant: []
+  notes: The output figure also appears in the sample feasibility report; both count for that part.
+- id: pp-01
+  category: paraphrase
+  qtype: paraphrase
+  domain: code
+  origin: v3
+  question: Can I give the initial handshake a short limit but let the server take longer to actually send data back?
+  gold:
+  - file: docs/user/advanced.rst
+    anchor: 'timeouts. Specify a tuple if you would like to set the values separately::'
+    until: '    r = requests.get(''https://github.com'', timeout=(3.05, 27))'
+    evidence: timeout=(3.05, 27)
+    part: tuple
+  - file: src/requests/adapters.py
+    anchor: '                connect, read = timeout'
+    evidence: connect, read = timeout
+    part: tuple
+  relevant:
+  - docs/user/advanced.rst
+  - src/requests/adapters.py
+  notes: Separate connect/read timeouts. Avoids "timeout", "connect", "read".
+- id: pp-02
+  category: paraphrase
+  qtype: paraphrase
+  domain: code
+  origin: v3
+  question: How can I find out how long the server took to answer me?
+  gold:
+  - file: src/requests/models.py
+    anchor: '#: The amount of time elapsed between sending the request'
+    evidence: time elapsed
+    part: elapsed
+  - file: src/requests/sessions.py
+    anchor: '        r.elapsed = timedelta(seconds=elapsed)'
+    evidence: r.elapsed
+    part: elapsed
+  relevant:
+  - src/requests/models.py
+  - src/requests/sessions.py
+  notes: Response.elapsed. Avoids "elapsed" and "time".
+- id: pp-03
+  category: paraphrase
+  qtype: paraphrase
+  domain: code
+  origin: v3
+  question: Is there an easy way to follow the next-page pointer an API puts in its reply metadata?
+  gold:
+  - file: docs/user/advanced.rst
+    anchor: 'Requests will automatically parse these link headers and make them easily consumable::'
+    evidence: parse these link headers
+    part: links
+  - file: src/requests/models.py
+    anchor: '"""Returns the parsed header links of the response, if any."""'
+    evidence: parsed header links
+    part: links
+  relevant:
+  - docs/user/advanced.rst
+  - src/requests/models.py
+  notes: Response.links / Link headers. Avoids "link" and "header".
+- id: pp-04
+  category: paraphrase
+  qtype: paraphrase
+  domain: code
+  origin: v3
+  question: Why might the size sent for my upload be wrong if I opened the file without the b flag?
+  gold:
+  - file: src/requests/exceptions.py
+    anchor: '"""A file was opened in text mode, but Requests determined its binary length."""'
+    evidence: text mode
+    part: textmode
+  - file: src/requests/utils.py
+    anchor: '"request using the binary size of the file: however, the "'
+    evidence: binary size of the file
+    part: textmode
+  - file: docs/user/advanced.rst
+    anchor: To stream and upload, simply provide a
+    until: if you open the file in *text mode*.
+    evidence: '*text mode*'
+    part: textmode
+  relevant:
+  - docs/user/advanced.rst
+  - src/requests/exceptions.py
+  - src/requests/utils.py
+  notes: FileModeWarning and super_len's warning. Avoids "text mode", "Content-Length".
+- id: pp-05
+  category: paraphrase
+  qtype: paraphrase
+  domain: code
+  origin: v3
+  question: How do I send a body when I don't know its total size in advance?
+  gold:
+  - file: docs/user/advanced.rst
+    anchor: To send a chunk-encoded request, simply provide a generator (or any iterator without
+    evidence: generator
+    part: chunked
+  - file: src/requests/models.py
+    anchor: '                self.headers["Transfer-Encoding"] = "chunked"'
+    evidence: chunked
+    part: chunked
+  relevant:
+  - docs/user/advanced.rst
+  - src/requests/models.py
+  notes: Chunked transfer encoding. Avoids "chunk", "generator", "stream".
+- id: pp-06
+  category: paraphrase
+  qtype: paraphrase
+  domain: code
+  origin: v3
+  question: Can I plug in my own logic for talking to one particular website, separate from the default behaviour?
+  gold:
+  - file: docs/user/advanced.rst
+    anchor: provide specific functionality. Once created, a Transport Adapter can be
+    evidence: Transport Adapter
+    part: adapter
+  - file: src/requests/sessions.py
+    anchor: '"""Registers a connection adapter to a prefix.'
+    evidence: connection adapter
+    part: adapter
+  relevant:
+  - docs/user/advanced.rst
+  - src/requests/sessions.py
+  notes: Transport adapters and Session.mount. Avoids "adapter", "mount", "prefix".
+- id: pp-07
+  category: paraphrase
+  qtype: paraphrase
+  domain: code
+  origin: v3
+  question: How do I get the reply bytes exactly as they came over the network, without automatic unpacking?
+  gold:
+  - file: docs/user/quickstart.rst
+    anchor: transfer-encodings.  ``Response.raw`` is a raw stream of bytes -- it does not
+    evidence: raw stream of bytes
+    part: raw
+  relevant:
+  - docs/user/quickstart.rst
+  notes: Response.raw vs iter_content decoding. Avoids "raw", "gzip", "decode".
+- id: pp-08
+  category: paraphrase
+  qtype: paraphrase
+  domain: code
+  origin: v3
+  question: How do I make every call from one client carry the same extra fields at the top of the message?
+  gold:
+  - file: docs/user/advanced.rst
+    anchor: '    s.headers.update({''x-test'': ''true''})'
+    evidence: s.headers.update
+    part: headers
+  - file: src/requests/sessions.py
+    anchor: '#: A case-insensitive dictionary of headers to be sent on each'
+    evidence: headers to be sent on each
+    part: headers
+  relevant:
+  - docs/user/advanced.rst
+  - src/requests/sessions.py
+  notes: Session-level headers. Avoids "header" and "session".
+- id: pp-09
+  category: paraphrase
+  qtype: paraphrase
+  domain: code
+  origin: v3
+  question: If a site moves me from plain http to https on the same machine, is my login header kept?
+  gold:
+  - file: src/requests/sessions.py
+    anchor: '        # Special case: allow http -> https redirect when using the standard'
+    evidence: allow http -> https redirect
+    part: special
+  relevant:
+  - src/requests/sessions.py
+  notes: should_strip_auth's http->https special case. Different answer from par-06 (different host).
+- id: pp-10
+  category: paraphrase
+  qtype: paraphrase
+  domain: code
+  origin: v3
+  question: Why isn't my connection going back to be reused after I make a call?
+  gold:
+  - file: docs/user/advanced.rst
+    anchor: Note that connections are only released back to the pool for reuse once all body
+    evidence: released back to the pool
+    part: release
+  relevant:
+  - docs/user/advanced.rst
+  notes: Keep-Alive note about reading the body. Avoids "pool", "stream", "content".
+- id: pp-11
+  category: paraphrase
+  qtype: paraphrase
+  domain: code
+  origin: v3
+  question: What happens if I try to decode a reply as JSON and it isn't valid?
+  gold:
+  - file: docs/user/quickstart.rst
+    anchor: attempting ``r.json()`` raises ``requests.exceptions.JSONDecodeError``. This wrapper exception
+    evidence: JSONDecodeError
+    part: error
+  - file: src/requests/models.py
+    anchor: '            # Catch JSON-related errors and raise as requests.JSONDecodeError'
+    evidence: requests.JSONDecodeError
+    part: error
+  relevant:
+  - docs/user/quickstart.rst
+  - src/requests/models.py
+  notes: Response.json raising RequestsJSONDecodeError.
+- id: dpp-01
+  category: doc_paraphrase
+  qtype: paraphrase
+  domain: docs
+  origin: v3
+  question: What problems stop a network learning well, like memorising the training set or signals fading away in deep layers?
+  gold:
+  - file: Deep_Learning_Unit1_Quick_Notes.pdf
+    page: 1
+    anchor: Overfitting, underfitting, vanishing gradients and exploding gradients are common deep learning
+    evidence: vanishing gradients
+  relevant: []
+  notes: Challenges section. Avoids "overfitting" and "vanishing".
+- id: dpp-02
+  category: doc_paraphrase
+  qtype: paraphrase
+  domain: docs
+  origin: v3
+  question: Which basic building block can only separate classes with a straight line?
+  gold:
+  - file: Deep_Learning_Unit1_Quick_Notes.pdf
+    page: 0
+    anchor: A perceptron is the simplest neural network used for linear classification. It updates weights using
+    evidence: linear classification
+  relevant: []
+  notes: Perceptron. Avoids "perceptron" and "linear".
+- id: dpp-03
+  category: doc_paraphrase
+  qtype: paraphrase
+  domain: docs
+  origin: v3
+  question: Which world spins the opposite way to most of the others and is hotter than an oven?
+  gold:
+  - file: space_planets_moons_advanced.txt
+    anchor: pressure is about 92 times that of Earth. Venus rotates in a retrograde
+    evidence: retrograde
+  relevant: []
+  notes: Venus. Avoids "Venus", "retrograde", "rotates".
+- id: dpp-04
+  category: doc_paraphrase
+  qtype: paraphrase
+  domain: docs
+  origin: v3
+  question: Why do the glowing trails of icy visitors always point away from our star?
+  gold:
+  - file: space_planets_moons_advanced.txt
+    anchor: sublimate, producing a glowing coma and one or more tails. The ion tail
+    until: always points away from the Sun because of the solar wind.
+    evidence: solar wind
+  relevant: []
+  notes: Comet ion tail. Avoids "comet", "tail", "Sun".
+- id: dpp-05
+  category: doc_paraphrase
+  qtype: paraphrase
+  domain: docs
+  origin: v3
+  question: What should I do if someone in the audience asks me something I can't answer?
+  gold:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    anchor: 5. Handling Questions
+    until: offer to follow up
+    evidence: offer to follow up
+  relevant: []
+  notes: Handling questions in the presentation delivery section.
+- id: dpp-06
+  category: doc_paraphrase
+  qtype: paraphrase
+  domain: docs
+  origin: v3
+  question: What goes at the very front of a long formal write-up, before the main text starts?
+  gold:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    anchor: I. Front Matter (Preliminary Section)
+    until: 7. List of Appendices (if needed)
+    evidence: Letter or Memo of Transmittal
+  relevant: []
+  notes: Front matter of a formal report. Avoids "front matter" and "report".
+- id: dpp-07
+  category: doc_paraphrase
+  qtype: paraphrase
+  domain: docs
+  origin: v3
+  question: Why would anyone report on a fill-in-the-boxes form instead of writing it from scratch?
+  gold:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    anchor: 4. Preprinted Format
+    until: Saves time and ensures uniformity
+    evidence: Saves time and ensures uniformity
+  relevant: []
+  notes: Preprinted report format. Avoids "preprinted", "fields", "standardized".
+- id: kw-01
+  category: literal_string
+  qtype: keyword
+  domain: code
+  origin: v3
+  question: REQUESTS_CA_BUNDLE environment variable
+  gold:
+  - file: src/requests/sessions.py
+    anchor: '                    os.environ.get("REQUESTS_CA_BUNDLE")'
+    evidence: REQUESTS_CA_BUNDLE
+    part: bundle
+  - file: docs/user/advanced.rst
+    anchor: This list of trusted CAs can also be specified through the ``REQUESTS_CA_BUNDLE`` environment variable.
+    evidence: REQUESTS_CA_BUNDLE
+    part: bundle
+  relevant:
+  - docs/user/advanced.rst
+  - src/requests/sessions.py
+  notes: Read in merge_environment_settings; documented in SSL Cert Verification.
+- id: kw-02
+  category: literal_string
+  qtype: keyword
+  domain: code
+  origin: v3
+  question: charset_normalizer chardet fallback
+  gold:
+  - file: src/requests/models.py
+    anchor: '"""The apparent encoding, provided by the charset_normalizer or chardet libraries."""'
+    evidence: charset_normalizer
+    part: detect
+  - file: docs/user/advanced.rst
+    anchor: When you install ``requests`` without specifying ``[use_chardet_on_py3]`` extra,
+    evidence: use_chardet_on_py3
+    part: detect
+  relevant:
+  - docs/user/advanced.rst
+  - src/requests/models.py
+  notes: Library names typed as keywords.
+- id: kw-03
+  category: literal_string
+  qtype: keyword
+  domain: code
+  origin: v3
+  question: ISO-8859-1 default charset for text content
+  gold:
+  - file: src/requests/utils.py
+    anchor: '        return "ISO-8859-1"'
+    evidence: ISO-8859-1
+    part: default
+  - file: docs/user/advanced.rst
+    anchor: that the default charset must be ``ISO-8859-1``. Requests follows the
+    evidence: ISO-8859-1
+    part: default
+  relevant:
+  - docs/user/advanced.rst
+  - src/requests/utils.py
+  notes: The RFC 2616 default for text/* without a charset.
+- id: kw-04
+  category: literal_string
+  qtype: keyword
+  domain: code
+  origin: v3
+  question: NETRC environment variable
+  gold:
+  - file: src/requests/utils.py
+    anchor: '    netrc_file = os.environ.get("NETRC")'
+    evidence: NETRC
+    part: netrc
+  - file: docs/user/authentication.rst
+    anchor: Requests will search for the netrc file at `~/.netrc`, `~/_netrc`, or at the path
+    evidence: netrc file
+    part: netrc
+  relevant:
+  - docs/user/authentication.rst
+  - src/requests/utils.py
+  notes: Lookup in get_netrc_auth; documented in authentication.rst.
+- id: kw-05
+  category: doc_exact_term
+  qtype: keyword
+  domain: docs
+  origin: v3
+  question: Letter of Transmittal
+  gold:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    anchor: 2. Letter or Memo of Transmittal
+    until: 3. Acknowledgement (optional)
+    evidence: Transmittal
+  relevant: []
+  notes: Element of a formal report's front matter.
+- id: kw-06
+  category: doc_exact_term
+  qtype: keyword
+  domain: docs
+  origin: v3
+  question: 4 Ps of Presentation
+  gold:
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    anchor: The 4 Ps of Presentation
+    occurrence: 1
+    evidence: 4 Ps
+    part: ps
+  - file: V_SEM_3_to_5_units_ETCE.docx
+    anchor: The 4 Ps of Presentation
+    occurrence: 2
+    evidence: 4 Ps
+    part: ps
+  relevant: []
+  notes: Inside the duplicated block; either copy counts.
+- id: kw-07
+  category: doc_exact_term
+  qtype: keyword
+  domain: docs
+  origin: v3
+  question: Great Red Spot
+  gold:
+  - file: space_planets_moons_advanced.txt
+    anchor: composed of hydrogen and helium. The Great Red Spot is a giant storm
+    evidence: Great Red Spot
+  relevant: []
+  notes: Jupiter section.
+- id: kw-08
+  category: doc_exact_term
+  qtype: keyword
+  domain: docs
+  origin: v3
+  question: Leaky ReLU
+  gold:
+  - file: Deep_Learning_Unit1_Quick_Notes.pdf
+    page: 0
+    anchor: 'Leaky ReLU: avoids dead neurons.'
+    evidence: avoids dead neurons
+  relevant: []
+  notes: Activation functions list.
+- id: rid-01
+  category: repo_identity
+  qtype: repo_identity
+  domain: code
+  origin: v3
+  question: What is this repository?
+  gold:
+  - file: README.md
+    anchor: '**Requests** is a simple, yet elegant, HTTP library.'
+    evidence: HTTP library
+    part: identity
+  - file: src/requests/__version__.py
+    anchor: __description__ = "Python HTTP for Humans."
+    evidence: Python HTTP for Humans
+    part: identity
+  relevant:
+  - README.md
+  - src/requests/__version__.py
+  notes: The question the README pin was built for.
+- id: rid-02
+  category: repo_identity
+  qtype: repo_identity
+  domain: code
+  origin: v3
+  question: Which Python versions does this project support?
+  gold:
+  - file: README.md
+    anchor: Requests officially supports Python 3.10+.
+    evidence: 3.10+
+    part: versions
+  - file: pyproject.toml
+    anchor: requires-python = ">=3.10"
+    evidence: '>=3.10'
+    part: versions
+  relevant:
+  - README.md
+  - pyproject.toml
+  notes: README and pyproject agree.
+- id: rid-03
+  category: repo_identity
+  qtype: repo_identity
+  domain: code
+  origin: v3
+  question: How do I install this library?
+  gold:
+  - file: README.md
+    anchor: $ python -m pip install requests
+    evidence: pip install requests
+    part: install
+  - file: docs/user/install.rst
+    anchor: 'To install Requests, simply run this simple command in your terminal of choice::'
+    evidence: simply run
+    part: install
+  relevant:
+  - README.md
+  - docs/user/install.rst
+  notes: README install section and the install docs.
+- id: rid-04
+  category: repo_identity
+  qtype: repo_identity
+  domain: code
+  origin: v3
+  question: What features does this project offer?
+  gold:
+  - file: README.md
+    anchor: '- Keep-Alive & Connection Pooling'
+    until: '- Chunked HTTP Requests'
+    evidence: Multi-part File Uploads
+    part: features
+  relevant:
+  - README.md
+  notes: README feature list.
+- id: rid-05
+  category: repo_identity
+  qtype: repo_identity
+  domain: code
+  origin: v3
+  question: Who wrote this project and what license is it under?
+  gold:
+  - file: src/requests/__version__.py
+    anchor: __author__ = "Kenneth Reitz"
+    evidence: Kenneth Reitz
+    part: author
+  - file: src/requests/__version__.py
+    anchor: __license__ = "Apache-2.0"
+    evidence: Apache-2.0
+    part: license
+  - file: pyproject.toml
+    anchor: license = {text = "Apache-2.0"}
+    evidence: Apache-2.0
+    part: license
+  - file: LICENSE
+    anchor: '                                 Apache License'
+    evidence: Apache License
+    part: license
+  relevant:
+  - LICENSE
+  - pyproject.toml
+  - src/requests/__version__.py
+  notes: Two parts; README does not state the license.
+- id: rid-06
+  category: repo_identity
+  qtype: repo_identity
+  domain: code
+  origin: v3
+  question: Cloning this repo fails with a bad commit timestamp error - how do I get around it?
+  gold:
+  - file: README.md
+    anchor: When cloning the Requests repository, you may need to add the `-c
+    until: fetch.fsck.badTimezone=ignore` flag to avoid an error about a bad commit timestamp (see
+    evidence: badTimezone=ignore
+  relevant:
+  - README.md
+  notes: README "Cloning the repository" section.
+- id: una-11
+  category: unanswerable
+  qtype: unanswerable
+  domain: code
+  origin: v3
+  question: How do I turn on HTTP/2 so several calls share one connection?
+  relevant: []
+  notes: Verified - "HTTP/2", "http2" and "multiplex" appear 0 times in the corpus.
+- id: una-12
+  category: unanswerable
+  qtype: unanswerable
+  domain: code
+  origin: v3
+  question: How do I sign my calls with AWS Signature Version 4?
+  relevant: []
+  notes: Verified - "Signature Version" appears 0 times; "AWS" only as a substring of "laws".
+- id: una-13
+  category: unanswerable
+  qtype: unanswerable
+  domain: code
+  origin: v3
+  question: How do I throttle my client so it never sends more than ten calls per second?
+  relevant: []
+  notes: 'Verified - "rate limit" appears 0 times. Adjacent-but-absent: advanced.rst shows GitHub''s x-ratelimit response
+    headers, which say nothing about limiting outgoing calls.
+
+    '
+- id: una-14
+  category: unanswerable
+  qtype: unanswerable
+  domain: code
+  origin: v3
+  question: Does the library have a built-in GraphQL client?
+  relevant: []
+  notes: Verified - "GraphQL" appears 0 times.
+- id: una-15
+  category: unanswerable
+  qtype: unanswerable
+  domain: code
+  origin: v3
+  question: Can I upload files to an FTP server with this library?
+  relevant: []
+  notes: 'Verified - "ftp" appears only as the ftp_proxy environment variable in tests/conftest.py and tests/test_utils.py;
+    no FTP transfer support exists.
+
+    '
+- id: una-16
+  category: unanswerable
+  qtype: unanswerable
+  domain: docs
+  origin: v3
+  question: What is the escape velocity of Mars?
+  relevant: []
+  notes: Verified - "escape velocity" appears 0 times; the Mars section covers Olympus Mons, Valles Marineris and the moons
+    only.
+- id: una-17
+  category: unanswerable
+  qtype: unanswerable
+  domain: docs
+  origin: v3
+  question: How do pooling layers work in a convolutional neural network?
+  relevant: []
+  notes: Verified - "convolution" appears 0 times; "pooling" only as connection pooling in the repo.
+- id: una-18
+  category: unanswerable
+  qtype: unanswerable
+  domain: docs
+  origin: v3
+  question: How should a press release be structured?
+  relevant: []
+  notes: Verified - "press release" appears 0 times.
+- id: una-19
+  category: unanswerable
+  qtype: unanswerable
+  domain: docs
+  origin: v3
+  question: What minimum font size do the notes recommend for presentation slides?
+  relevant: []
+  notes: 'Verified - no size is given anywhere. Adjacent-but-absent: the docx says only "Use high-quality images, readable
+    fonts, and consistent colors".
+
+    '
