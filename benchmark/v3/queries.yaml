@@ -14,8 +14,8 @@
 #   relevant  v2's file-level locators, kept for the secondary file-level
 #           metric on code queries.
 #
-# Status: DRAFT for review. Nothing here is frozen until the dev/holdout split
-# and its SHA-256 manifest are written (benchmark/v3/split.json).
+# Status: reviewed. Frozen by benchmark/v3/manifest.json together with the
+# dev/holdout split (benchmark/v3/split.json); edit only via a documented re-freeze.
 
 version: 3
 queries:
@@ -94,9 +94,16 @@ queries:
   - file: src/requests/cookies.py
     anchor: ':param overwrite: (optional) If False, will not replace cookies'
     evidence: overwrite
+    part: p0
+  - file: src/requests/cookies.py
+    anchor: def cookiejar_from_dict(
+    occurrence: 3
+    evidence: cookiejar_from_dict
+    part: p0
   relevant:
   - src/requests/cookies.py
-  notes: Builds a RequestsCookieJar from a plain dict.
+  notes: 'Builds a RequestsCookieJar from a plain dict. Alternative span added in v3 review: the implementation''s def line
+    (third def after two typing overloads).'
 - id: eid-07
   category: exact_identifier
   qtype: exact_identifier
@@ -1221,7 +1228,7 @@ queries:
   qtype: paraphrase
   domain: docs
   origin: v2
-  question: When would a short internal note be a better choice than a formal letter for reporting?
+  question: When is a quick note to colleagues inside the company a better fit than sending a proper letter?
   gold:
   - file: V_SEM_3_to_5_units_ETCE.docx
     start: 1483
@@ -1231,7 +1238,9 @@ queries:
   - file: V_SEM_3_to_5_units_ETCE.docx
     start: 1483
     end: 3057
-  notes: Memo versus letter format rationale.
+  notes: 'Memo versus letter format rationale. REWORDED in v3 review (overlap audit): four of five shared tokens ("formal",
+    "internal", "short", "reporting") were ordinary words from the source; only "letter" names the format. Original: "When
+    would a short internal note be a better choice than a formal letter for reporting?"'
 - id: dco-08
   category: doc_conceptual
   qtype: paraphrase
@@ -1281,12 +1290,14 @@ queries:
   gold:
   - file: V_SEM_3_to_5_units_ETCE.docx
     start: 62169
-    end: 67608
+    end: 62892
     part: p0
+    evidence: Kinesics
   - file: V_SEM_3_to_5_units_ETCE.docx
     start: 67648
-    end: 73087
+    end: 68371
     part: p0
+    evidence: Kinesics
   relevant:
   - file: V_SEM_3_to_5_units_ETCE.docx
     start: 62169
@@ -1295,9 +1306,8 @@ queries:
     start: 67648
     end: 73087
   notes: 'Answerable from either copy of the duplicated block. Both listed so a correct retrieval of the second copy is not
-    scored as a miss.
-
-    '
+    scored as a miss. NARROWED in v3 review: v2 labelled the whole duplicated block [62169,67608)/[67648,73087) (15 chunks:
+    kinesics, the 4 Ps of presentation, visual aids); gold is now the kinesics section of each copy.'
 - id: dpa-01
   category: doc_paraphrase
   qtype: paraphrase
@@ -1319,7 +1329,7 @@ queries:
   qtype: paraphrase
   domain: docs
   origin: v2
-  question: Which document helps decide whether a proposed plan is actually worth doing?
+  question: Which write-up tells you if a scheme is realistic enough to go ahead with?
   gold:
   - file: V_SEM_3_to_5_units_ETCE.docx
     start: 26668
@@ -1329,7 +1339,9 @@ queries:
   - file: V_SEM_3_to_5_units_ETCE.docx
     start: 26668
     end: 27623
-  notes: Feasibility report. Question avoids "feasibility".
+  notes: 'Feasibility report. Question avoids "feasibility". REWORDED in v3 review (overlap audit): all five shared tokens
+    ("decide", "document", "plan", "proposed", "whether") were ordinary words from the source sentence, not the topic name.
+    Original: "Which document helps decide whether a proposed plan is actually worth doing?"'
 - id: dpa-03
   category: doc_paraphrase
   qtype: paraphrase
@@ -1387,12 +1399,14 @@ queries:
   gold:
   - file: V_SEM_3_to_5_units_ETCE.docx
     start: 62169
-    end: 67608
+    end: 62892
     part: p0
+    evidence: Kinesics
   - file: V_SEM_3_to_5_units_ETCE.docx
     start: 67648
-    end: 73087
+    end: 68371
     part: p0
+    evidence: Kinesics
   relevant:
   - file: V_SEM_3_to_5_units_ETCE.docx
     start: 62169
@@ -1400,7 +1414,9 @@ queries:
   - file: V_SEM_3_to_5_units_ETCE.docx
     start: 67648
     end: 73087
-  notes: Unusual technical term, unlikely to appear by accident. Duplicated block.
+  notes: 'Unusual technical term, unlikely to appear by accident. Duplicated block. NARROWED in v3 review: v2 labelled the
+    whole duplicated block [62169,67608)/[67648,73087) (15 chunks: kinesics, the 4 Ps of presentation, visual aids); gold
+    is now the kinesics section of each copy.'
 - id: dex-02
   category: doc_exact_term
   qtype: keyword
@@ -1705,9 +1721,16 @@ queries:
   - file: src/requests/utils.py
     anchor: dictionary. If it can be, return a list of tuples, e.g.,
     evidence: return a list of tuples
+    part: p0
+  - file: src/requests/utils.py
+    anchor: def to_key_val_list(
+    occurrence: 3
+    evidence: to_key_val_list
+    part: p0
   relevant:
   - src/requests/utils.py
-  notes: '"to" is a stopword. Span is the implementation''s docstring (the two typing overloads precede it).'
+  notes: '"to" is a stopword. Span is the implementation''s docstring (the two typing overloads precede it). Alternative span
+    added in review: the implementation''s def line (third def after two typing overloads).'
 - id: isw-06
   category: identifier_stopword
   qtype: exact_identifier
@@ -1718,9 +1741,15 @@ queries:
   - file: src/requests/utils.py
     anchor: dictionary. Unless it can not be represented as such, return an
     evidence: Unless it can not be represented
+    part: p0
+  - file: src/requests/utils.py
+    anchor: def from_key_val_list(
+    evidence: from_key_val_list
+    part: p0
   relevant:
   - src/requests/utils.py
-  notes: '"from" is a stopword. Sibling of isw-05 with near-identical vocabulary.'
+  notes: '"from" is a stopword. Sibling of isw-05 with near-identical vocabulary. Alternative span added in review: the def
+    line.'
 - id: isw-07
   category: identifier_stopword
   qtype: exact_identifier
@@ -1847,7 +1876,7 @@ queries:
   notes: Two typos; neither misspelled word exists in the corpus.
 - id: msp-03
   category: misspelled
-  qtype: misspelled
+  qtype: exact_identifier
   domain: code
   origin: v3
   question: resolve_redirect
@@ -1857,7 +1886,8 @@ queries:
     evidence: resolve_redirects
   relevant:
   - src/requests/sessions.py
-  notes: Singular for plural; the exact token "redirect" is common elsewhere.
+  notes: Singular for plural; the exact token "redirect" is common elsewhere. qtype moved to exact_identifier in review (category
+    kept as misspelled for traceability).
 - id: msp-04
   category: misspelled
   qtype: misspelled
@@ -2598,14 +2628,15 @@ queries:
   qtype: paraphrase
   domain: docs
   origin: v3
-  question: Why do the glowing trails of icy visitors always point away from our star?
+  question: Why do the streaks behind icy visitors face away from our star whichever way they're moving?
   gold:
   - file: space_planets_moons_advanced.txt
     anchor: sublimate, producing a glowing coma and one or more tails. The ion tail
     until: always points away from the Sun because of the solar wind.
     evidence: solar wind
   relevant: []
-  notes: Comet ion tail. Avoids "comet", "tail", "Sun".
+  notes: 'Comet ion tail. Avoids "comet", "tail", "Sun". REWORDED in v3 review: the draft copied "glowing" and "always point
+    away from". Draft: "Why do the glowing trails of icy visitors always point away from our star?"'
 - id: dpp-05
   category: doc_paraphrase
   qtype: paraphrase

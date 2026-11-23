@@ -301,9 +301,21 @@ def test_harness_runs_production_path_end_to_end(tmp_path, monkeypatch):
     for arm in E.ARMS:
         for metric in ("hit@1", "hit@5", "mrr@5", "recall@20"):
             assert 0.0 <= row["arms"][arm][metric] <= 1.0
-    assert result["per_query"]["u1"]["arms"] == {}
+    for metric in ("all_parts@5", "chunk_cov@5", "chunk_cov@20"):
+        assert 0.0 <= row["arms"]["production"][metric] <= 1.0
+    unans = result["per_query"]["u1"]
+    assert unans["arms"] == {}
+    for arm in E.ARMS:                      # refusal signals recorded for every query
+        for r in (unans, row):
+            cosine = r["top1"][arm]["cosine"]
+            assert cosine is None or -1.01 <= cosine <= 1.01   # None: the arm returned nothing
+    assert unans["top1"]["dense_plain"]["cosine"] is not None   # dense always returns chunks
+    assert unans["top1"]["bm25"]["cosine"] is None              # no shared token, no candidates
+    assert row["top1"]["production"]["native"] is not None   # RRF score
     agg = E.aggregate(result["per_query"], resamples=50, seed=1)
     assert agg["all/all/all"]["n"] == 1
+    signal = E.refusal_signal(result["per_query"])["all"]["production"]
+    assert signal["unanswerable_cosine"]["n"] == 1 and signal["answerable_cosine"]["n"] == 1
 
 
 def test_scoring_refuses_unfrozen_set_without_flag(monkeypatch, tmp_path):
@@ -329,3 +341,103 @@ def test_committed_v3_results_match_the_code():
     assert not stale, (
         f"benchmark/v3/results.json is stale for {stale}: re-run "
         "`python -m benchmark.v3.evaluate` and commit the new results")
+
+
+# ── new metrics ──────────────────────────────────────────────────────────────
+
+class TestNewMetrics:
+    def test_chunk_coverage(self):
+        from benchmark.v3.evaluate import chunk_coverage
+
+        direct = {1: {"a"}, 2: {"a"}, 3: {"a"}, 4: {"a"}}
+        assert chunk_coverage([1, 9, 2], direct, 5) == 0.5
+        assert chunk_coverage([9, 9, 9, 9, 9, 1, 2, 3, 4], direct, 5) == 0.0
+        assert chunk_coverage([9, 9, 9, 9, 9, 1, 2, 3, 4], direct, 20) == 1.0
+        with pytest.raises(ValueError):
+            chunk_coverage([1], {}, 5)
+
+    def test_all_parts_needs_every_part(self):
+        from benchmark.v3.evaluate import score_query
+
+        gold = {1: {"a"}, 2: {"b"}}
+        one = score_query([1, 9, 9], [1, 9, 9], gold, 2, gold)
+        both = score_query([9, 2, 1], [9, 2, 1], gold, 2, gold)
+        assert one["hit@5"] == 1.0 and one["all_parts@5"] == 0.0
+        assert both["all_parts@5"] == 1.0 and both["mrr@5"] == 0.5
+
+    def test_group_tags(self):
+        from benchmark.v3.evaluate import group_tags
+
+        assert group_tags({"qtype": "keyword", "gold_parts": 1, "gold_chunks": 1}) == ["keyword"]
+        assert group_tags({"qtype": "list_all", "gold_parts": 2, "gold_chunks": 4}) == [
+            "list_all", "multi_part", "gold4plus"]
+
+    def test_typo_effect_pairs_twins(self):
+        from benchmark.v3 import evaluate as E
+
+        arms = {a: {"rank": 1} for a in E.ARMS}
+        per_query = {"msp-09": {"arms": {a: {"rank": None} for a in E.ARMS}},
+                     "dfa-04": {"arms": arms}}
+        out = E.typo_effect(per_query)
+        assert list(out) == ["msp-09|dfa-04"]
+        assert out["msp-09|dfa-04"]["production"] == {"typo_rank": None, "correct_rank": 1}
+
+
+# ── freeze ───────────────────────────────────────────────────────────────────
+
+def _queries(n_per_stratum: int):
+    out = []
+    for dom in ("code", "docs"):
+        for qt in ("keyword", "paraphrase"):
+            out += [{"id": f"{dom}-{qt}-{i}", "domain": dom, "qtype": qt}
+                    for i in range(n_per_stratum)]
+    return out
+
+
+class TestFreeze:
+    def test_split_is_stratified_and_deterministic(self):
+        from benchmark.v3.freeze import stratified_split
+
+        qs = _queries(10)
+        a = stratified_split(qs, seed=7)
+        assert a == stratified_split(list(reversed(qs)), seed=7)    # order-independent
+        for dom in ("code", "docs"):
+            for qt in ("keyword", "paraphrase"):
+                ids = [q["id"] for q in qs if q["domain"] == dom and q["qtype"] == qt]
+                assert sum(a[i] == "holdout" for i in ids) == 3
+        assert set(a) == {q["id"] for q in qs}
+        assert stratified_split(qs, seed=8) != a
+
+    def test_verify_detects_a_changed_file(self, tmp_path):
+        from benchmark.v3 import freeze
+
+        (tmp_path / "f.txt").write_text("frozen")
+        files = {"f.txt": freeze.sha256_file(str(tmp_path / "f.txt"))}
+        manifest = {"files": files, "manifest_sha256": freeze._manifest_digest(files)}
+        (tmp_path / "m.json").write_text(json.dumps(manifest))
+        freeze.verify(str(tmp_path / "m.json"), str(tmp_path))
+        (tmp_path / "f.txt").write_text("edited")
+        with pytest.raises(freeze.FrozenFileChanged, match="f.txt"):
+            freeze.verify(str(tmp_path / "m.json"), str(tmp_path))
+
+    def test_verify_detects_an_edited_file_list(self, tmp_path):
+        from benchmark.v3 import freeze
+
+        (tmp_path / "f.txt").write_text("frozen")
+        manifest = {"files": {"f.txt": freeze.sha256_file(str(tmp_path / "f.txt"))},
+                    "manifest_sha256": "0" * 64}
+        (tmp_path / "m.json").write_text(json.dumps(manifest))
+        with pytest.raises(freeze.FrozenFileChanged, match="file list"):
+            freeze.verify(str(tmp_path / "m.json"), str(tmp_path))
+
+
+def test_committed_frozen_files_are_intact():
+    """CI fails if the frozen query set, split or gold rules are edited without a re-freeze."""
+    from benchmark.v3 import freeze
+
+    if not os.path.exists(freeze.MANIFEST_PATH):
+        pytest.skip("query set not frozen yet")
+    manifest = freeze.verify()
+    assignment = freeze.load_split_assignments()
+    assert set(assignment) == {q["id"] for q in D.load()["queries"]}
+    assert manifest["n_dev"] + manifest["n_holdout"] == len(assignment)

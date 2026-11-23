@@ -72,13 +72,21 @@ COLLECTION = "langchain"      # langchain_community.vectorstores.Chroma's defaul
 ARMS = ("production", "production_no_pin", "dense_fallback", "dense_plain", "bm25")
 RECALL_K = 20
 
-# Files whose content decides what the production arm returns. Their hashes
-# are recorded with every result; tests/test_benchmark_v3.py fails when the
-# committed results no longer match the code.
+# Misspelled queries whose correctly spelled twin has the same gold span; the
+# per-pair rank difference is the typo effect. (msp-09, msp-10 were kept in
+# review specifically for this; the identifier twins come for free.)
+TYPO_TWINS = (("msp-09", "dfa-04"), ("msp-10", "dco-02"), ("msp-01", "eid-01"),
+              ("msp-03", "eid-02"), ("msp-04", "eid-04"))
+
+# Files whose content decides what is measured and how it is scored. Their
+# hashes are recorded with every result; tests/test_benchmark_v3.py fails when
+# the committed results no longer match them.
 FINGERPRINT_FILES = (
     "src/hybrid_retrieval.py", "src/vector_store.py", "src/chunking.py",
     "src/code_languages.py", "src/repo_ingestion.py", "src/data_ingestion.py",
-    "benchmark/v3/queries.yaml",
+    "benchmark/v3/queries.yaml", "benchmark/v3/split.json",
+    "benchmark/v3/gold.py", "benchmark/v3/dataset.py", "benchmark/v3/corpus.py",
+    "benchmark/v3/stats.py", "benchmark/v3/evaluate.py",
 )
 
 
@@ -91,7 +99,11 @@ def sha256_path(path: str) -> str:
 
 
 def fingerprint() -> dict:
-    return {rel: sha256_path(os.path.join(PROJECT_ROOT, rel)) for rel in FINGERPRINT_FILES}
+    out = {}
+    for rel in FINGERPRINT_FILES:
+        path = os.path.join(PROJECT_ROOT, rel)
+        out[rel] = sha256_path(path) if os.path.exists(path) else None
+    return out
 
 
 def library_versions() -> dict:
@@ -183,15 +195,32 @@ def make_arms(chroma_dir: str):
 
 # ── scoring ──────────────────────────────────────────────────────────────────
 
+def chunk_coverage(ranked: list, direct: dict, k: int) -> float:
+    """Share of the chunks overlapping a gold span that appear in the top k."""
+    if not direct:
+        raise ValueError("coverage is undefined without gold chunks")
+    return len(set(ranked[:k]) & set(direct)) / len(direct)
+
+
 def score_query(ranked_top: list, ranked_wide: list, gold: dict, n_parts: int,
                 direct: dict) -> dict:
+    """
+    ranked_top: what the arm returns (production: its final 5).
+    ranked_wide: the arm's list for the @20 metrics (production: final_k=20).
+    gold: chunk -> parts, near-duplicates included. direct: span-overlap only.
+    """
+    recall5 = G.recall_at(ranked_top, gold, n_parts, 5)
     return {
         "rank": G.first_rank(ranked_top, gold),
         "hit@1": float(G.hit_at(ranked_top, gold, 1)),
         "hit@5": float(G.hit_at(ranked_top, gold, 5)),
         "mrr@5": G.mrr_at(ranked_top, gold, 5),
+        "recall@5": recall5,
+        "all_parts@5": float(recall5 == 1.0),
         "recall@20": G.recall_at(ranked_wide, gold, n_parts, RECALL_K),
         "hit@20": float(G.hit_at(ranked_wide, gold, RECALL_K)),
+        "chunk_cov@5": chunk_coverage(ranked_top, direct, 5),
+        "chunk_cov@20": chunk_coverage(ranked_wide, direct, RECALL_K),
         "hit@5_direct": float(G.hit_at(ranked_top, direct, 5)),
     }
 
@@ -217,6 +246,7 @@ def run(chunks: list, parents: dict, data: dict, chroma_dir: str, splits: dict) 
 
     pos = {chunk_key(c): i for i, c in enumerate(chunks)}
     arms, retriever = make_arms(chroma_dir)
+    vectors, embed_query = stored_vectors(chroma_dir, pos)
 
     def indices(docs):
         out = []
@@ -237,6 +267,7 @@ def run(chunks: list, parents: dict, data: dict, chroma_dir: str, splits: dict) 
                                 for d in lists["production"]),
                "top5": {name: [f"{G.chunk_file(chunks[i])}@{chunks[i].metadata.get('start_index')}"
                                for i in indices(lists[name])[:5]] for name in ARMS},
+               "top1": top1_signals(question, lists, indices, vectors, embed_query, retriever),
                "arms": {}}
         if q["qtype"] != "unanswerable":
             r = resolved[qid]
@@ -260,19 +291,81 @@ def run(chunks: list, parents: dict, data: dict, chroma_dir: str, splits: dict) 
                                                         "search_type", None)}}
 
 
-METRICS = ("hit@1", "hit@5", "mrr@5", "recall@20")
+def stored_vectors(chroma_dir: str, pos: dict):
+    """Chunk index -> the embedding production stored for it, plus the query embedder."""
+    import numpy as np
+    from langchain_core.documents import Document
+
+    from src.hybrid_retrieval import chunk_key
+    from src.vector_store import get_embeddings, load_vector_store
+
+    raw = load_vector_store(chroma_dir)._collection.get(include=["embeddings", "metadatas"])
+    vectors = {}
+    for vec, meta in zip(raw["embeddings"], raw["metadatas"]):
+        vectors[pos[chunk_key(Document(page_content="", metadata=dict(meta or {})))]] = (
+            np.asarray(vec, dtype=np.float32))
+    return vectors, get_embeddings().embed_query
+
+
+def top1_signals(question: str, lists: dict, indices, vectors: dict, embed_query,
+                 retriever) -> dict:
+    """
+    Confidence signals for each arm's top-1 chunk, recorded for every query so a
+    refusal threshold can later be set from answerable vs unanswerable queries.
+
+    cosine: production embedding of the query vs the stored embedding of the
+    top-1 chunk - one scale for every arm. native: the score the arm itself
+    exposes (RRF score for the fused arms, BM25 score for bm25; dense arms
+    expose none through the retriever, so their native signal is the cosine).
+    """
+    import numpy as np
+
+    qv = np.asarray(embed_query(question), dtype=np.float32)
+    qv = qv / (np.linalg.norm(qv) or 1.0)
+    out = {}
+    for name in ARMS:
+        docs = lists[name]
+        if not docs:
+            out[name] = {"cosine": None, "native": None}
+            continue
+        cv = vectors[indices(docs[:1])[0]]
+        cosine = float(cv @ qv / (np.linalg.norm(cv) or 1.0))
+        if name in ("production", "production_no_pin"):
+            native = docs[0].metadata.get("rrf_score")
+        elif name == "bm25":
+            hits = retriever.bm25_index.search(question, 1)
+            native = float(hits[0][1]) if hits else None
+        else:
+            native = cosine
+        out[name] = {"cosine": cosine, "native": native}
+    return out
+
+
+METRICS = ("hit@1", "hit@5", "mrr@5", "recall@20", "all_parts@5", "chunk_cov@5", "chunk_cov@20")
+MULTI_PART_MIN = 2
+LARGE_GOLD_MIN = 4
+
+
+def group_tags(row: dict) -> list[str]:
+    """Reporting groups a query belongs to, besides 'all'."""
+    tags = [row["qtype"]]
+    if row["gold_parts"] >= MULTI_PART_MIN:
+        tags.append("multi_part")
+    if row["gold_chunks"] >= LARGE_GOLD_MIN:
+        tags.append("gold4plus")
+    return tags
 
 
 def aggregate(per_query: dict, resamples: int, seed: int) -> dict:
-    """Per split x domain x qtype group: metric means with paired bootstrap CIs."""
+    """Per split x domain x group: metric means with paired bootstrap CIs."""
     groups: dict[tuple, list[str]] = defaultdict(list)
     for qid, row in per_query.items():
         if row["qtype"] == "unanswerable":
             continue
         for split in (row["split"], "all") if row["split"] != "all" else ("all",):
             for dom in (row["domain"], "all"):
-                for qt in (row["qtype"], "all"):
-                    groups[(split, dom, qt)].append(qid)
+                for tag in [*group_tags(row), "all"]:
+                    groups[(split, dom, tag)].append(qid)
     out = {}
     for (split, dom, qt), ids in sorted(groups.items()):
         ids = sorted(ids)
@@ -292,6 +385,43 @@ def aggregate(per_query: dict, resamples: int, seed: int) -> dict:
                                     [per_query[i]["arms"]["production"][m] for i in ids], idx)
                 for m in METRICS}
         out[f"{split}/{dom}/{qt}"] = block
+    return out
+
+
+def refusal_signal(per_query: dict) -> dict:
+    """Top-1 signal distributions, answerable vs unanswerable, per split and arm."""
+    import numpy as np
+
+    out: dict = {}
+    splits = sorted({r["split"] for r in per_query.values()} | {"all"})
+    for split in splits:
+        rows = [r for r in per_query.values() if split in ("all", r["split"])]
+        block = {}
+        for arm in ARMS:
+            block[arm] = {}
+            for label, want in (("answerable", False), ("unanswerable", True)):
+                for signal in ("cosine", "native"):
+                    vals = [r["top1"][arm][signal] for r in rows
+                            if (r["qtype"] == "unanswerable") == want
+                            and r["top1"][arm][signal] is not None]
+                    block[arm][f"{label}_{signal}"] = (
+                        {"n": len(vals), "median": float(np.median(vals)),
+                         "p10": float(np.quantile(vals, 0.1)), "p90": float(np.quantile(vals, 0.9))}
+                        if vals else None)
+        out[split] = block
+    return out
+
+
+def typo_effect(per_query: dict) -> dict:
+    """Rank of the first gold chunk for each misspelled query and its correct twin."""
+    out = {}
+    for typo, correct in TYPO_TWINS:
+        if typo not in per_query or correct not in per_query:
+            continue
+        out[f"{typo}|{correct}"] = {
+            arm: {"typo_rank": per_query[typo]["arms"][arm]["rank"],
+                  "correct_rank": per_query[correct]["arms"][arm]["rank"]}
+            for arm in ARMS}
     return out
 
 
@@ -368,6 +498,8 @@ def main() -> int:
             "pin_fired": sum(1 for r in result["per_query"].values()
                              if r["qtype"] == "unanswerable" and r["pin_fired"]),
         },
+        "refusal_signal": refusal_signal(result["per_query"]),
+        "typo_effect": typo_effect(result["per_query"]),
         "pin_fired_answerable": sum(1 for r in result["per_query"].values()
                                     if r["qtype"] != "unanswerable" and r["pin_fired"]),
         "dataset_warnings": result["warnings"],
