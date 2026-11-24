@@ -1,32 +1,40 @@
 """
-Hybrid retrieval: dense (Chroma + MMR) fused with sparse (BM25) via RRF.
+Hybrid retrieval: a recall-oriented candidate pool, reordered by a reranker.
 
-Why hybrid
+Two stages
 ----------
-The two retrievers fail in opposite directions, which is exactly what makes
-them worth combining:
+1. Candidate pool (this module). Plain dense similarity (top ``POOL_K``)
+   and BM25 (top ``POOL_K``) over the same chunks, fused by min-max score
+   blending with equal weight. The pool's job is recall: get the right chunk
+   into the top ``RERANK_TOP_K``, not into the top 5.
+2. Reranking (src/reranker.py). A cross-encoder reads each (question, chunk)
+   pair of the pool's top ``RERANK_TOP_K`` and the best ``FINAL_K`` go into
+   the prompt.
 
-  * Dense / MMR  — matches meaning. Handles paraphrase well
-    ("how do I cancel" ~ "termination of the agreement"), but a 384-dim
-    MiniLM vector smears rare tokens. Exact identifiers, section numbers,
-    acronyms, product names and typo-prone proper nouns often do not survive
-    the projection.
-  * Sparse / BM25 — matches surface form. Nails "Section 4.2", "ISO 27001",
-    "CVE-2024-3094", any term the user copied verbatim out of the document,
-    but is blind to synonyms and returns nothing when vocabulary differs.
+Why this shape, with the measured numbers (v3 benchmark, dev split), is in
+docs/DECISIONS.md. In short: MMR was removed (LangChain's Chroma wrapper
+returned its selection in plain similarity order, so it only dropped
+candidates), the pool went from 20 MMR+BM25 candidates to a 50+50 blend
+(dev Recall@20 84.2 -> 89.5), and the reranker raised dev Hit@1 from 39.8 to
+54.9 and Hit@5 from 73.5 to 81.4.
 
-Fusion strategy
----------------
-Reciprocal Rank Fusion (Cormack et al., 2009) rather than score blending.
-Chroma returns cosine distances, rank_bm25 returns unbounded corpus-relative
-scores; the two have no common scale, and per-query min-max normalisation is
-unstable when one list is short or its scores are near-uniform. RRF ignores
-magnitudes entirely and combines *ranks*:
+The two retrievers fail in opposite directions, which is why both feed the
+pool:
 
-    score(chunk) = sum over retrievers of  weight / (smoothing + rank)
+  * Dense  - matches meaning. Handles paraphrase ("how do I cancel" ~
+    "termination of the agreement"), but a 384-dim MiniLM vector smears rare
+    tokens: identifiers, section numbers, acronyms.
+  * BM25   - matches surface form. Nails "Section 4.2", "CVE-2024-3094" and
+    pasted identifiers, but is blind to synonyms.
 
-A chunk found by both retrievers accumulates two terms and therefore beats a
-chunk found by only one, which is the behaviour we want.
+Fallbacks: retrieval never breaks
+---------------------------------
+  * BM25 unavailable (rank_bm25 missing, index build fails) -> dense-only pool.
+  * Reranker unavailable, raising, or over its time budget -> fused order.
+  * Fewer chunks than POOL_K (a small chat) -> the pool is whatever exists.
+
+Each query writes one log line (pool size, rerank time, top-1 score, fallback)
+to stderr. The question text and chunk content are never logged.
 
 Design constraints inherited from the existing app
 --------------------------------------------------
@@ -38,11 +46,12 @@ Design constraints inherited from the existing app
 2. ``build_rag_chain`` runs on every uncached message, so index construction
    must be cached. ``load_bm25_index`` is keyed on (chroma_dir, chunk_count);
    appending documents changes the count, which invalidates the entry for
-   free — no manual cache busting needed.
+   free - no manual cache busting needed. The reranker is loaded once per
+   process (src/reranker.get_reranker).
 3. Returned Documents keep ``source`` / ``page`` / ``start_index`` untouched
-   so the citation helpers in app.py keep working unchanged.
+   so the citation helpers keep working unchanged.
 4. Streamlit and Chroma are imported lazily / defensively so this module can
-   be imported by pytest or a future evaluate.py with neither installed.
+   be imported by pytest with neither installed.
 """
 
 from __future__ import annotations
@@ -50,11 +59,15 @@ from __future__ import annotations
 import functools
 import hashlib
 import re
+import sys
 import threading
+import time
 from typing import Any, Iterable, Sequence
 
 from langchain_core.documents import Document
 from langchain_core.retrievers import BaseRetriever
+
+from src.reranker import RERANK_BUDGET_S, RERANK_TOP_K, RerankFailed
 
 try:
     from rank_bm25 import BM25Okapi
@@ -65,63 +78,68 @@ except ModuleNotFoundError:  # pragma: no cover - exercised only on a broken ins
 
 
 # ── Tuning constants ──────────────────────────────────────────────────────────
-# Each retriever proposes CANDIDATE_K chunks; RRF fuses both lists and the top
-# FINAL_K survive into the prompt. FINAL_K stays at 5 so the QA prompt keeps
-# roughly the same context budget as before the upgrade.
+# Measured on the v3 benchmark's dev split; see docs/DECISIONS.md.
 
-FINAL_K            = 5
-VECTOR_CANDIDATE_K = 10    # dense candidates fed into fusion
-VECTOR_FETCH_K     = 30    # MMR pre-fetch pool (was 20 for k=5)
-MMR_LAMBDA         = 0.6   # unchanged: 0 = max diversity, 1 = pure relevance
-BM25_CANDIDATE_K   = 10    # sparse candidates fed into fusion
+FINAL_K      = 5      # chunks that go into the prompt (unchanged context budget)
+POOL_K       = 50     # candidates each retriever contributes to the pool
+FUSION_ALPHA = 0.5    # weight of the dense side in the min-max blend
+# RERANK_TOP_K (20) and RERANK_BUDGET_S (3 s) live in src/reranker.py.
 
-RRF_SMOOTHING = 60         # standard constant; damps the top-rank advantage
-VECTOR_WEIGHT = 0.5
-BM25_WEIGHT   = 0.5
+# Legacy constants of the pre-v3 pipeline (MMR + RRF). Not used by the default
+# path; kept because the v1/v2 benchmark tooling (evaluate_retrieval.py,
+# benchmark/sweep.py) imports them to reproduce its own measurements.
+VECTOR_CANDIDATE_K = 10
+VECTOR_FETCH_K     = 30
+MMR_LAMBDA         = 0.6
+BM25_CANDIDATE_K   = 10
+RRF_SMOOTHING      = 60
+VECTOR_WEIGHT      = 0.5
+BM25_WEIGHT        = 0.5
 
 
 # ── Tokenisation ──────────────────────────────────────────────────────────────
-# Deliberately simple and identical for corpus and query — consistency between
-# the two sides matters far more than linguistic sophistication. Lowercasing
-# plus alphanumeric splitting means "GPT-4" indexes as ["gpt", "4"] and the
-# query "gpt 4" still matches it.
+# Identical for corpus and query - consistency between the two sides matters
+# far more than linguistic sophistication.
+#
+# Identifiers are kept WHOLE as well as split into their parts:
+#
+#   "TooManyRedirects"          -> toomanyredirects, too, many, redirects
+#   "get_encoding_from_headers" -> get_encoding_from_headers, get, encoding,
+#                                  from, headers
+#
+# Two consequences, both measured on the v3 benchmark:
+#   * an exact paste of an identifier matches the identifier itself, not just
+#     a scatter of common words ("get", "auth", "url") that occur everywhere;
+#   * stopwords are removed only OUTSIDE identifiers. The old tokenizer turned
+#     "TooManyRedirects" into ["many", "redirects"] because "too" is a
+#     stopword, and lost that query entirely.
+# A lowercased identifier typed as prose ("toomanyredirects") now matches the
+# whole-identifier token too.
+#
+# A word counts as an identifier when it contains an underscore or an internal
+# case boundary (camelCase, PascalCase, HTTPServer). Plain words are
+# lowercased, split on non-alphanumerics and stopword-filtered as before, so
+# "GPT-4" still indexes as ["gpt", "4"].
 
+_WORD_RE = re.compile(r"[A-Za-z0-9_]+")
 _TOKEN_RE = re.compile(r"[a-z0-9]+")
-
-# Identifier case boundaries, applied BEFORE lowercasing.
-#
-# Without this, casing is destroyed before it can be used as a word boundary,
-# and the result is language-dependent by accident: `_` is not in [a-z0-9] so
-# snake_case splits correctly, while camelCase and PascalCase collapse into
-# one token. `build_hybrid_retriever` was reachable from the query "build
-# hybrid retriever"; `buildHybridRetriever` was not, so BM25 returned nothing
-# for every natural-language query against a JS/TS/Java/Go codebase — and
-# because zero lexical overlap means an empty candidate list, hybrid retrieval
-# silently degraded to vector-only on exactly the identifier queries where
-# dense embeddings are weakest.
-#
-# Splitting both corpus and query keeps the module's core invariant (identical
-# treatment on both sides), so an exact paste of `buildHybridRetriever` still
-# matches — it now decomposes the same way the document did.
 _CAMEL_LOWER_UPPER = re.compile(r"(?<=[a-z0-9])(?=[A-Z])")   # buildHybrid -> build Hybrid
 _CAMEL_ACRONYM     = re.compile(r"(?<=[A-Z])(?=[A-Z][a-z])") # HTTPServer  -> HTTP Server
 
 # Function words carry almost no discriminative signal and inflate document
-# length, which BM25 penalises. Removed from both sides so the length
-# normalisation stays meaningful.
+# length, which BM25 penalises. Removed from both sides, but only outside
+# identifiers (see above).
 #
 # NOTE ON PROGRAMMING KEYWORDS: this list also contains `if`, `for`, `in`,
 # `is`, `not`, `and`, `or`, `as`, `from`, `with` and `this`, which are keywords
 # in most languages, so they are unsearchable as bare terms. That is a
-# deliberate decision, not an oversight. Stopwords here are not merely a
-# scoring tweak — BM25Index.search() uses token overlap to decide *candidacy*,
-# so admitting a token present in nearly every code chunk would make nearly
-# every chunk a candidate for any query containing it, while IDF gives those
-# terms almost no ranking power in return. The realistic cost is queries made
-# only of keywords ("for", "if"), which are not useful searches; "for loop"
-# still matches on "loop". Meaningful code keywords — `class`, `def`,
-# `function`, `return`, `import`, `async`, `await`, `try`, `except`, `self` —
-# are all absent from this list and remain searchable.
+# deliberate decision, not an oversight. BM25Index.search() uses token overlap
+# to decide *candidacy*, so admitting a token present in nearly every code
+# chunk would make nearly every chunk a candidate for any query containing it,
+# while IDF gives those terms almost no ranking power in return. "for loop"
+# still matches on "loop". Meaningful code keywords - `class`, `def`,
+# `function`, `return`, `import`, `async`, `await`, `try`, `except`, `self` -
+# are absent from this list and remain searchable.
 _STOPWORDS = frozenset("""
 a an the and or but if then than that this these those there here
 is are was were be been being am do does did doing done
@@ -134,11 +152,26 @@ please tell explain give show
 """.split())
 
 
+def _is_identifier(word: str) -> bool:
+    core = word.strip("_")
+    if "_" in core:
+        return True
+    return bool(_CAMEL_LOWER_UPPER.search(core) or _CAMEL_ACRONYM.search(core))
+
+
 def tokenize(text: str) -> list[str]:
-    """Split identifier case boundaries, lowercase, split on alphanumeric runs,
-    drop stopwords. Applied identically to corpus and query."""
-    text = _CAMEL_ACRONYM.sub(" ", _CAMEL_LOWER_UPPER.sub(" ", text))
-    return [t for t in _TOKEN_RE.findall(text.lower()) if t not in _STOPWORDS]
+    """Identifiers: whole token plus all parts. Other words: lowercase,
+    alphanumeric runs, stopwords dropped. Applied identically to corpus and query."""
+    out: list[str] = []
+    for word in _WORD_RE.findall(text):
+        if _is_identifier(word):
+            whole = word.strip("_").lower()
+            out.append(whole)
+            split = _CAMEL_ACRONYM.sub(" ", _CAMEL_LOWER_UPPER.sub(" ", word)).lower()
+            out.extend(p for p in _TOKEN_RE.findall(split) if p != whole)
+        else:
+            out.extend(t for t in _TOKEN_RE.findall(word.lower()) if t not in _STOPWORDS)
+    return out
 
 
 # ── Chunk identity ────────────────────────────────────────────────────────────
@@ -292,7 +325,9 @@ class BM25Index:
         return min(candidates, key=lambda d: d.metadata.get("start_index", 0))
 
 
-# ── Reciprocal Rank Fusion ────────────────────────────────────────────────────
+# ── Fusion ────────────────────────────────────────────────────────────────────
+# reciprocal_rank_fusion is the pre-v3 fusion; the default path now uses
+# minmax_fusion below. Kept for the v1/v2 benchmark tooling.
 
 def reciprocal_rank_fusion(
     ranked_lists: dict[str, Iterable[Document]],
@@ -340,6 +375,61 @@ def reciprocal_rank_fusion(
     ]
 
 
+def _minmax(scores: dict) -> dict:
+    """Scale one retriever's scores to [0, 1]; a single or flat list maps to 1.0."""
+    if not scores:
+        return {}
+    lo, hi = min(scores.values()), max(scores.values())
+    return {k: (v - lo) / (hi - lo) if hi > lo else 1.0 for k, v in scores.items()}
+
+
+def minmax_fusion(
+    dense: Sequence[tuple[Document, float]],
+    sparse: Sequence[tuple[Document, float]],
+    alpha: float = FUSION_ALPHA,
+) -> list[Document]:
+    """
+    Blend two scored lists: alpha * minmax(dense) + (1 - alpha) * minmax(bm25).
+
+    A chunk missing from one list contributes 0 from that side. Ties keep
+    first-seen order (dense first), so a fixed candidate set always fuses to
+    the same order. Returns fresh Documents carrying ``retrieval`` (which
+    retrievers found the chunk) and ``fusion_score``; the BM25 index caches its
+    Documents for the session, so they are never mutated in place.
+
+    Score blending was chosen over RRF for the candidate pool because, measured
+    on the v3 dev split at depth 50, it put more gold chunks into the top 20
+    (Recall@20 89.5 vs 86.4) - the reranker's input window. Per-query min-max
+    is unstable when a list is very short; here each side contributes up to 50
+    candidates, and a one-item list simply scores 1.0.
+    """
+    docs: dict[tuple, Document] = {}
+    origins: dict[tuple, list[str]] = {}
+    dense_scores: dict[tuple, float] = {}
+    sparse_scores: dict[tuple, float] = {}
+    order: list[tuple] = []
+    for name, ranked, sink in (("vector", dense, dense_scores), ("bm25", sparse, sparse_scores)):
+        for doc, score in ranked:
+            key = chunk_key(doc)
+            if key not in docs:
+                docs[key], origins[key] = doc, []
+                order.append(key)
+            if key not in sink:
+                sink[key] = float(score)
+                origins[key].append(name)
+    dn, sn = _minmax(dense_scores), _minmax(sparse_scores)
+    fused = {k: alpha * dn.get(k, 0.0) + (1 - alpha) * sn.get(k, 0.0) for k in order}
+    ranked_keys = sorted(order, key=lambda k: -fused[k])     # stable: first-seen on ties
+    return [
+        Document(
+            page_content=docs[k].page_content,
+            metadata={**docs[k].metadata, "retrieval": "+".join(origins[k]),
+                      "fusion_score": round(fused[k], 6)},
+        )
+        for k in ranked_keys
+    ]
+
+
 def is_repo_readme(doc: Document) -> bool:
     """
     True for a repository's own top-level README — not a nested subdirectory
@@ -353,42 +443,101 @@ def is_repo_readme(doc: Document) -> bool:
     )
 
 
+
 # ── Retriever ─────────────────────────────────────────────────────────────────
 
 class HybridRetriever(BaseRetriever):
     """
-    Drop-in replacement for the previous ``vector_store.as_retriever(...)``.
+    Candidate pool (dense + BM25, min-max fused) -> cross-encoder rerank -> top FINAL_K.
 
-    Exposes the same ``.invoke(query) -> list[Document]`` contract, so
-    rag_chain's call site is unchanged and the retriever stays composable with
-    the rest of LangChain.
+    Keeps the ``.invoke(query) -> list[Document]`` contract of the retriever it
+    replaced, so rag_chain's call site is unchanged.
+
+    The dense side is ``vector_store`` (a Chroma store, queried with scores) or,
+    for tests and adapters, any ``vector_retriever`` exposing ``invoke`` that
+    returns a ranked list; rank then stands in for score.
     """
 
-    vector_retriever: Any
+    vector_store: Any = None
+    vector_retriever: Any = None
     bm25_index: Any = None
+    reranker: Any = None
+    corpus_size: int | None = None
     final_k: int = FINAL_K
-    bm25_candidate_k: int = BM25_CANDIDATE_K
-    vector_weight: float = VECTOR_WEIGHT
-    bm25_weight: float = BM25_WEIGHT
-    rrf_smoothing: int = RRF_SMOOTHING
+    pool_k: int = POOL_K
+    rerank_k: int = RERANK_TOP_K
+    fusion_alpha: float = FUSION_ALPHA
+    rerank_budget_s: float = RERANK_BUDGET_S
+    # The README pin is off by default: on the v3 dev split it never turned a
+    # repository-identity miss into a hit and, after reranking, cost two other
+    # queries their only gold chunk (docs/DECISIONS.md). Kept as an option.
+    surface_readme: bool = False
+    log_stream: Any = None
+
+    # ── stage 1: candidate pool ──────────────────────────────────────────────
+
+    def _dense(self, query: str) -> list[tuple[Document, float]]:
+        k = self.pool_k if self.corpus_size is None else min(self.pool_k, self.corpus_size)
+        if k <= 0:
+            return []
+        if self.vector_store is not None:
+            # Chroma returns L2 distances; with normalised embeddings that is a
+            # linear function of cosine similarity, so -distance preserves both
+            # the order and the min-max-normalised value of cosine.
+            hits = self.vector_store.similarity_search_with_score(query, k=k)
+            return [(doc, -float(dist)) for doc, dist in hits]
+        if self.vector_retriever is not None:
+            docs = list(self.vector_retriever.invoke(query))[:k]
+            n = len(docs)
+            return [(doc, float(n - i)) for i, doc in enumerate(docs)]
+        return []
+
+    def _sparse(self, query: str) -> list[tuple[Document, float]]:
+        if self.bm25_index is None or not getattr(self.bm25_index, "ready", False):
+            return []
+        return self.bm25_index.search(query, self.pool_k)
+
+    def candidate_pool(self, query: str) -> list[Document]:
+        """The fused pool, best first, before reranking (up to 2 x pool_k chunks)."""
+        return minmax_fusion(self._dense(query), self._sparse(query), self.fusion_alpha)
+
+    # ── stage 2: rerank ──────────────────────────────────────────────────────
 
     def _get_relevant_documents(self, query: str, *, run_manager: Any = None) -> list[Document]:
-        dense = self.vector_retriever.invoke(query)
+        pool = self.candidate_pool(query)
+        candidates = pool[: self.rerank_k]
+        results = pool[: self.final_k]
+        fallback, rerank_ms, top1 = "none", None, None
 
-        sparse: list[Document] = []
-        if self.bm25_index is not None and self.bm25_index.ready:
-            sparse = [d for d, _ in self.bm25_index.search(query, self.bm25_candidate_k)]
+        if not candidates:
+            fallback = "empty_pool"
+        elif self.reranker is None:
+            fallback = "no_reranker"
+        else:
+            started = time.monotonic()
+            try:
+                scores = self.reranker.score(query, [d.page_content for d in candidates],
+                                             budget_s=self.rerank_budget_s)
+                order = sorted(range(len(candidates)), key=lambda i: (-scores[i], i))
+                results = [
+                    Document(page_content=candidates[i].page_content,
+                             metadata={**candidates[i].metadata,
+                                       "rerank_score": round(scores[i], 4)})
+                    for i in order[: self.final_k]
+                ]
+                top1 = scores[order[0]]
+            except RerankFailed as exc:
+                fallback = exc.reason                 # "timeout" | "error": keep fused order
+            rerank_ms = round(1000 * (time.monotonic() - started))
 
-        # No lexical hits (unknown vocabulary, or an all-stopword query):
-        # fusion of a single list is order-preserving, so this degrades
-        # cleanly to the original dense-only behaviour.
-        fused = reciprocal_rank_fusion(
-            {"vector": dense, "bm25": sparse},
-            {"vector": self.vector_weight, "bm25": self.bm25_weight},
-            smoothing=self.rrf_smoothing,
-            top_k=self.final_k,
-        )
-        return self._surface_readme_if_missing(fused, query)
+        if self.surface_readme:
+            results = self._surface_readme_if_missing(results, query)
+
+        log_retrieval(pool_size=len(pool), reranked=len(candidates) if rerank_ms is not None else 0,
+                      rerank_ms=rerank_ms, top1_score=top1, fallback=fallback,
+                      bm25=self.bm25_index is not None and getattr(self.bm25_index, "ready", False),
+                      stream=self.log_stream)
+        return results
 
     def _surface_readme_if_missing(self, fused: list[Document], query: str) -> list[Document]:
         """
@@ -509,39 +658,53 @@ def forget_bm25_index(chroma_dir: str) -> None:
         _clear_bm25_entry(chroma_dir, chunk_count)
 
 
-def build_hybrid_retriever(chroma_dir: str):
+def build_hybrid_retriever(chroma_dir: str) -> HybridRetriever:
     """
     Assemble the retriever used by the RAG pipeline.
 
-    Falls back to dense-only retrieval — with a warning rather than an
-    exception — if rank_bm25 is missing, so a partial install degrades the
-    answer quality instead of taking the app down.
+    Never fails for a missing component: without rank_bm25 or a buildable BM25
+    index the pool is dense-only, and without a reranker the pool's fused
+    order is used. Each degradation prints a warning.
     """
+    from src.reranker import get_reranker
     from src.vector_store import count_chunks, load_vector_store
 
     store = load_vector_store(chroma_dir)   # cached client; never a second connection
-    vector_retriever = store.as_retriever(
-        search_type="mmr",
-        search_kwargs={
-            "k":           VECTOR_CANDIDATE_K,
-            "fetch_k":     VECTOR_FETCH_K,
-            "lambda_mult": MMR_LAMBDA,
-        },
-    )
+    chunk_count = count_chunks(chroma_dir)
 
+    bm25_index = None
     if not BM25_AVAILABLE:
-        print("[WARNING] rank_bm25 not installed — falling back to vector-only "
-              "retrieval. Run: pip install rank-bm25")
-        return vector_retriever
+        print("[WARNING] rank_bm25 not installed - candidate pool is dense-only. "
+              "Run: pip install rank-bm25")
+    else:
+        try:
+            _record_bm25_count(chroma_dir, chunk_count)
+            bm25_index = load_bm25_index(chroma_dir, chunk_count)
+        except Exception as exc:
+            # Retrieval quality should degrade, not the app.
+            print(f"[WARNING] BM25 index unavailable ({exc}) - candidate pool is dense-only.")
+            bm25_index = None
 
-    try:
-        chunk_count = count_chunks(chroma_dir)
-        _record_bm25_count(chroma_dir, chunk_count)
-        bm25_index = load_bm25_index(chroma_dir, chunk_count)
-    except Exception as exc:
-        # Retrieval quality should degrade, not the app. Vector search alone
-        # is still a working system.
-        print(f"[WARNING] BM25 index unavailable ({exc}) — using vector-only retrieval.")
-        return vector_retriever
+    return HybridRetriever(vector_store=store, bm25_index=bm25_index,
+                           reranker=get_reranker(), corpus_size=chunk_count)
 
-    return HybridRetriever(vector_retriever=vector_retriever, bm25_index=bm25_index)
+
+# ── Logging ───────────────────────────────────────────────────────────────────
+
+def format_retrieval_log(pool_size: int, reranked: int, rerank_ms: int | None,
+                         top1_score: float | None, fallback: str, bm25: bool) -> str:
+    """
+    One line per retrieval. Takes only numbers and fixed labels: the question
+    and the chunk text are not parameters, so they cannot leak into logs.
+    fallback: none | no_reranker | timeout | error | empty_pool.
+    """
+    ms = "-" if rerank_ms is None else str(rerank_ms)
+    top1 = "-" if top1_score is None else f"{top1_score:.3f}"
+    return (f"retrieval pool={pool_size} reranked={reranked} rerank_ms={ms} "
+            f"top1_score={top1} fallback={fallback} bm25={'on' if bm25 else 'off'}")
+
+
+def log_retrieval(pool_size: int, reranked: int, rerank_ms: int | None,
+                  top1_score: float | None, fallback: str, bm25: bool, stream=None) -> None:
+    print(format_retrieval_log(pool_size, reranked, rerank_ms, top1_score, fallback, bm25),
+          file=stream or sys.stderr, flush=True)

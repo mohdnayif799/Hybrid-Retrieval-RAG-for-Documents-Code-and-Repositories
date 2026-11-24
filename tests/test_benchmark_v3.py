@@ -276,9 +276,15 @@ def test_harness_runs_production_path_end_to_end(tmp_path, monkeypatch):
     from langchain_core.embeddings import DeterministicFakeEmbedding
 
     from benchmark.v3 import evaluate as E
+    from src import reranker as rr
     from src import vector_store
 
+    class FakeModel:
+        def predict(self, pairs, batch_size=4):
+            return [5.0 if "parse_header" in text else -1.0 for _, text in pairs]
+
     monkeypatch.setattr(vector_store, "get_embeddings", lambda: DeterministicFakeEmbedding(size=16))
+    rr.set_reranker_for_tests(rr.Reranker(FakeModel()))
     texts = ["def parse_header(value): split the header on commas",
              "README project overview: a tiny HTTP helper",
              "def retry_policy(): retries failed connections",
@@ -295,8 +301,13 @@ def test_harness_runs_production_path_end_to_end(tmp_path, monkeypatch):
     ]}
     store = E.build_store(chunks, str(tmp_path / "store"), exact=True)
     assert E.store_hnsw_config(store)["ef_search"] == E.EXACT_HNSW["ef_search"]
-    result = E.run(chunks, parents, data, store, splits={})
+    try:
+        result = E.run(chunks, parents, data, store, splits={})
+    finally:
+        rr.reset_for_tests()
     row = result["per_query"]["a1"]
+    assert row["production_log"]["fallback"] == "none" and row["production_log"]["pool"] >= 1
+    assert row["arms"]["production"]["hit@1"] == 1.0          # the fake reranker put it first
     assert set(row["arms"]) == set(E.ARMS)
     for arm in E.ARMS:
         for metric in ("hit@1", "hit@5", "mrr@5", "recall@20"):
@@ -311,9 +322,11 @@ def test_harness_runs_production_path_end_to_end(tmp_path, monkeypatch):
             assert cosine is None or -1.01 <= cosine <= 1.01   # None: the arm returned nothing
     assert unans["top1"]["dense_plain"]["cosine"] is not None   # dense always returns chunks
     assert unans["top1"]["bm25"]["cosine"] is None              # no shared token, no candidates
-    assert row["top1"]["production"]["native"] is not None   # RRF score
+    assert row["top1"]["production"]["native"] == 5.0          # the reranker's score
+    assert row["top1"]["baseline_v3"]["native"] is not None    # its RRF score
     agg = E.aggregate(result["per_query"], resamples=50, seed=1)
     assert agg["all/all/all"]["n"] == 1
+    assert set(agg["all/all/all"]["vs_baseline"]) == set(E.ARMS) - {E.REFERENCE_ARM}
     signal = E.refusal_signal(result["per_query"])["all"]["production"]
     assert signal["unanswerable_cosine"]["n"] == 1 and signal["answerable_cosine"]["n"] == 1
 
@@ -441,3 +454,22 @@ def test_committed_frozen_files_are_intact():
     assignment = freeze.load_split_assignments()
     assert set(assignment) == {q["id"] for q in D.load()["queries"]}
     assert manifest["n_dev"] + manifest["n_holdout"] == len(assignment)
+
+
+def test_harness_refuses_to_score_production_without_its_reranker(tmp_path, monkeypatch):
+    """With the reranker missing, production runs its fallback; that is not what ships."""
+    pytest.importorskip("chromadb")
+    from langchain_core.embeddings import DeterministicFakeEmbedding
+
+    from benchmark.v3 import evaluate as E
+    from src import reranker as rr
+    from src import vector_store
+
+    monkeypatch.setattr(vector_store, "get_embeddings", lambda: DeterministicFakeEmbedding(size=16))
+    rr.set_reranker_for_tests(None)
+    try:
+        store = E.build_store([chunk("a.py", 0, "def f(): pass")], str(tmp_path / "s"), exact=True)
+        with pytest.raises(RuntimeError, match="reranker did not load"):
+            E.make_arms(store)
+    finally:
+        rr.reset_for_tests()
