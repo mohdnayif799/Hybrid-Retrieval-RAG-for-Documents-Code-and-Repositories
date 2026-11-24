@@ -20,6 +20,12 @@ from src.rag_chain import build_rag_chain
 from src.example_repo import EXAMPLE_REPO, EXAMPLE_REPO_URL, load_example_repository
 from src.query_log import CallCounter, is_quota_error, log_query, redact
 from src.reranker import start_background_warmup
+from src.response_cache import (
+    batch_digest,
+    cache_key,
+    document_set_hash,
+    is_cacheable,
+)
 from src.citations import (
     build_inline_citations,
     doc_type_label,
@@ -234,6 +240,10 @@ def _blank_chat() -> dict:
         "uploaded_files": [],
         "repos":          [],
         "response_cache": {},
+        # One digest per indexed batch (documents or a repository). Part of
+        # the response-cache key, so adding documents invalidates cached
+        # answers. See src/response_cache.py.
+        "doc_digests":    [],
         # Message count when the example repo was indexed; the suggested
         # question is offered until the next message is sent.
         "example_hint_at": None,
@@ -322,6 +332,9 @@ def _index_chunks(aid: str, chunks: list, progress_bar, base_pct: int = 60):
         chat["chroma_dir"] = chroma_dir
     else:
         append_to_vector_store(chunks, chat["chroma_dir"], progress_callback=embed_progress)
+    # Recorded only once the chunks are stored: the chat's document set has
+    # changed, so answers cached before this point no longer match its key.
+    chat.setdefault("doc_digests", []).append(batch_digest(chunks))
 
 
 def _new_chat():
@@ -508,7 +521,7 @@ def _forget_evicted_stores() -> None:
         if chat["chroma_dir"] and not store_exists(chat["chroma_dir"]):
             chat.update(
                 chroma_dir=None, uploaded_files=[], repos=[], response_cache={},
-                example_hint_at=None, store_cleared=True,
+                doc_digests=[], example_hint_at=None, store_cleared=True,
             )
 
 
@@ -548,7 +561,7 @@ with st.sidebar:
     st.divider()
 
     # New Chat
-    if st.button("\u2795  New Chat", width="stretch"):
+    if st.button("\u2795  New Chat", key="new_chat", width="stretch"):
         _new_chat()
         st.rerun()
 
@@ -824,13 +837,19 @@ if user_question:
 
         with st.container():          # see replay loop: avoids the avatar
             try:
-                cache_key = user_question.strip().lower()
-                cache     = st.session_state.chats[aid]["response_cache"]
+                chat  = st.session_state.chats[aid]
+                cache = chat["response_cache"]
+                # Keyed by chat, the chat's document set and the question; a
+                # follow-up that leans on earlier turns bypasses the cache
+                # entirely (src/response_cache.py).
+                use_cache = is_cacheable(user_question, has_history=bool(chat["lc_history"]))
+                key = cache_key(aid, document_set_hash(chat.get("doc_digests", [])),
+                                user_question)
 
-                if cache_key in cache:
+                if use_cache and key in cache:
                     status      = "cached"
-                    answer      = cache[cache_key]["answer"]
-                    source_docs = cache[cache_key]["source_docs"]
+                    answer      = cache[key]["answer"]
+                    source_docs = cache[key]["source_docs"]
                     st.caption("\U0001f5c4️ *(retrieved from session cache)*")
                 else:
                     with st.spinner("Searching documents and generating answer…"):
@@ -847,7 +866,8 @@ if user_question:
                         status      = "ok"
                         answer      = result["answer"]
                         source_docs = result["context"]
-                        cache[cache_key] = {"answer": answer, "source_docs": source_docs}
+                        if use_cache:
+                            cache[key] = {"answer": answer, "source_docs": source_docs}
                         # Only a completed answer counts. A failure or a quota
                         # refusal raises before this line, so it never uses up
                         # one of the visitor's demo queries.

@@ -139,3 +139,38 @@ correction and intent, list and summary questions, answer length) is in
 [`ROADMAP_v4.md`](ROADMAP_v4.md). Decisions are recorded here as each phase
 lands. The retrieval holdout has been scored once (PR #6); the plan scores it
 a second and final time in its last phase.
+
+### Response cache keyed by chat, document set and question (2026-11-24)
+
+The per-chat answer cache was keyed by the lowercased question alone. That
+caused two concrete failures, each now covered by an `AppTest` that fails on
+the old code:
+
+* **New documents were ignored.** A question answered before a document was
+  added returned the same answer, with the same sources, after it was added.
+* **History was ignored.** A repeated follow-up ("and the next one?") returned
+  its first answer even after the conversation had moved on.
+
+**Now** (`src/response_cache.py`):
+
+* **Key:** (chat id, document-set digest, normalized question). Normalizing
+  means case, extra spaces and trailing `?!.` don't change the key.
+* **Document-set digest:** each time a chat indexes documents or a
+  repository, a SHA-256 over that batch's chunk sources and texts is
+  recorded. The document set is the digest of those batch digests, sorted.
+  Adding anything changes the key. Evicting the store resets it, along with
+  the cache.
+* **Follow-ups:** when the chat already has history, a message that leans on
+  it is not read from or written to the cache. A message leans on history if
+  any of these hold:
+  * it has 3 words or fewer;
+  * it opens with "and", "but", "what about", "why", "tell me more" and the
+    like;
+  * it contains a reference word: "it", "this", "they", "next", "previous",
+    "second", "more", ...
+* **Errs towards a cache miss.** "What does this library do?" also bypasses
+  the cache. A wrong miss costs one Gemini call (about $0.001); a wrong hit
+  answers a different question.
+* **First messages are always cacheable.**
+
+**Cost:** no new Gemini calls. A few hash operations per question.
