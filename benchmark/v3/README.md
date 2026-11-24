@@ -151,3 +151,8 @@ exhaustive store. Default HNSW is itself nondeterministic across builds: 9 of
    0.771 on dev; 0.935 vs 0.796 on holdout). A threshold of about -7.5 keeps
    107/113 answerable and flags 6/14 unanswerable on dev (44/49 and 3/5 on
    holdout). `src/reranker.REFUSAL_SCORE_HINT` records it; nothing uses it yet.
+10. **`smoke_repo_retrieval.py` line-number check fails.** Step 4/6 ("reported
+    line numbers match file contents") reports 2367 chunks verified and 2
+    mismatched, so the script ends 21 passed, 1 failed. It fails the same way
+    on `main` before Phase 1+2. It concerns chunk `start_line` metadata
+    (chunking), not retrieval ranking. Not investigated or fixed yet.
