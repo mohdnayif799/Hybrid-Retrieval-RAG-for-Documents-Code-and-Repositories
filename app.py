@@ -19,6 +19,7 @@ from src.vector_store import (
 from src.rag_chain import build_rag_chain
 from src.example_repo import EXAMPLE_REPO, EXAMPLE_REPO_URL, load_example_repository
 from src.query_log import CallCounter, is_quota_error, log_query, redact
+from src.reranker import start_background_warmup
 from src.citations import (
     build_inline_citations,
     doc_type_label,
@@ -47,6 +48,13 @@ st.set_page_config(
     page_title="Hybrid-Retrieval RAG",
     layout="wide",
 )
+
+# ── Model warm-up ─────────────────────────────────────────────────────────────
+# The service scales to zero, so a visitor's first page load often lands on a
+# fresh container. Loading the embedding model and the reranker in a
+# background thread now means the first question does not pay for it, and the
+# page itself renders without waiting. Once per process; a no-op on reruns.
+start_background_warmup()
 
 # ── Global CSS ────────────────────────────────────────────────────────────────
 st.markdown("""

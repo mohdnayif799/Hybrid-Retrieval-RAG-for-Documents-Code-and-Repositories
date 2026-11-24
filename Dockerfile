@@ -89,15 +89,19 @@ ENV HF_HOME=/opt/models/huggingface \
 # missing model), and CI catches it by loading the model through the app's own
 # code inside the built image.
 ARG EMBEDDING_MODEL=all-MiniLM-L6-v2
+# Must match RERANK_MODEL in src/reranker.py, for the same reason.
+ARG RERANK_MODEL=cross-encoder/ms-marco-MiniLM-L6-v2
 
 # Download both models now, by loading them exactly the way the app does, so
 # the files on disk are precisely the ones the app will ask for:
 #   * all-MiniLM-L6-v2 (~90 MB) for embeddings
+#   * cross-encoder/ms-marco-MiniLM-L6-v2 (~90 MB) for reranking
 #   * EasyOCR's English detector + recognizer (~95 MB) for scanned PDFs
 # Then drop download leftovers: hf-xet's chunk cache (a second copy of the
 # same bytes) and empty lock files. chmod makes sure the unprivileged runtime
 # user can read everything, whatever permissions the downloaders chose.
 RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('${EMBEDDING_MODEL}', device='cpu')" \
+ && python -c "from sentence_transformers import CrossEncoder; CrossEncoder('${RERANK_MODEL}', device='cpu', max_length=512)" \
  && python -c "import easyocr; easyocr.Reader(['en'], gpu=False, verbose=False)" \
  && rm -rf "${HF_HOME}/xet" "${HF_HOME}/hub/.locks" \
  && chmod -R a+rX /opt/models

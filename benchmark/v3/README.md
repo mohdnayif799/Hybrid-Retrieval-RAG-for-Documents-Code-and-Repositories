@@ -5,10 +5,12 @@ ground truth**, **deterministically**, with **paired confidence intervals**. It
 replaces `evaluate_retrieval.py` (v1/v2) as the baseline for retrieval changes.
 No Gemini call is made: retrieval happens before generation.
 
-> **Status: reviewed, frozen, scored.** The query set was reviewed and then
-> frozen (`manifest.json`, 127 dev / 54 holdout) before anything was scored.
-> The baseline is in [RESULTS.md](RESULTS.md). It is the "before" measurement
-> for retrieval Phases 1 and 2.
+> **Status: Phase 1+2 scored.** The query set was reviewed and frozen
+> (`manifest.json`, 127 dev / 54 holdout) before anything was scored. The
+> Phase-0 baseline is in [RESULTS_phase0.md](RESULTS_phase0.md). The current
+> pipeline (candidate pool + reranker) against that baseline is in
+> [RESULTS.md](RESULTS.md); configuration was chosen on dev, and holdout was
+> scored once. Why each choice was made: [docs/DECISIONS.md](../../docs/DECISIONS.md).
 
 ## Why v3
 
@@ -29,7 +31,9 @@ its "no significant difference" result uninformative:
 | `queries.yaml` | The frozen query set: v2's 93 queries plus 88 new ones (review edits recorded in each query's notes) |
 | `split.json`, `manifest.json` | The stratified 70/30 dev/holdout split and the SHA-256 freeze manifest |
 | `REVIEW.md` | Generated review sheet: every new query and every new label, with the exact text each span covers |
-| `results.json`, `RESULTS.md` | The baseline: raw per-query results and the generated report |
+| `results.json`, `RESULTS.md` | Current pipeline vs baseline: raw per-query results and the generated report |
+| `results_phase0.json`, `RESULTS_phase0.md` | The Phase-0 baseline, kept unchanged |
+| `baseline_v3.py` | Frozen copy of the pre-Phase-1 retriever (the `baseline_v3` arm) |
 | `corpus.py` | Loads the v2 corpus through the real ingestion and chunking code; verifies the repository by a content digest |
 | `gold.py` | Span gold: anchors, evidence checks, parts, near-duplicates, rank metrics |
 | `dataset.py` | Loads and validates `queries.yaml` (`python -m benchmark.v3.dataset`) |
@@ -52,7 +56,7 @@ the code); different parts are different pieces of a multi-part answer.
 
 * **Hit@1 / Hit@5 / MRR@5**: is any part found in the top 1 / top 5 (ranking quality).
 * **Recall@20**: share of parts found in the top 20 (candidate quality). For
-  the production arm this uses the same retriever with `final_k=20`.
+  the production arm this is the candidate pool's top 20, the reranker's input.
 * **File-level Hit@5** for code queries: the v2-comparable secondary metric.
 * **all-parts@5** (multi-part queries): every part has a chunk in the top 5.
 * **Chunk coverage @5 / @20** (list_all queries): share of the gold-span chunks retrieved.
@@ -71,15 +75,17 @@ because each admitted chunks that do not contain the answer (details in `gold.py
 
 | Arm | What it is |
 |---|---|
-| `production` | `build_hybrid_retriever(store).invoke(q)`: what the app returns (final_k=5, README pin on) |
-| `production_no_pin` | the same fused list without the README pin |
-| `dense_fallback` | the retriever's MMR vector retriever alone: what production returns if BM25 is unavailable (10 chunks) |
+| `production` | `build_hybrid_retriever(store).invoke(q)`: what the app returns (candidate pool -> reranker -> top 5). The harness refuses to run if the reranker did not load |
+| `baseline_v3` | the pre-Phase-1 pipeline (MMR + BM25, RRF, README pin) from the frozen `baseline_v3.py`; it reproduces the Phase-0 production top-5 lists exactly |
+| `production_no_rerank` | the candidate pool's fused order: what production returns if the reranker fails or runs over budget |
 | `dense_plain` | plain similarity search on the same store |
-| `bm25` | the retriever's BM25 index |
+| `bm25` | production's BM25 index |
 
 All arms run in one process on one store. Every aggregate is reported per
 split, domain (code / docs) and query type, with paired differences against
-`production`.
+`baseline_v3`. Production's per-query log line (fallback, rerank time) is
+recorded with its scores. `--split dev` retrieves and scores the dev split
+only, for tuning without touching holdout.
 
 ## Running
 
@@ -108,8 +114,10 @@ exhaustive store. Default HNSW is itself nondeterministic across builds: 9 of
    `results.json` records hashes of the retrieval code, the frozen files and the
    harness, and a CI test fails when they no longer match, so a retrieval change
    must ship with re-run results.
-2. **Tuning discipline:** Phase 1/2 decisions are made on `dev`; `holdout` is
-   scored to confirm a change once, not to choose between variants.
+2. **Tuning discipline:** decisions are made on `dev`; `holdout` is scored to
+   confirm a change once, not to choose between variants. Phase 1+2 followed
+   this: Part A experiments were dev-only, and holdout was scored once, in the
+   run behind RESULTS.md.
 3. **Multi-turn query rewriting is not covered.** After the first message of a
    chat, production does not retrieve with the user's words. `src/rag_chain.py`
    first asks Gemini to rewrite the follow-up into a standalone query, and
@@ -119,5 +127,27 @@ exhaustive store. Default HNSW is itself nondeterministic across builds: 9 of
    rewriter (or recorded rewrites). Not built in Phase 0.
 4. **Production's default HNSW.** The eval scores an exhaustive store; production
    uses Chroma's defaults, which change 5-9 of 181 production top-5 lists
-   relative to the exhaustive store, varying by build. If those are ever judged material, the fix
-   belongs in production (collection settings), not in the eval.
+   relative to the exhaustive store, varying by build (4 of 181 in the Phase 1+2
+   run). If those are ever judged material, the fix belongs in production
+   (collection settings), not in the eval.
+5. **Repository identity.** `rid-01` ("What is this repository?") and `rid-04`
+   ("What features does this project offer?") miss under the old pipeline and
+   the new one, with or without the README pin; holdout's `rid-05` (author and
+   license, two parts) misses too. The README's opening is not retrieved for
+   identity questions phrased without its vocabulary.
+6. **Misspelled code queries.** Still 0 of 4 at Hit@1 on dev (`msp-02`,
+   `msp-06` are not retrieved at all; `msp-05`, `msp-11` reach rank 2).
+   Fixing them needs query rewriting or spelling correction before retrieval,
+   which needs the Gemini key (see item 3).
+7. **Code multi-hop.** Dev Hit@5 63.6% (baseline 45.5%), but all-parts@5 for
+   multi-part queries is still 20% on dev: the top 5 rarely holds every piece of
+   a multi-part answer.
+8. **list_all coverage.** On dev, the top 5 holds 69.0% of a list's chunks
+   (baseline 50.0%); the top 20 holds 90.5%. Long lists span more chunks than
+   the prompt takes; this needs more chunks for list questions, or neighbour
+   expansion around a retrieved list chunk.
+9. **Refusal threshold, not wired in.** The reranker's top-1 score separates
+   unanswerable from answerable questions better than cosine (AUROC 0.886 vs
+   0.771 on dev; 0.935 vs 0.796 on holdout). A threshold of about -7.5 keeps
+   107/113 answerable and flags 6/14 unanswerable on dev (44/49 and 3/5 on
+   holdout). `src/reranker.REFUSAL_SCORE_HINT` records it; nothing uses it yet.

@@ -2,15 +2,16 @@
 v3 retrieval evaluation: the PRODUCTION retrieval path, scored deterministically
 against span-level gold. API-free: retrieval happens before generation.
 
-    python -m benchmark.v3.evaluate [--archive PATH] [--fidelity]
+    python -m benchmark.v3.evaluate [--archive PATH] [--fidelity] [--split dev]
 
 What "production path" means here
 ---------------------------------
 The arm named ``production`` is ``src.hybrid_retrieval.build_hybrid_retriever``
 called exactly as ``src/rag_chain.py`` calls it, over a store built by
-``src.vector_store._embed_in_batches`` (what both public store creators use).
-Nothing about retrieval is re-implemented here, so a change to the shipped
-retriever - constants, fusion, the README pin - is measured automatically.
+``src.vector_store._embed_in_batches`` (what both public store creators use),
+reranker included. Nothing about retrieval is re-implemented here, so a change
+to the shipped retriever is measured automatically. The harness refuses to run
+if the reranker did not load, so it cannot silently measure the fallback.
 
 Determinism
 -----------
@@ -26,16 +27,17 @@ top-5 lists differ between the two, without looking at any gold.
 
 Arms (all in one process, one store)
 ------------------------------------
-  production          build_hybrid_retriever(...).invoke - what the app returns
-                      (final_k=5, README pin on). Recall@20 uses the same
-                      retriever with final_k=20.
-  production_no_pin   the same fused list without the README pin: RRF over the
-                      retriever's own dense and BM25 candidates.
-  dense_fallback      the retriever's MMR vector retriever alone - what
-                      build_hybrid_retriever returns when BM25 is unavailable
-                      (10 chunks).
-  dense_plain         plain similarity search on the same store, top 20.
-  bm25                the retriever's BM25 index, top 20.
+  production            build_hybrid_retriever(...).invoke - what the app
+                        returns: candidate pool -> reranker -> top 5. Recall@20
+                        is measured on the pool's top 20 (what the reranker sees).
+  baseline_v3           the pipeline that shipped before Phase 1+2 (MMR + BM25,
+                        RRF, README pin), from the frozen copy in
+                        benchmark/v3/baseline_v3.py. Every paired difference is
+                        reported against this arm.
+  production_no_rerank  the candidate pool's fused order - what production
+                        returns when the reranker fails or runs over budget.
+  dense_plain           plain similarity search on the same store, top 20.
+  bm25                  production's BM25 index, top 20.
 
 Metrics, per query: Hit@1, Hit@5, MRR@5 and Recall@20 against span gold
 (near-duplicates included), plus file-level Hit@5 for code queries as the v2
@@ -46,11 +48,12 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import io
 import json
 import os
 import sys
 import time
-from collections import defaultdict
+from collections import Counter, defaultdict
 
 V3_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(os.path.dirname(V3_DIR))
@@ -62,6 +65,7 @@ from benchmark.v3 import gold as G
 from benchmark.v3 import stats as S
 
 RESULTS_PATH = os.path.join(V3_DIR, "results.json")
+DEV_RESULTS_PATH = os.path.join(V3_DIR, "results_dev.json")
 MANIFEST_PATH = os.path.join(V3_DIR, "manifest.json")
 STORE_PREFIX = "chroma_bench_v3"
 
@@ -69,7 +73,8 @@ STORE_PREFIX = "chroma_bench_v3"
 EXACT_HNSW = {"space": "l2", "ef_construction": 400, "ef_search": 2000, "max_neighbors": 64}
 COLLECTION = "langchain"      # langchain_community.vectorstores.Chroma's default name
 
-ARMS = ("production", "production_no_pin", "dense_fallback", "dense_plain", "bm25")
+ARMS = ("production", "baseline_v3", "production_no_rerank", "dense_plain", "bm25")
+REFERENCE_ARM = "baseline_v3"
 RECALL_K = 20
 
 # Misspelled queries whose correctly spelled twin has the same gold span; the
@@ -84,6 +89,7 @@ TYPO_TWINS = (("msp-09", "dfa-04"), ("msp-10", "dco-02"), ("msp-01", "eid-01"),
 FINGERPRINT_FILES = (
     "src/hybrid_retrieval.py", "src/vector_store.py", "src/chunking.py",
     "src/code_languages.py", "src/repo_ingestion.py", "src/data_ingestion.py",
+    "src/reranker.py", "benchmark/v3/baseline_v3.py",
     "benchmark/v3/queries.yaml", "benchmark/v3/split.json",
     "benchmark/v3/gold.py", "benchmark/v3/dataset.py", "benchmark/v3/corpus.py",
     "benchmark/v3/stats.py", "benchmark/v3/evaluate.py",
@@ -150,47 +156,35 @@ def store_hnsw_config(chroma_dir: str) -> dict:
 # ── arms ─────────────────────────────────────────────────────────────────────
 
 def make_arms(chroma_dir: str):
-    from src.hybrid_retrieval import (
-        HybridRetriever,
-        build_hybrid_retriever,
-        reciprocal_rank_fusion,
-    )
+    from benchmark.v3.baseline_v3 import BaselineV3
+    from src.hybrid_retrieval import HybridRetriever, build_hybrid_retriever
     from src.vector_store import load_vector_store
 
-    retriever = build_hybrid_retriever(chroma_dir)          # exactly as rag_chain.py:233
-    if not isinstance(retriever, HybridRetriever):
-        raise TypeError("build_hybrid_retriever fell back to vector-only; is rank_bm25 installed?")
-    wide = retriever.model_copy(update={"final_k": RECALL_K})
+    retriever = build_hybrid_retriever(chroma_dir)          # exactly as rag_chain.py builds it
+    if not isinstance(retriever, HybridRetriever) or retriever.bm25_index is None:
+        raise TypeError("build_hybrid_retriever came back without BM25; is rank_bm25 installed?")
+    if retriever.reranker is None:
+        raise RuntimeError("the reranker did not load, so production would run its fallback; "
+                           "refusing to score that as production (check RAG_RERANKER and the model)")
+    # Production warms the reranker at startup (src/reranker.start_background_warmup)
+    # so no question pays for the model's first call; do the same here. Without
+    # it the first query of a run measured 3.2 s and fell back on the budget.
+    retriever.reranker.score("warm-up", ["warm-up"], budget_s=60.0)
+    baseline = BaselineV3(chroma_dir)
     store = load_vector_store(chroma_dir)
-
-    def production(q):
-        return retriever.invoke(q)
-
-    def production_wide(q):
-        return wide.invoke(q)
-
-    def production_no_pin(q):
-        dense = retriever.vector_retriever.invoke(q)
-        sparse = [d for d, _ in retriever.bm25_index.search(q, retriever.bm25_candidate_k)]
-        return reciprocal_rank_fusion(
-            {"vector": dense, "bm25": sparse},
-            {"vector": retriever.vector_weight, "bm25": retriever.bm25_weight},
-            smoothing=retriever.rrf_smoothing, top_k=RECALL_K)
-
-    def dense_fallback(q):
-        return retriever.vector_retriever.invoke(q)
-
-    def dense_plain(q):
-        return store.similarity_search(q, k=RECALL_K)
 
     def bm25(q):
         return [d for d, _ in retriever.bm25_index.search(q, RECALL_K)]
 
     return {
-        "production": production, "production@20": production_wide,
-        "production_no_pin": production_no_pin, "dense_fallback": dense_fallback,
-        "dense_plain": dense_plain, "bm25": bm25,
-    }, retriever
+        "production": retriever.invoke,
+        "production@20": lambda q: retriever.candidate_pool(q)[:RECALL_K],
+        "baseline_v3": baseline.invoke,
+        "baseline_v3@20": lambda q: baseline.invoke(q, final_k=RECALL_K),
+        "production_no_rerank": lambda q: retriever.candidate_pool(q)[:RECALL_K],
+        "dense_plain": lambda q: store.similarity_search(q, k=RECALL_K),
+        "bm25": bm25,
+    }, retriever, baseline
 
 
 # ── scoring ──────────────────────────────────────────────────────────────────
@@ -245,8 +239,13 @@ def run(chunks: list, parents: dict, data: dict, chroma_dir: str, splits: dict) 
         raise RuntimeError("dataset failed validation:\n  " + "\n  ".join(errors))
 
     pos = {chunk_key(c): i for i, c in enumerate(chunks)}
-    arms, retriever = make_arms(chroma_dir)
+    arms, retriever, baseline = make_arms(chroma_dir)
     vectors, embed_query = stored_vectors(chroma_dir, pos)
+    # Production writes one log line per query; capture it to record each
+    # query's fallback and rerank time alongside its scores.
+    log = io.StringIO()
+    logged = retriever.model_copy(update={"log_stream": log})
+    arms["production"] = logged.invoke
 
     def indices(docs):
         out = []
@@ -260,11 +259,18 @@ def run(chunks: list, parents: dict, data: dict, chroma_dir: str, splits: dict) 
     per_query: dict = {}
     for q in data["queries"]:
         qid, question = q["id"], q["question"]
+        log.seek(0)
+        log.truncate(0)
         lists = {name: fn(question) for name, fn in arms.items()}
+        fields = dict(kv.split("=", 1) for kv in log.getvalue().split()[1:] if "=" in kv)
         row = {"qtype": q["qtype"], "domain": q["domain"], "origin": q["origin"],
                "split": splits.get(qid, "all"),
+               "production_log": {"fallback": fields.get("fallback"),
+                                  "rerank_ms": int(fields["rerank_ms"])
+                                  if fields.get("rerank_ms", "-").isdigit() else None,
+                                  "pool": int(fields.get("pool", 0))},
                "pin_fired": any(d.metadata.get("retrieval") == "readme_boost"
-                                for d in lists["production"]),
+                                for d in lists["baseline_v3"]),
                "top5": {name: [f"{G.chunk_file(chunks[i])}@{chunks[i].metadata.get('start_index')}"
                                for i in indices(lists[name])[:5]] for name in ARMS},
                "top1": top1_signals(question, lists, indices, vectors, embed_query, retriever),
@@ -273,22 +279,27 @@ def run(chunks: list, parents: dict, data: dict, chroma_dir: str, splits: dict) 
             r = resolved[qid]
             for name in ARMS:
                 top = indices(lists[name])
-                wide = indices(lists["production@20"]) if name == "production" else top
+                wide = indices(lists[f"{name}@20"]) if f"{name}@20" in lists else top
                 row["arms"][name] = score_query(top, wide, r.expanded, r.n_parts, r.direct)
                 row["arms"][name]["file_hit@5"] = file_hit5(lists[name], q)
             row["gold_chunks"] = len(r.direct)
             row["gold_parts"] = r.n_parts
         per_query[qid] = row
+    from benchmark.v3 import baseline_v3 as B
+    from src import reranker as R
+
     return {"per_query": per_query, "warnings": warnings,
-            "retriever": {"final_k": retriever.final_k,
-                          "bm25_candidate_k": retriever.bm25_candidate_k,
-                          "rrf_smoothing": retriever.rrf_smoothing,
-                          "vector_weight": retriever.vector_weight,
-                          "bm25_weight": retriever.bm25_weight,
-                          "vector_search_kwargs": dict(getattr(retriever.vector_retriever,
-                                                               "search_kwargs", {}) or {}),
-                          "vector_search_type": getattr(retriever.vector_retriever,
-                                                        "search_type", None)}}
+            "retriever": {"final_k": retriever.final_k, "pool_k": retriever.pool_k,
+                          "rerank_k": retriever.rerank_k, "fusion_alpha": retriever.fusion_alpha,
+                          "rerank_budget_s": retriever.rerank_budget_s,
+                          "surface_readme": retriever.surface_readme,
+                          "reranker_model": R.RERANK_MODEL,
+                          "reranker_max_length": R.RERANK_MAX_LENGTH,
+                          "reranker_batch": R.RERANK_BATCH},
+            "baseline_v3": {"final_k": baseline.final_k, "mmr_k": B.VECTOR_CANDIDATE_K,
+                            "mmr_fetch_k": B.VECTOR_FETCH_K, "mmr_lambda": B.MMR_LAMBDA,
+                            "bm25_k": B.BM25_CANDIDATE_K, "rrf_smoothing": B.RRF_SMOOTHING,
+                            "readme_pin": True}}
 
 
 def stored_vectors(chroma_dir: str, pos: dict):
@@ -315,8 +326,9 @@ def top1_signals(question: str, lists: dict, indices, vectors: dict, embed_query
 
     cosine: production embedding of the query vs the stored embedding of the
     top-1 chunk - one scale for every arm. native: the score the arm itself
-    exposes (RRF score for the fused arms, BM25 score for bm25; dense arms
-    expose none through the retriever, so their native signal is the cosine).
+    exposes (reranker score for production, fusion score for the pool's own
+    order, RRF score for baseline_v3, BM25 score for bm25; dense search exposes
+    none through the retriever, so its native signal is the cosine).
     """
     import numpy as np
 
@@ -330,7 +342,11 @@ def top1_signals(question: str, lists: dict, indices, vectors: dict, embed_query
             continue
         cv = vectors[indices(docs[:1])[0]]
         cosine = float(cv @ qv / (np.linalg.norm(cv) or 1.0))
-        if name in ("production", "production_no_pin"):
+        if name == "production":
+            native = docs[0].metadata.get("rerank_score")
+        elif name == "production_no_rerank":
+            native = docs[0].metadata.get("fusion_score")
+        elif name == "baseline_v3":
             native = docs[0].metadata.get("rrf_score")
         elif name == "bm25":
             hits = retriever.bm25_index.search(question, 1)
@@ -357,7 +373,8 @@ def group_tags(row: dict) -> list[str]:
 
 
 def aggregate(per_query: dict, resamples: int, seed: int) -> dict:
-    """Per split x domain x group: metric means with paired bootstrap CIs."""
+    """Per split x domain x group: metric means with paired bootstrap CIs, and
+    each arm's paired difference against REFERENCE_ARM (arm minus baseline)."""
     groups: dict[tuple, list[str]] = defaultdict(list)
     for qid, row in per_query.items():
         if row["qtype"] == "unanswerable":
@@ -370,7 +387,7 @@ def aggregate(per_query: dict, resamples: int, seed: int) -> dict:
     for (split, dom, qt), ids in sorted(groups.items()):
         ids = sorted(ids)
         idx = S.resample_matrix(len(ids), resamples, seed)
-        block = {"n": len(ids), "arms": {}, "vs_production": {}}
+        block = {"n": len(ids), "arms": {}, "vs_baseline": {}}
         for arm in ARMS:
             block["arms"][arm] = {m: S.mean_ci([per_query[i]["arms"][arm][m] for i in ids], idx)
                                   for m in METRICS}
@@ -378,11 +395,11 @@ def aggregate(per_query: dict, resamples: int, seed: int) -> dict:
             fl = [x for x in fl if x is not None]
             block["arms"][arm]["file_hit@5"] = (sum(fl) / len(fl)) if fl else None
         for arm in ARMS:
-            if arm == "production":
+            if arm == REFERENCE_ARM:
                 continue
-            block["vs_production"][arm] = {
+            block["vs_baseline"][arm] = {
                 m: S.paired_diff_ci([per_query[i]["arms"][arm][m] for i in ids],
-                                    [per_query[i]["arms"]["production"][m] for i in ids], idx)
+                                    [per_query[i]["arms"][REFERENCE_ARM][m] for i in ids], idx)
                 for m in METRICS}
         out[f"{split}/{dom}/{qt}"] = block
     return out
@@ -465,7 +482,10 @@ def main() -> int:
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--archive", help="local psf/requests tarball at the pinned commit")
     parser.add_argument("--store", help="reuse an existing exact eval store directory")
-    parser.add_argument("--out", default=RESULTS_PATH)
+    parser.add_argument("--out", help=f"default: {os.path.basename(RESULTS_PATH)}; "
+                        f"{os.path.basename(DEV_RESULTS_PATH)} with --split dev")
+    parser.add_argument("--split", choices=("all", "dev"), default="all",
+                        help="dev: retrieve and score the dev split only (holdout untouched)")
     parser.add_argument("--resamples", type=int, default=S.DEFAULT_RESAMPLES)
     parser.add_argument("--seed", type=int, default=S.DEFAULT_SEED)
     parser.add_argument("--fidelity", action="store_true",
@@ -481,10 +501,20 @@ def main() -> int:
     started = time.time()
     chunks, parents, corpus_meta = load_corpus(args.archive)
     data = D.load()
+    if args.split == "dev":
+        if not splits:
+            raise SystemExit("--split dev needs the frozen split")
+        data = {**data, "queries": [q for q in data["queries"] if splits[q["id"]] == "dev"]}
+    out_path = args.out or (DEV_RESULTS_PATH if args.split == "dev" else RESULTS_PATH)
     chroma_dir = args.store or build_store(chunks, new_store_dir("exact"), exact=True)
     result = run(chunks, parents, data, chroma_dir, splits)
     report = {
         "config": result["retriever"],
+        "baseline_v3_config": result["baseline_v3"],
+        "scored_split": args.split,
+        "reference_arm": REFERENCE_ARM,
+        "production_fallbacks": dict(sorted(Counter(
+            r["production_log"]["fallback"] for r in result["per_query"].values()).items())),
         "store": {"dir": os.path.basename(chroma_dir), "hnsw": store_hnsw_config(chroma_dir)},
         "corpus": corpus_meta,
         "fingerprint": fingerprint(),
@@ -508,9 +538,9 @@ def main() -> int:
     }
     if args.fidelity:
         report["fidelity_default_hnsw"] = fidelity(chunks, data, chroma_dir)
-    with open(args.out, "w", encoding="utf-8") as handle:
+    with open(out_path, "w", encoding="utf-8") as handle:
         json.dump(report, handle, indent=1, sort_keys=False, default=str)
-    print(f"written: {args.out}")
+    print(f"written: {out_path}")
     return 0
 
 

@@ -216,8 +216,8 @@ def build_rag_chain(gemini_api_key: str, model_name: str, chroma_dir: str | None
          information" replies to "thanks!") and an efficiency win (one
          Gemini call instead of two).
       2. Otherwise -> standard RAG pipeline: rewrite the question using
-         chat history, retrieve via hybrid search (MMR vector + BM25
-         lexical, fused with RRF), generate a grounded answer that also
+         chat history, retrieve (dense + BM25 candidate pool, reranked by
+         a cross-encoder), generate a grounded answer that also
          receives conversation history for reference resolution.
     """
     client = google_genai.Client(api_key=gemini_api_key)
@@ -225,11 +225,11 @@ def build_rag_chain(gemini_api_key: str, model_name: str, chroma_dir: str | None
 
     retriever = None
     if has_documents:
-        # Hybrid retrieval: MMR vector search (semantic, diverse across
-        # documents) fused with BM25 lexical search (exact terms, identifiers,
-        # section numbers) via Reciprocal Rank Fusion. See src/hybrid_retrieval.py
-        # for the fusion rationale and tuning constants. Both indexes are
-        # cached, so rebuilding the chain per message stays cheap.
+        # Two-stage retrieval: a candidate pool of dense search (meaning) and
+        # BM25 (exact terms, identifiers, section numbers) fused by score, then
+        # a cross-encoder reranker picks the final chunks. See
+        # src/hybrid_retrieval.py and docs/DECISIONS.md. Both indexes and the
+        # reranker are cached, so rebuilding the chain per message stays cheap.
         retriever = build_hybrid_retriever(chroma_dir)
 
     def run_pipeline(input_dict: dict) -> dict:

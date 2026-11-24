@@ -109,6 +109,20 @@ jobs:
           # code, with HF_HUB_OFFLINE=1 (set in the image). A model name that
           # no longer matches the Dockerfile's download fails here.
           docker exec rag-qa python -c "from src.vector_store import get_embeddings; assert len(get_embeddings().embed_query('ok')) == 384"
+          # The reranker, loaded and timed the way the app loads it (offline,
+          # from the baked files). The printed seconds are the cold-start cost
+          # that the background warm-up in app.py takes off the first question.
+          docker exec rag-qa python -c "
+          import time
+          t = time.monotonic()
+          from src.reranker import get_reranker
+          r = get_reranker()
+          assert r is not None, 'reranker failed to load in the image'
+          loaded = time.monotonic() - t
+          s = r.score('how do I set a timeout', ['Pass timeout=5 to requests.get.', 'Cookies persist in a session.'])
+          print(f'reranker: loaded in {loaded:.2f}s, first scoring in {time.monotonic() - t - loaded:.2f}s')
+          assert s[0] > s[1], s
+          "
           docker exec rag-qa python -c "from src.data_ingestion import get_ocr_reader; get_ocr_reader()"
 
           # Run app.py headlessly and check the empty state renders without an
@@ -203,6 +217,20 @@ jobs:
           set -eu
           test "$(docker exec rag-qa id -u)" = "10001"
           docker exec rag-qa python -c "from src.vector_store import get_embeddings; assert len(get_embeddings().embed_query('ok')) == 384"
+          # The reranker, loaded and timed the way the app loads it (offline,
+          # from the baked files). The printed seconds are the cold-start cost
+          # that the background warm-up in app.py takes off the first question.
+          docker exec rag-qa python -c "
+          import time
+          t = time.monotonic()
+          from src.reranker import get_reranker
+          r = get_reranker()
+          assert r is not None, 'reranker failed to load in the image'
+          loaded = time.monotonic() - t
+          s = r.score('how do I set a timeout', ['Pass timeout=5 to requests.get.', 'Cookies persist in a session.'])
+          print(f'reranker: loaded in {loaded:.2f}s, first scoring in {time.monotonic() - t - loaded:.2f}s')
+          assert s[0] > s[1], s
+          "
           docker exec rag-qa python -c "from src.data_ingestion import get_ocr_reader; get_ocr_reader()"
           docker exec rag-qa python -c "
           from streamlit.testing.v1 import AppTest

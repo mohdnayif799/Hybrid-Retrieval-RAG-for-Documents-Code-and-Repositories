@@ -4,9 +4,9 @@ Retrieval-only smoke test over a REAL repository.
 
 Packs this project's own source tree into a GitHub-shaped tarball and pushes it
 through the entire ingestion path — archive reading, filtering, language
-chunking, line numbering, BM25 indexing, RRF fusion, citation rendering.
+chunking, line numbering, BM25 indexing, score fusion, citation rendering.
 
-Real: the source files, the archive, the filters, the chunker, BM25, RRF,
+Real: the source files, the archive, the filters, the chunker, BM25, fusion,
       metadata and citations.
 Not real: the dense retriever (stubbed) and Chroma, which need torch and
       chromadb. Zero Gemini API calls — retrieval runs entirely before
@@ -132,7 +132,7 @@ def main():
     check("reported line numbers match file contents",
           mismatched == 0, f"{verified} verified, {mismatched} mismatched")
 
-    print("\n[5/6] Hybrid retrieval (real BM25 + real RRF)")
+    print("\n[5/6] Hybrid retrieval (real BM25 + real fusion; reranker not loaded)")
     index = BM25Index(chunks)
     print(f"       BM25 indexed {len(index)} chunk(s), skipped {index.skipped_empty} empty")
     check("BM25 index built", index.ready)
@@ -162,7 +162,7 @@ def main():
     check("BM25 rescued a chunk the dense side lacked",
           any(target in r.page_content for r in results))
     check("all results carry provenance", all("retrieval" in r.metadata for r in results))
-    check("all results carry an rrf_score", all("rrf_score" in r.metadata for r in results))
+    check("all results carry a fusion_score", all("fusion_score" in r.metadata for r in results))
 
     a = [r.page_content for r in retriever.invoke("reciprocal rank fusion")]
     b = [r.page_content for r in retriever.invoke("reciprocal rank fusion")]

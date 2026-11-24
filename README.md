@@ -9,7 +9,7 @@
 
 A retrieval-augmented question answering system for **documents and source code**. Upload PDFs, Word documents, presentations or plain text — or paste a GitHub repository URL — and ask questions that are answered strictly from the indexed material, with citations that point to the exact page, slide, character offset, or `file.py:line`.
 
-Retrieval is **hybrid**: dense vector search for meaning, BM25 for exact terms, fused with Reciprocal Rank Fusion. A controlled retrieval evaluation — 93 hand-authored queries over a 1,222-chunk corpus, scored with confidence intervals and significance tests — measures exactly where that combination helps, where it doesn't, and why (see [Evaluation](#evaluation)). Each conversation is an isolated workspace with its own vector store, and documents and repositories can be indexed side by side in the same chat.
+Retrieval is **two-stage**: dense vector search for meaning and BM25 for exact terms build a candidate pool, and a cross-encoder reranker picks the chunks that go into the prompt. A controlled retrieval evaluation (181 hand-labelled queries over a 1,222-chunk corpus, frozen into a dev/holdout split, scored with paired confidence intervals) measures where each part helps and where it doesn't (see [Evaluation](#evaluation) and [docs/DECISIONS.md](docs/DECISIONS.md)). Each conversation is an isolated workspace with its own vector store, and documents and repositories can be indexed side by side in the same chat.
 
 ---
 
@@ -96,7 +96,7 @@ The production demo is containerized with Docker and deployed to **Google Cloud 
 | **Document ingestion** | PDF, DOCX, DOC, PPTX, TXT, MD — one Document per page, slide or file |
 | **OCR fallback** | Scanned PDF pages are detected per page and routed through EasyOCR; typed pages use fast text extraction |
 | **GitHub ingestion** | Paste a public repository URL; source and documentation files are indexed alongside uploaded documents |
-| **Hybrid retrieval** | Dense MMR vector search fused with BM25 lexical search via Reciprocal Rank Fusion |
+| **Hybrid retrieval** | Dense + BM25 candidate pool, reordered by a cross-encoder reranker; falls back gracefully if a component is missing or slow |
 | **Grounded answers** | Answers are constrained to retrieved context, with an explicit refusal when evidence is insufficient |
 | **Exact citations** | Page numbers for PDF, slide numbers for PPTX, character offsets for TXT/MD, `path/file.py:line` for repository code |
 | **Retrieval provenance** | Every returned chunk records whether it was found by semantic search, keyword search, or both |
@@ -133,44 +133,37 @@ Situations 2 and 3 are served by one shared conversational-response function, pa
 
 ## Retrieval architecture
 
-Retrieval combines two methods that fail in opposite directions.
+Retrieval runs in two stages. The first gathers candidates with two methods that fail in opposite directions; the second reads each candidate against the question and keeps the best five. Every choice below was measured on the v3 benchmark; the numbers are in [docs/DECISIONS.md](docs/DECISIONS.md).
 
-### Dense — Chroma + MMR
+### Stage 1: candidate pool (dense + BM25)
 
-`all-MiniLM-L6-v2` embeddings (384-dimensional, normalised, CPU) in ChromaDB, retrieved with Maximal Marginal Relevance at `k=10`, `fetch_k=30`, `lambda_mult=0.6`.
+**Dense.** `all-MiniLM-L6-v2` embeddings (384-dimensional, normalised, CPU) in ChromaDB, plain similarity search, top 50. Dense search matches **meaning**: *"how do I cancel"* finds *"termination of the agreement"*. (An earlier version used MMR. LangChain's Chroma wrapper returned the MMR selection in plain similarity order, so it only dropped candidates; it was removed.)
 
-Dense search matches **meaning**. It handles paraphrase well — *"how do I cancel"* finds *"termination of the agreement"*. MMR is used instead of plain cosine similarity because with several documents indexed, top-k nearest neighbours cluster on whichever single source scores highest; MMR fetches a larger candidate pool and selects results that are jointly relevant and mutually diverse.
+**Sparse.** Okapi BM25 (`rank_bm25`), top 50, over exactly the same chunks, read back out of the Chroma collection so there is one ingestion path and one chunking policy behind both indexes. BM25 matches **surface form**: `CVE-2024-3094`, `Section 4.2`, `validate_access_token`. These are rare tokens that a 384-dimensional projection tends to smear.
 
-### Sparse — BM25
+- **Identifiers are indexed whole and in parts.** `TooManyRedirects` becomes `toomanyredirects, too, many, redirects`, and `get_encoding_from_headers` keeps its full name plus `get, encoding, from, headers`. An exact paste matches the identifier itself, and stopwords are removed only outside identifiers (the old tokenizer reduced `TooManyRedirects` to `many, redirects` and lost the query).
+- **Candidacy is decided by query-term overlap, not by a positive score.** Okapi's IDF goes negative for terms appearing in more than roughly half the corpus, and a chat holding one short upload is exactly that regime.
 
-Okapi BM25 (`rank_bm25`) over exactly the same chunks, read back out of the Chroma collection so there is one ingestion path and one chunking policy behind both indexes.
+**Fusion.** The two scored lists are min-max normalised per query and blended with equal weight. The pool's job is recall, getting the right chunk into the reranker's window, not ordering. On the benchmark's dev split, this 50 + 50 pool raised Recall@20 from 84.2 to 89.5.
 
-Sparse search matches **surface form**. It finds `CVE-2024-3094`, `Section 4.2`, `validate_access_token` — rare tokens that a 384-dimensional projection tends to smear. It is blind to synonyms and returns nothing when the query and the document use different vocabulary.
+### Stage 2: cross-encoder reranking
 
-Two implementation details worth naming:
+`cross-encoder/ms-marco-MiniLM-L6-v2` scores each (question, chunk) pair for the pool's top 20, and the best 5 go into the prompt. Unlike the embedding model, it reads the question and the chunk together, which is what fixes ranking. On dev, Hit@1 rose from 39.8 to 54.9 and Hit@5 from 73.5 to 81.4. On the holdout split, scored once to confirm, Hit@5 rose from 73.5 to 89.8.
 
-- **Candidacy is decided by query-term overlap, not by a positive score.** Okapi's IDF goes negative for terms appearing in more than roughly half the corpus, and a chat holding one short upload is exactly that regime. Filtering on `score > 0` silently discarded genuine matches on small corpora.
-- **The tokenizer splits identifier case boundaries before lowercasing.** Without this, `_` acts as a word boundary by accident while camelCase and PascalCase collapse into a single token, so `build_hybrid_retriever` was reachable from the query *"build hybrid retriever"* but `buildHybridRetriever` was not. Both corpus and query are tokenized identically, so an exact paste of an identifier still matches.
+It costs about 1.0–1.3 s per question on one vCPU (20 pairs, batch 4) and about 140 MB of memory. The model is baked into the Docker image and warmed in a background thread when the app first renders, so the first question does not pay for loading it.
 
-### Fusion — Reciprocal Rank Fusion
+### Fallbacks: retrieval never breaks
 
-The two ranked lists are merged with weighted RRF (`smoothing=60`, equal weights) and the top 5 chunks go into the prompt:
+| Failure | What happens |
+|---|---|
+| `rank_bm25` missing or the BM25 index fails to build | The pool is dense-only; reranking still runs |
+| The reranker cannot load | The pool's fused order is used |
+| Reranking raises, or exceeds its 3-second budget | That question keeps the pool's fused order |
+| A chat has fewer than 50 chunks | The pool uses whatever exists |
 
-```
-score(chunk) = Σ  weight / (60 + rank_in_that_list)
-```
+Each question writes one log line (`retrieval pool=… reranked=… rerank_ms=… top1_score=… fallback=… bm25=…`). It never includes the question or chunk text.
 
-RRF is used rather than score blending because Chroma returns cosine distances and BM25 returns unbounded corpus-relative scores; the two have no common scale, and per-query normalisation is unstable when one list is short or nearly uniform. RRF uses only ranks. A chunk found by both retrievers accumulates two terms and therefore outranks a chunk found by one. Sorting is stable and BM25's own internal ties break on ascending corpus index, so a fixed candidate set always fuses to the same order.
-
-**One exception to plain RRF order.** If a repository's top-level README has any lexical (BM25) relevance to the query and is not already among the fused top 5, it replaces the weakest of the five slots. The reasoning is that a repository's own README is disproportionately likely to be useful context for a question about that repository, even when it doesn't rank there on fusion score alone — it is the only way a chunk enters the final answer without earning its position through RRF.
-
-### What hybrid retrieval does and does not guarantee
-
-Hybrid retrieval is **not** a universal improvement. It is a targeted fix for one failure mode: queries whose discriminative content is an exact token that embeddings blur. On paraphrase-heavy queries BM25 contributes nothing — it returns no lexical overlap and fusion degrades cleanly to the dense ranking.
-
-A controlled retrieval evaluation (93 queries, 1,222 chunks — see [Evaluation](#evaluation)) measures this directly rather than leaving it as a design argument: hybrid and dense-only are statistically indistinguishable on this project's code corpus, hybrid shows a suggestive but not statistically significant edge on the document corpus, and the evaluation diagnoses a specific, arithmetic mechanism — equal-weight RRF's strict interleaving — by which fusion can evict a dense top-5 candidate that dense-only alone would have returned.
-
-Every returned chunk carries a `retrieval` field recording which retriever surfaced it, rendered in the UI as **🧠 semantic**, **🔍 keyword** or **⭐ semantic + keyword**, so the contribution is inspectable per query rather than assumed. If `rank_bm25` is unavailable or the index fails to build, retrieval falls back to dense-only with a warning instead of failing.
+Every returned chunk carries a `retrieval` field recording which retriever surfaced it, rendered in the UI as **🧠 semantic**, **🔍 keyword** or **⭐ semantic + keyword**, so the contribution is inspectable per query rather than assumed. A README pin (inject the repository README into the results) existed before; it never turned a missed repository-identity question into a hit on the benchmark and cost two other queries their answer, so it is off by default (`HybridRetriever(surface_readme=True)` to enable).
 
 ---
 
@@ -269,12 +262,13 @@ No test needs an API key or downloads a model, so the suite is fast and costs no
 
 ```bash
 python -m pytest tests/ -q
-# 350 passed, 58 subtests passed
+# 378 passed, 58 subtests passed
 ```
 
 | Test file | Tests run | Test functions | Covers |
 |---|---|---|---|
-| `test_hybrid_retrieval.py` | 48 | 48 | Tokenization including camelCase and PascalCase, BM25 scoring and candidacy, RRF fusion and dedup, retriever fallback and determinism |
+| `test_hybrid_retrieval.py` | 50 | 50 | Tokenization (whole identifiers plus parts, stopwords kept inside identifiers), BM25 scoring and candidacy, RRF fusion and dedup, the opt-in README pin, retriever determinism |
+| `test_reranking.py` | 25 | 25 | Two-stage retrieval: min-max fusion, reranker batching and its 3 s budget, load failure, every fallback (no BM25, no reranker, reranker error or timeout, empty pool), a real 3-chunk Chroma store, log lines that never contain the question or chunk text, the startup warm-up |
 | `test_repo_ingestion.py` | 47 | 22 | URL parsing and rejection, path traversal, symlink entries, archive filtering, size/count/bomb limits, repository metadata |
 | `test_citations.py` | 25 | 25 | Location formatting per source type, path-vs-basename grouping, Markdown-safe rendering, location ordering |
 | `test_chunking.py` | 13 | 13 | Language dispatch, line-number accuracy, and a regression test asserting document chunking is byte-identical to the pre-change implementation |
@@ -284,7 +278,7 @@ python -m pytest tests/ -q
 | `test_benchmark_metrics.py` | 37 | 35 | `benchmark.metrics` — Hit@K, MRR@K, Recall@K — against synthetic fixtures |
 | `test_benchmark_specs.py` | 28 | 26 | Benchmark ground-truth and specification handling introduced for the range-level document scoring in evaluation v2 |
 | `test_benchmark_sweep.py` | 22 | 16 | Configuration-sweep harness wiring for the tested-but-not-shipped configurations in [Evaluation](#evaluation) |
-| `test_benchmark_v3.py` | 44 | 44 | v3 benchmark: span gold resolution and evidence checks, near-duplicate rules, rank and coverage metrics, paired bootstrap, the stratified split and freeze verification, the harness end to end on the production retrieval path (fake embedder), the refusal to score an unfrozen set, and that the committed frozen files and baseline results still match the code |
+| `test_benchmark_v3.py` | 45 | 45 | v3 benchmark: span gold resolution and evidence checks, near-duplicate rules, rank and coverage metrics, paired bootstrap, the stratified split and freeze verification, the harness end to end on the production retrieval path (fake embedder and reranker), its refusal to score an unfrozen set or a production path without its reranker, and that the committed frozen files and results still match the code |
 | `test_store_registry.py` | 14 | 11 | Chat-store eviction policy: idle timeout, count and size budgets, least-recently-used order, never evicting the store in use, settings from environment variables |
 | `test_app_ui.py` | 13 | 13 | Headless Streamlit `AppTest` runs of `app.py`: demo-key counter and limit, quota and failure messages, model choice, the example chip, the evicted-store notice |
 | `test_example_repo.py` | 12 | 9 | Bundled example tarball checksum and offline loading, local archive ingestion, repository limits from environment variables |
@@ -294,7 +288,7 @@ python -m pytest tests/ -q
 | `test_store_eviction.py` | 3 | 3 | Eviction against real ChromaDB: stops Chroma, closes its files, deletes the store, drops stale BM25 entries |
 | `test_lazy_ocr_import.py` | 1 | 1 | EasyOCR is not imported until a page actually needs OCR |
 
-"Tests run" comes from an actual `python -m pytest tests/ -q` run; "Test functions" is counted from the current source (`def test_*`, including class-based methods). The run reports more passes than functions because `test_repo_ingestion.py`, three of the benchmark files, `test_store_registry.py`, `test_example_repo.py` and `test_demo_key.py` use `@pytest.mark.parametrize` to run one function over several cases, and `test_casual_detection.py`'s `subTest` blocks report separately. That is why `pytest -q` totals 350 passed with 58 subtests from 308 test functions.
+"Tests run" comes from an actual `python -m pytest tests/ -q` run; "Test functions" is counted from the current source (`def test_*`, including class-based methods). The run reports more passes than functions because `test_repo_ingestion.py`, three of the benchmark files, `test_store_registry.py`, `test_example_repo.py` and `test_demo_key.py` use `@pytest.mark.parametrize` to run one function over several cases, and `test_casual_detection.py`'s `subTest` blocks report separately. That is why `pytest -q` totals 378 passed with 58 subtests from 336 test functions.
 
 None of the benchmark tests assert on a measured, corpus-dependent number: they exercise the scoring and configuration code against fixed synthetic fixtures, since the actual benchmark numbers in [Evaluation](#evaluation) are measurements, not invariants, and move if the corpus does.
 
@@ -357,18 +351,21 @@ Hybrid-Retrieval-RAG-for-Documents-Code-and-Repositories/
 │   ├── code_languages.py        # Extension -> Language map, indexable extensions
 │   ├── vector_store.py          # Chroma create/append/load, batched embedding, store stats
 │   ├── store_paths.py           # Store directory naming and cleanup rules
-│   ├── hybrid_retrieval.py      # BM25 index, RRF fusion, HybridRetriever
+│   ├── hybrid_retrieval.py      # BM25 index, candidate pool, two-stage HybridRetriever
+│   ├── reranker.py              # Cross-encoder reranker: loading, time budget, warm-up
 │   ├── citations.py             # Citation formatting and grouping
 │   └── rag_chain.py             # Routing, query rewriting, grounded generation
 │
 ├── benchmark/                    # Controlled retrieval evaluation (see Evaluation)
-│   ├── v3/                       # Production-path evaluation, span-level gold, frozen query set + baseline
+│   ├── v3/                       # Production-path evaluation, span-level gold, frozen split, results
 │   ├── RESULTS_V2.md             # v2 results: 93 queries, 1,222 chunks (predates the README pin)
 │   ├── TUNING.md                 # Pre-registered configuration sweep
 │   ├── blind_audit_log.md        # Ground-truth quality audit, logged before outcomes were known
 │   └── corpus_manifest.json      # Pinned corpus: repo commit SHA, document hashes, chunk counts
 │
-├── tests/                        # 350 passed, 58 subtests — no API key required
+├── docs/DECISIONS.md             # Why retrieval looks the way it does, with the numbers
+│
+├── tests/                        # 378 passed, 58 subtests — no API key required
 │
 └── chroma_db_*/                  # Per-chat vector stores (auto-created, gitignored)
     chroma_eval_*/                # Evaluation stores (separate namespace)
@@ -437,17 +434,22 @@ Documents and repositories can be combined in one chat.
 
 ## Evaluation
 
-> **The figures in this section are v2, and they predate the README pin.** The
-> stored v2 rankings were produced by a `hybrid_retrieval.py` that is not in git
-> history, and none of them carries the README pin
-> (`HybridRetriever._surface_readme_if_missing`), which every committed version
-> contains. Measured on the shipped code, the pin fires on 41 of 83 answerable
-> queries and hybrid Hit@5 is 71/83, not the 72/83 reported below. A v3
-> evaluation that scores the production retrieval path itself, against
-> span-level ground truth, is in [`benchmark/v3/`](benchmark/v3/README.md): 162 answerable
-> and 19 unanswerable queries, frozen into a 70/30 dev/holdout split before scoring.
-> Its baseline ([`benchmark/v3/RESULTS.md`](benchmark/v3/RESULTS.md)) supersedes the v2
-> figures below as the reference for retrieval changes.
+> **Current results are v3; the figures in the rest of this section are v2.**
+> The v3 benchmark ([`benchmark/v3/`](benchmark/v3/README.md)) scores the
+> production retrieval path itself against span-level ground truth: 162
+> answerable and 19 unanswerable queries, frozen into a 70/30 dev/holdout split
+> before scoring. Against the previous pipeline, the current one (candidate pool
+> + reranker) measured, with paired 95% intervals:
+>
+> | | dev (113) | holdout (49, scored once) |
+> |---|---|---|
+> | Hit@1 | 39.8 → 54.9 (+15.0 [+6.2, +23.9]) | 44.9 → 55.1 (+10.2 [−6.1, +26.5]) |
+> | Hit@5 | 73.5 → 81.4 (+8.0 [+1.8, +15.0]) | 73.5 → 89.8 (+16.3 [+6.1, +28.6]) |
+> | MRR@5 | 52.6 → 64.4 (+11.8 [+5.3, +18.1]) | 56.0 → 69.9 (+13.9 [+3.2, +24.8]) |
+>
+> Full tables: [`benchmark/v3/RESULTS.md`](benchmark/v3/RESULTS.md); reasons:
+> [docs/DECISIONS.md](docs/DECISIONS.md). The v2 figures below predate the README
+> pin and the v3 changes and are kept for the record.
 
 The retrieval architecture above states what dense search and BM25 are each good at; this section measures it, on a real corpus, with a labelled query set and standard statistical tests — rather than leaving it as a design argument.
 

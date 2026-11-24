@@ -291,17 +291,18 @@ def test_hybrid_output_is_deterministic(corpus):
 
 # ── Code-aware tokenisation (added for repository ingestion) ──────────────────
 
-def test_tokenize_splits_camel_case():
-    assert tokenize("buildHybridRetriever") == ["build", "hybrid", "retriever"]
+def test_tokenize_splits_camel_case_and_keeps_the_whole_identifier():
+    assert tokenize("buildHybridRetriever") == ["buildhybridretriever", "build", "hybrid", "retriever"]
 
 
-def test_tokenize_splits_pascal_case():
-    assert tokenize("UserAuthService") == ["user", "auth", "service"]
+def test_tokenize_splits_pascal_case_and_keeps_the_whole_identifier():
+    assert tokenize("UserAuthService") == ["userauthservice", "user", "auth", "service"]
 
 
 def test_tokenize_splits_acronym_boundaries():
-    # HTTPServer must not become ["httpserver"] or ["h","t","t","p","server"].
-    assert tokenize("HTTPServerConfig") == ["http", "server", "config"]
+    # HTTPServer must not become ["h","t","t","p","server"]; the whole identifier
+    # is kept alongside its parts.
+    assert tokenize("HTTPServerConfig") == ["httpserverconfig", "http", "server", "config"]
 
 
 def test_camel_case_identifier_is_reachable_from_natural_language():
@@ -313,13 +314,30 @@ def test_camel_case_identifier_is_reachable_from_natural_language():
     assert doc & query == {"build", "hybrid", "retriever"}
 
 
-def test_exact_identifier_paste_still_matches_after_splitting():
+def test_exact_identifier_paste_matches_the_whole_identifier_and_its_parts():
     doc = set(tokenize("class UserAuthService { validateAccessToken() {} }"))
-    assert doc & set(tokenize("validateAccessToken")) == {"validate", "access", "token"}
+    assert doc & set(tokenize("validateAccessToken")) == {
+        "validateaccesstoken", "validate", "access", "token"}
 
 
-def test_snake_case_behaviour_is_unchanged():
-    assert tokenize("build_hybrid_retriever") == ["build", "hybrid", "retriever"]
+def test_snake_case_keeps_the_whole_identifier_and_its_parts():
+    assert tokenize("build_hybrid_retriever") == [
+        "build_hybrid_retriever", "build", "hybrid", "retriever"]
+
+
+def test_stopwords_are_kept_inside_identifiers():
+    # The v3 benchmark's TooManyRedirects query was lost because "too" is a
+    # stopword; inside an identifier it is part of the name.
+    assert tokenize("TooManyRedirects") == ["toomanyredirects", "too", "many", "redirects"]
+    assert tokenize("get_encoding_from_headers") == [
+        "get_encoding_from_headers", "get", "encoding", "from", "headers"]
+    # ...but still removed from prose.
+    assert tokenize("too many redirects from the server") == ["many", "redirects", "server"]
+
+
+def test_lowercased_identifier_typed_as_prose_matches_the_identifier():
+    doc = set(tokenize("class TooManyRedirects(RequestException):"))
+    assert "toomanyredirects" in doc & set(tokenize("toomanyredirects exeption"))
 
 
 def test_camel_split_does_not_disturb_prose_or_identifiers():
@@ -404,6 +422,7 @@ def test_hybrid_surfaces_readme_when_bm25_would_otherwise_crowd_it_out():
         vector_retriever=StubVectorRetriever(crowding),  # dense ALSO misses it — worst case
         bm25_index=BM25Index(all_docs),
         final_k=5,
+        surface_readme=True,                              # the pin is opt-in since v3
     )
     results = retriever.invoke("what is this repository about")
     assert any(is_repo_readme(d) for d in results)
@@ -416,6 +435,7 @@ def test_readme_boost_does_not_fire_when_readme_already_present():
             impl_doc("some code", start=1)]
     retriever = HybridRetriever(
         vector_retriever=StubVectorRetriever(docs), bm25_index=BM25Index(docs), final_k=5,
+        surface_readme=True,
     )
     results = retriever.invoke("this repository")
     origins = {d.metadata.get("retrieval") for d in results if is_repo_readme(d)}
@@ -429,6 +449,7 @@ def test_readme_boost_never_forces_in_zero_relevance_content():
         vector_retriever=StubVectorRetriever(crowding),
         bm25_index=BM25Index(crowding + [readme]),
         final_k=5,
+        surface_readme=True,
     )
     results = retriever.invoke("repository configuration handler")
     assert not any(is_repo_readme(d) for d in results)  # no shared vocabulary — must not be forced in
