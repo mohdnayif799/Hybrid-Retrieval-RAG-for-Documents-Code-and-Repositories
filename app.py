@@ -282,31 +282,68 @@ def _render_user_message(text: str) -> None:
     )
 
 
-def _render_sources(source_docs) -> None:
-    """
-    Draw the Sources block and the source-chunk expander for one answer.
+EARLIER_SOURCES_LABEL = "Sources"
+SOURCE_CHUNKS_LABEL = "\U0001f4da Source Chunks Used"
 
-    Single renderer shared by the history replay loop and the live response.
-    Previously this markup existed only in the live path, so sources vanished
-    from every earlier answer on the next rerun — the duplication was the bug,
-    so there is now exactly one copy.
+
+def _render_source_chunks(source_docs) -> None:
+    """One entry per retrieved chunk: reference, type, location, preview."""
+    for i, doc in enumerate(source_docs, 1):
+        sf    = doc.metadata.get("source", "unknown")
+        stype = doc.metadata.get("source_type")
+        st.markdown(
+            f"**Chunk {i}** — `{format_reference(doc, i)}` "
+            f"· {doc_type_label(sf, stype)} · **{format_location(doc, i)}**"
+            f"{retrieval_badge(doc)}"
+        )
+        st.caption(doc.page_content[:500] + "…")
+        st.divider()
+
+
+def _render_sources(source_docs, collapsed: bool = False) -> None:
+    """
+    Draw the sources of one answer, directly under that answer.
+
+    Single renderer shared by the history replay loop and the live response,
+    so every answer keeps its own sources for the life of the chat.
+
+    collapsed=False (the latest answer): the "Sources:" citation list, with
+    the retrieved chunks in an expander below it.
+    collapsed=True (every earlier answer): the same citations and chunks in
+    one closed "Sources" expander, so a long chat shows only the latest
+    answer's sources in full. Streamlit does not allow an expander inside an
+    expander, so the chunks are listed directly inside it.
     """
     if not source_docs:
         return
 
-    st.markdown("---\n**Sources:**\n\n" + build_inline_citations(source_docs))
+    citations = build_inline_citations(source_docs)
+    if collapsed:
+        with st.expander(EARLIER_SOURCES_LABEL, expanded=False):
+            st.markdown(citations)
+            _render_source_chunks(source_docs)
+        return
 
-    with st.expander("\U0001f4da Source Chunks Used"):
-        for i, doc in enumerate(source_docs, 1):
-            sf    = doc.metadata.get("source", "unknown")
-            stype = doc.metadata.get("source_type")
-            st.markdown(
-                f"**Chunk {i}** \u2014 `{format_reference(doc, i)}` "
-                f"· {doc_type_label(sf, stype)} · **{format_location(doc, i)}**"
-                f"{retrieval_badge(doc)}"
-            )
-            st.caption(doc.page_content[:500] + "\u2026")
-            st.divider()
+    st.markdown("---\n**Sources:**\n\n" + citations)
+    with st.expander(SOURCE_CHUNKS_LABEL):
+        _render_source_chunks(source_docs)
+
+
+def _latest_answer_index(messages: list, answering_now: bool) -> int | None:
+    """
+    Index of the answer whose sources are shown in full, or None.
+
+    That is the last assistant message, unless a new question is being
+    answered in this run: then every stored answer is already an earlier one,
+    so the previous answer's sources collapse as soon as the next question is
+    sent, not one rerun later.
+    """
+    if answering_now:
+        return None
+    for i in range(len(messages) - 1, -1, -1):
+        if messages[i]["role"] == "assistant":
+            return i
+    return None
 
 
 def _index_chunks(aid: str, chunks: list, progress_bar, base_pct: int = 60):
@@ -793,7 +830,11 @@ if active_chat.pop("store_cleared", False):
 submitted = st.chat_input("Ask a question, or just say hello…")
 user_question = submitted or st.session_state.pop(PENDING_QUESTION, None)
 
-for msg in active_chat["messages"]:
+# A question that cannot be answered (no key) adds no answer, so it must not
+# collapse the latest one.
+latest_answer = _latest_answer_index(active_chat["messages"],
+                                     answering_now=bool(user_question and gemini_api_key))
+for idx, msg in enumerate(active_chat["messages"]):
     if msg["role"] == "user":
         _render_user_message(msg["content"])
     else:
@@ -805,7 +846,9 @@ for msg in active_chat["messages"]:
             st.markdown(msg["content"])
             # .get() so messages stored before sources were persisted, and
             # error messages (which carry none), still replay cleanly.
-            _render_sources(msg.get("sources") or [])
+            # Only the latest answer's sources are shown in full; each earlier
+            # answer keeps its own in a closed "Sources" expander beneath it.
+            _render_sources(msg.get("sources") or [], collapsed=idx != latest_answer)
 
 # ── Chat input ────────────────────────────────────────────────────────────────
 if user_question:

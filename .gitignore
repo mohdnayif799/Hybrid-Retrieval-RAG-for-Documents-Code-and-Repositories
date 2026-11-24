@@ -38,3 +38,6 @@ build/
 
 # Benchmark cache
 benchmark/.cache/
+
+# Browser-check screenshots (scripts/ui_sources_check.js)
+.ui-check/

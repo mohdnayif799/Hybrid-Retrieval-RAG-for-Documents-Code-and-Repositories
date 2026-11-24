@@ -322,3 +322,116 @@ def test_a_follow_up_that_depends_on_history_bypasses_the_cache(monkeypatch):
     assert not _served_from_cache(at)
     chat = at.session_state.chats[at.session_state.active_id]
     assert len(chat["response_cache"]) == 1              # only the first question
+
+
+# ── Sources toggle ────────────────────────────────────────────────────────────
+# Only the latest answer shows its sources in full; each earlier answer keeps
+# its own sources in a closed "Sources" expander directly beneath it.
+
+SOURCES = "Sources"
+CHUNKS = "\U0001f4da Source Chunks Used"
+
+
+def _chain_with_sources(monkeypatch, sources_by_question: dict) -> None:
+    """Each question is answered with chunks from its own file (or none)."""
+    from langchain_core.documents import Document
+
+    from src import rag_chain
+
+    class FakeChain:
+        def invoke(self, inputs):
+            name = sources_by_question[inputs["input"]]
+            docs = [] if name is None else [
+                Document(page_content=f"Text from {name}.",
+                         metadata={"source": name, "source_type": "upload",
+                                   "start_index": 0})]
+            return {"answer": f"Answer citing {name}.", "context": docs}
+
+    monkeypatch.setattr(rag_chain, "build_rag_chain",
+                        lambda api_key, model, chroma_dir: FakeChain())
+
+
+def _expanders(at: AppTest, label: str) -> list:
+    return [e for e in at.expander if e.label == label]
+
+
+def _text(element) -> str:
+    return " ".join(m.value for m in element.markdown)
+
+
+def _full_citation_blocks(at: AppTest) -> list[str]:
+    """The "Sources:" lists drawn in full (outside any expander)."""
+    return [m.value for m in at.markdown if m.value.startswith("---\n**Sources:**")]
+
+
+QUESTIONS = {"What is in alpha?": "alpha.txt",
+             "What is in beta?": "beta.txt",
+             "What is in gamma?": "gamma.txt"}
+
+
+def test_a_single_answer_shows_its_sources_in_full(monkeypatch):
+    _fake_gemini(monkeypatch, reply="A title")
+    _chain_with_sources(monkeypatch, QUESTIONS)
+    at = _app(monkeypatch, FAKE_SHARED_KEY).run()
+
+    _ask(at, "What is in alpha?")
+
+    assert not at.exception
+    assert _expanders(at, SOURCES) == []
+    blocks = _full_citation_blocks(at)
+    assert len(blocks) == 1 and "alpha.txt" in blocks[0]
+    assert len(_expanders(at, CHUNKS)) == 1
+
+
+def test_earlier_answers_keep_their_own_sources_collapsed(monkeypatch):
+    _fake_gemini(monkeypatch, reply="A title")
+    _chain_with_sources(monkeypatch, QUESTIONS)
+    at = _app(monkeypatch, FAKE_SHARED_KEY).run()
+
+    _ask(at, "What is in alpha?")
+    _ask(at, "What is in beta?")
+
+    assert not at.exception
+    earlier = _expanders(at, SOURCES)
+    assert len(earlier) == 1
+    assert earlier[0].proto.expanded is False
+    assert "alpha.txt" in _text(earlier[0]) and "beta.txt" not in _text(earlier[0])
+    blocks = _full_citation_blocks(at)
+    assert len(blocks) == 1 and "beta.txt" in blocks[0] and "alpha.txt" not in blocks[0]
+    assert len(_expanders(at, CHUNKS)) == 1          # only the latest answer's
+
+    _ask(at, "What is in gamma?")
+
+    earlier = _expanders(at, SOURCES)
+    assert [("alpha.txt" in _text(e), "beta.txt" in _text(e)) for e in earlier] == [
+        (True, False), (False, True)]               # each under its own answer, in order
+    assert all(e.proto.expanded is False for e in earlier)
+    assert "gamma.txt" in _full_citation_blocks(at)[0]
+
+
+def test_the_latest_answer_stays_in_full_on_an_idle_rerun(monkeypatch):
+    _fake_gemini(monkeypatch, reply="A title")
+    _chain_with_sources(monkeypatch, QUESTIONS)
+    at = _app(monkeypatch, FAKE_SHARED_KEY).run()
+
+    _ask(at, "What is in alpha?")
+    _ask(at, "What is in beta?")
+    at.run()                                        # e.g. a sidebar click
+
+    assert len(_expanders(at, SOURCES)) == 1
+    blocks = _full_citation_blocks(at)
+    assert len(blocks) == 1 and "beta.txt" in blocks[0]
+
+
+def test_a_latest_answer_without_sources_leaves_earlier_ones_collapsed(monkeypatch):
+    _fake_gemini(monkeypatch, reply="A title")
+    _chain_with_sources(monkeypatch, {**QUESTIONS, "Tell me a joke please": None})
+    at = _app(monkeypatch, FAKE_SHARED_KEY).run()
+
+    _ask(at, "What is in alpha?")
+    _ask(at, "Tell me a joke please")
+    at.run()
+
+    assert not at.exception
+    assert len(_expanders(at, SOURCES)) == 1
+    assert _full_citation_blocks(at) == []

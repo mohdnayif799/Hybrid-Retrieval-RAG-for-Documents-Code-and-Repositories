@@ -174,3 +174,32 @@ the old code:
 * **First messages are always cacheable.**
 
 **Cost:** no new Gemini calls. A few hash operations per question.
+
+### Phase 1: only the latest answer's sources in full (2026-11-24)
+
+Before, every answer in a chat replayed its full "Sources:" list and chunk
+expander, so a chat of ten questions showed ten source blocks.
+
+**Now:**
+* The latest answer shows its sources as before: the citation list, with the
+  chunks in an expander.
+* Each earlier answer keeps its **own** sources in one closed "Sources"
+  expander directly beneath it. Sources were already stored on each message,
+  so nothing about which sources belong to which answer changed.
+* When a new question is sent, the previous answer collapses in the same run,
+  not one rerun later. A question that cannot be answered (no key) adds no
+  answer, so it collapses nothing.
+* If the latest answer has no sources (a casual reply, an error), no block is
+  shown in full.
+* Streamlit forbids an expander inside an expander, so the collapsed version
+  lists the chunks directly inside its single expander.
+
+**Checks:**
+* Four `AppTest` runs. Three of them fail on the previous code; the
+  single-answer case looks the same before and after.
+* A Playwright browser check (`scripts/ui_sources_check.js`, fake LLM):
+  * after three questions there is exactly one full block (the latest);
+  * the two earlier expanders start closed;
+  * opening the first shows only its own file and chunk.
+
+No retrieval, prompt or cache change; no latency or cost change.

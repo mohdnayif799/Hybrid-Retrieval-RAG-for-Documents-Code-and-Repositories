@@ -99,6 +99,7 @@ The production demo is containerized with Docker and deployed to **Google Cloud 
 | **Hybrid retrieval** | Dense + BM25 candidate pool, reordered by a cross-encoder reranker; falls back gracefully if a component is missing or slow |
 | **Grounded answers** | Answers are constrained to retrieved context, with an explicit refusal when evidence is insufficient |
 | **Exact citations** | Page numbers for PDF, slide numbers for PPTX, character offsets for TXT/MD, `path/file.py:line` for repository code |
+| **Sources per answer** | The latest answer shows its sources in full; each earlier answer keeps its own sources in a collapsed "Sources" expander beneath it |
 | **Retrieval provenance** | Every returned chunk records whether it was found by semantic search, keyword search, or both |
 | **Multi-chat workspace** | Independent conversations, each with their own sources, history and vector store |
 | **Incremental indexing** | Adding a second source appends to the existing store rather than rebuilding it |
@@ -262,7 +263,7 @@ No test needs an API key or downloads a model, so the suite is fast and costs no
 
 ```bash
 python -m pytest tests/ -q
-# 407 passed, 58 subtests passed
+# 411 passed, 58 subtests passed
 ```
 
 | Test file | Tests run | Test functions | Covers |
@@ -280,7 +281,7 @@ python -m pytest tests/ -q
 | `test_benchmark_sweep.py` | 22 | 16 | Configuration-sweep harness wiring for the tested-but-not-shipped configurations in [Evaluation](#evaluation) |
 | `test_benchmark_v3.py` | 45 | 45 | v3 benchmark: span gold resolution and evidence checks, near-duplicate rules, rank and coverage metrics, paired bootstrap, the stratified split and freeze verification, the harness end to end on the production retrieval path (fake embedder and reranker), its refusal to score an unfrozen set or a production path without its reranker, and that the committed frozen files and results still match the code |
 | `test_store_registry.py` | 14 | 11 | Chat-store eviction policy: idle timeout, count and size budgets, least-recently-used order, never evicting the store in use, settings from environment variables |
-| `test_app_ui.py` | 17 | 17 | Headless Streamlit `AppTest` runs of `app.py`: demo-key counter and limit, quota and failure messages, model choice, the example chip, the evicted-store notice, and the response cache (a repeated question, a document added after a cached answer, the same question in two chats, a history-dependent follow-up) |
+| `test_app_ui.py` | 21 | 21 | Headless Streamlit `AppTest` runs of `app.py`: demo-key counter and limit, quota and failure messages, model choice, the example chip, the evicted-store notice, the sources toggle (only the latest answer in full, earlier answers' own sources collapsed beneath them), and the response cache (a repeated question, a document added after a cached answer, the same question in two chats, a history-dependent follow-up) |
 | `test_response_cache.py` | 25 | 11 | Response-cache rules: the document-set digest, the key (chat, documents, question), and which follow-ups depend on earlier turns |
 | `test_example_repo.py` | 12 | 9 | Bundled example tarball checksum and offline loading, local archive ingestion, repository limits from environment variables |
 | `test_query_log.py` | 7 | 7 | Per-query log line, Gemini quota-error detection, key redaction, Gemini call counting through the RAG chain |
@@ -289,9 +290,17 @@ python -m pytest tests/ -q
 | `test_store_eviction.py` | 3 | 3 | Eviction against real ChromaDB: stops Chroma, closes its files, deletes the store, drops stale BM25 entries |
 | `test_lazy_ocr_import.py` | 1 | 1 | EasyOCR is not imported until a page actually needs OCR |
 
-"Tests run" comes from an actual `python -m pytest tests/ -q` run; "Test functions" is counted from the current source (`def test_*`, including class-based methods). The run reports more passes than functions because `test_repo_ingestion.py`, three of the benchmark files, `test_store_registry.py`, `test_example_repo.py`, `test_demo_key.py` and `test_response_cache.py` use `@pytest.mark.parametrize` to run one function over several cases, and `test_casual_detection.py`'s `subTest` blocks report separately. That is why `pytest -q` totals 407 passed with 58 subtests from 351 test functions.
+"Tests run" comes from an actual `python -m pytest tests/ -q` run; "Test functions" is counted from the current source (`def test_*`, including class-based methods). The run reports more passes than functions because `test_repo_ingestion.py`, three of the benchmark files, `test_store_registry.py`, `test_example_repo.py`, `test_demo_key.py` and `test_response_cache.py` use `@pytest.mark.parametrize` to run one function over several cases, and `test_casual_detection.py`'s `subTest` blocks report separately. That is why `pytest -q` totals 411 passed with 58 subtests from 355 test functions.
 
 None of the benchmark tests assert on a measured, corpus-dependent number: they exercise the scoring and configuration code against fixed synthetic fixtures, since the actual benchmark numbers in [Evaluation](#evaluation) are measurements, not invariants, and move if the corpus does.
+
+### Browser check: sources toggle
+
+```bash
+PYTHON=python node scripts/ui_sources_check.js
+```
+
+Runs the app with a fake Gemini client and a fake chain (`scripts/ui_fake_app.py`), asks three questions in headless Chromium through Playwright, and checks what a visitor sees: only the latest answer's sources are shown in full, each earlier answer has its own closed "Sources" expander, and opening one shows that answer's citations and chunks only. Screenshots go to `.ui-check/`. It needs Node with the `playwright` package and a Chromium for it; it is not part of the pytest suite.
 
 ### Repository retrieval smoke test
 
@@ -368,7 +377,9 @@ Hybrid-Retrieval-RAG-for-Documents-Code-and-Repositories/
 ├── docs/DECISIONS.md             # Why retrieval looks the way it does, with the numbers
 ├── docs/ROADMAP_v4.md            # Plan for answer-quality work (v4)
 │
-├── tests/                        # 407 passed, 58 subtests — no API key required
+├── scripts/                      # Browser check of the sources toggle (fake LLM; not in the suite)
+│
+├── tests/                        # 411 passed, 58 subtests — no API key required
 │
 └── chroma_db_*/                  # Per-chat vector stores (auto-created, gitignored)
     chroma_eval_*/                # Evaluation stores (separate namespace)
