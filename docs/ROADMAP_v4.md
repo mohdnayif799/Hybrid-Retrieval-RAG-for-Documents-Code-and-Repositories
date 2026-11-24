@@ -107,7 +107,7 @@ full run.
 | **Total** | | | **≈ $1.00** (cap: abort any single run projected over $0.50) |
 
 That is about a dollar if thinking tokens are small, which is above "in the
-cents" taken strictly. The levers are listed under *Decisions I need from you*.
+cents" taken strictly. You accepted about $1 (see *Decisions taken*).
 
 If your key is on the free tier, the cost is $0 but rate limits apply. The
 runner throttles to a configurable requests-per-minute, and resumes from the
@@ -443,7 +443,7 @@ dev, list_all coverage is 69.0% @5 and 90.5% @20, and multi-part all-parts@5 is
 * **Sources.** With no retrieval there are no ranked chunks, so the sources
   block names the document(s) and pages used ("whole document"). The
   alternative is to keep retrieval running for the citation display only
-  (+1.1-1.4 s). Your call; see Decisions.
+  (+1.1-1.4 s). Decided: no retrieval, with page or section markers the model cites (see *Decisions taken*, item 4).
 
 **List/summary on larger stores.**
 * For list or summary intent, return the reranker's top **10** instead of 5.
@@ -536,40 +536,53 @@ Phase 2 baseline. Proposed acceptance (please confirm):
 
 ---
 
-## Findings outside the phases (for your decision)
+## Findings outside the phases
 
-1. **The response cache can serve stale answers** (`app.py:827-850`). It is
-   keyed only by the lowercased question.
-   * It is never cleared when documents are added to a chat, only on
-     eviction. Asking the same question after uploading a new file returns
-     the old answer and sources.
-   * It ignores chat history. A repeated follow-up such as "and the next
-     one?" returns its first answer even when the conversation has moved on.
-   * Fix: key on (question, store version, hash of the last turns), and bump
-     the store version on every upload.
-   * It is a small app-level change. I'd fold it into Phase 1 (also app-only,
-     no retrieval or prompt change) if you agree; otherwise it gets its own
-     small PR.
+1. **The response cache could serve stale answers.** It was keyed only by the
+   lowercased question, was never cleared when documents were added, and
+   ignored chat history. **Fixed in its own PR before Phase 1**: the key is
+   (chat, document-set digest, question), and follow-ups that depend on
+   earlier turns bypass the cache. See `src/response_cache.py` and
+   DECISIONS.md.
 2. **The answer context has no file labels** (`rag_chain.py:270`). The model
    can't say which file a fact came from, and the UI shows citations instead.
    Labelling chunks could help multi-file answers. Not planned; noted.
 3. **The `smoke_repo_retrieval.py` line-number check** (v3 open item 10)
    remains out of scope.
 
-## Decisions I need from you
+## Decisions taken (2026-11-24)
 
-1. **Eval budget.** About $1.00 total as projected, capped at $0.50 per run. Is
-   that acceptable? If it must stay well under $1:
-   * judge with thinking off (already planned);
-   * skip the Phase 2 noise re-runs (−$0.04), which weakens later claims;
-   * run Phase 5 only on fact and list questions (−≈ $0.15).
-2. **The judge-check bar:** ≥ 80% raw agreement on `correct` and `grounded`,
-   or a different bar?
-3. **Committing results.** Do you push `results_gen_*.json` (no text) from the
-   laptop so I can analyse per question, or paste summaries only?
-4. **Small-document sources:** show "whole document", or keep retrieval for
-   chunk citations (+1.1-1.4 s)?
-5. **The response-cache fix:** in Phase 1, or a separate PR?
+These override the phase descriptions above where they differ.
+
+1. **Budget.** About $1 total for all eval runs is accepted. The Phase 2 noise
+   re-runs stay.
+2. **Judge model and bar.**
+   * The judge is `gemini-3.5-flash` if the 5-question pilot projects the
+     total eval spend under $1.50; otherwise it is flash-lite.
+   * The judge passes if it agrees with your hand labels at least 80% of the
+     time on `correct` and on `grounded`.
+   * The agreement report also gives the direction of each disagreement:
+     whether the judge was more lenient or stricter than you.
+3. **Results files come back by git.** For every laptop step, the PR gives
+   exact PowerShell commands, from the repo folder, to:
+   * fetch, check out and pull the branch;
+   * run the eval;
+   * `git add` only the results file (verdicts and counts, no text), commit,
+     and push to the same branch.
+   I stay stopped until you say to pull and continue.
+4. **Small-document mode uses no retrieval.**
+   * The full-document context carries page (PDF, PPTX) or section markers.
+   * The model is told to cite those markers.
+   * The sources block shows the document name and the pages or sections the
+     answer cited.
+5. **Response-cache fix:** its own PR before Phase 1, keyed by chat, document
+   set and question, with follow-ups that depend on history skipping the
+   cache. Tests cover a document added after a cached answer, and the same
+   question in two chats.
+6. **Synthetic typo set (Phase 3):** generated only from dev questions, with a
+   fixed seed, and **frozen (hashed) before anything is measured on it**.
+7. **Freshness test:** from Phase 3 it points at dev-only results until
+   Phase 6.
 
 [aa]: https://artificialanalysis.ai/models/gemini-3-5-flash-lite
 [dm]: https://deepmind.google/models/gemini/flash-lite/

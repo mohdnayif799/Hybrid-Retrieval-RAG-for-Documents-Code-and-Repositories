@@ -103,7 +103,7 @@ The production demo is containerized with Docker and deployed to **Google Cloud 
 | **Multi-chat workspace** | Independent conversations, each with their own sources, history and vector store |
 | **Incremental indexing** | Adding a second source appends to the existing store rather than rebuilding it |
 | **Conversational memory** | Follow-ups such as "what about the next one?" are rewritten into standalone queries before retrieval |
-| **Session response cache** | Repeated questions are served from an in-memory cache without an LLM call |
+| **Session response cache** | A repeated question is served from an in-memory cache without an LLM call. The cache is keyed by chat, the chat's document set and the question, so adding documents invalidates it; follow-ups that depend on earlier turns bypass it |
 | **LLM-generated titles** | The first question in a chat produces a concise title |
 
 ---
@@ -262,7 +262,7 @@ No test needs an API key or downloads a model, so the suite is fast and costs no
 
 ```bash
 python -m pytest tests/ -q
-# 378 passed, 58 subtests passed
+# 407 passed, 58 subtests passed
 ```
 
 | Test file | Tests run | Test functions | Covers |
@@ -280,7 +280,8 @@ python -m pytest tests/ -q
 | `test_benchmark_sweep.py` | 22 | 16 | Configuration-sweep harness wiring for the tested-but-not-shipped configurations in [Evaluation](#evaluation) |
 | `test_benchmark_v3.py` | 45 | 45 | v3 benchmark: span gold resolution and evidence checks, near-duplicate rules, rank and coverage metrics, paired bootstrap, the stratified split and freeze verification, the harness end to end on the production retrieval path (fake embedder and reranker), its refusal to score an unfrozen set or a production path without its reranker, and that the committed frozen files and results still match the code |
 | `test_store_registry.py` | 14 | 11 | Chat-store eviction policy: idle timeout, count and size budgets, least-recently-used order, never evicting the store in use, settings from environment variables |
-| `test_app_ui.py` | 13 | 13 | Headless Streamlit `AppTest` runs of `app.py`: demo-key counter and limit, quota and failure messages, model choice, the example chip, the evicted-store notice |
+| `test_app_ui.py` | 17 | 17 | Headless Streamlit `AppTest` runs of `app.py`: demo-key counter and limit, quota and failure messages, model choice, the example chip, the evicted-store notice, and the response cache (a repeated question, a document added after a cached answer, the same question in two chats, a history-dependent follow-up) |
+| `test_response_cache.py` | 25 | 11 | Response-cache rules: the document-set digest, the key (chat, documents, question), and which follow-ups depend on earlier turns |
 | `test_example_repo.py` | 12 | 9 | Bundled example tarball checksum and offline loading, local archive ingestion, repository limits from environment variables |
 | `test_query_log.py` | 7 | 7 | Per-query log line, Gemini quota-error detection, key redaction, Gemini call counting through the RAG chain |
 | `test_demo_key.py` | 3 | 2 | Shared demo key detection |
@@ -288,7 +289,7 @@ python -m pytest tests/ -q
 | `test_store_eviction.py` | 3 | 3 | Eviction against real ChromaDB: stops Chroma, closes its files, deletes the store, drops stale BM25 entries |
 | `test_lazy_ocr_import.py` | 1 | 1 | EasyOCR is not imported until a page actually needs OCR |
 
-"Tests run" comes from an actual `python -m pytest tests/ -q` run; "Test functions" is counted from the current source (`def test_*`, including class-based methods). The run reports more passes than functions because `test_repo_ingestion.py`, three of the benchmark files, `test_store_registry.py`, `test_example_repo.py` and `test_demo_key.py` use `@pytest.mark.parametrize` to run one function over several cases, and `test_casual_detection.py`'s `subTest` blocks report separately. That is why `pytest -q` totals 378 passed with 58 subtests from 336 test functions.
+"Tests run" comes from an actual `python -m pytest tests/ -q` run; "Test functions" is counted from the current source (`def test_*`, including class-based methods). The run reports more passes than functions because `test_repo_ingestion.py`, three of the benchmark files, `test_store_registry.py`, `test_example_repo.py`, `test_demo_key.py` and `test_response_cache.py` use `@pytest.mark.parametrize` to run one function over several cases, and `test_casual_detection.py`'s `subTest` blocks report separately. That is why `pytest -q` totals 407 passed with 58 subtests from 351 test functions.
 
 None of the benchmark tests assert on a measured, corpus-dependent number: they exercise the scoring and configuration code against fixed synthetic fixtures, since the actual benchmark numbers in [Evaluation](#evaluation) are measurements, not invariants, and move if the corpus does.
 
@@ -354,6 +355,7 @@ Hybrid-Retrieval-RAG-for-Documents-Code-and-Repositories/
 │   ├── hybrid_retrieval.py      # BM25 index, candidate pool, two-stage HybridRetriever
 │   ├── reranker.py              # Cross-encoder reranker: loading, time budget, warm-up
 │   ├── citations.py             # Citation formatting and grouping
+│   ├── response_cache.py        # When a chat may reuse a cached answer
 │   └── rag_chain.py             # Routing, query rewriting, grounded generation
 │
 ├── benchmark/                    # Controlled retrieval evaluation (see Evaluation)
@@ -364,8 +366,9 @@ Hybrid-Retrieval-RAG-for-Documents-Code-and-Repositories/
 │   └── corpus_manifest.json      # Pinned corpus: repo commit SHA, document hashes, chunk counts
 │
 ├── docs/DECISIONS.md             # Why retrieval looks the way it does, with the numbers
+├── docs/ROADMAP_v4.md            # Plan for answer-quality work (v4)
 │
-├── tests/                        # 378 passed, 58 subtests — no API key required
+├── tests/                        # 407 passed, 58 subtests — no API key required
 │
 └── chroma_db_*/                  # Per-chat vector stores (auto-created, gitignored)
     chroma_eval_*/                # Evaluation stores (separate namespace)
@@ -585,7 +588,6 @@ Full methodology, per-category breakdowns and the pre-registration log are in [`
 - **Repository size is bounded.** Ingestion refuses above 3,000 indexable files, and well before that limit, embedding time on CPU becomes the practical constraint — a large repository produces tens of thousands of chunks and takes minutes to index.
 - **Retrieval breadth.** Five chunks are supplied per answer, which suits targeted questions; broad architectural questions over a large repository see only a small slice of the corpus.
 - **No file-tree representation.** File contents are indexed, not the directory structure, though a lexically relevant top-level README is preferentially surfaced when one exists (see [Retrieval architecture](#retrieval-architecture)).
-- **Response cache keyed on question text alone.** The cache ignores conversation history, so identical phrasing in two different contexts can return the earlier answer.
 - **Single-user, session-scoped.** Chat state lives in Streamlit session state and does not survive a restart; the chat's on-disk Chroma directory is not cleaned up when this happens, so a long-running deployment accumulates orphaned per-chat stores over time.
 
 ---
@@ -619,7 +621,6 @@ Full methodology, per-category breakdowns and the pre-registration log are in [`
 - **Repository manifest document** — a synthetic index of file paths so structural questions about a repository have something to retrieve
 - **Code-specific embeddings** — a model trained on code, to strengthen the dense half for repositories
 - **Streaming responses** — token-by-token generation for lower perceived latency
-- **History-aware response cache** — key on conversation context, not question text alone
 - **Persistent storage** — chat history and metadata surviving restarts, and cleanup of orphaned per-chat vector stores
 - **Docker + hosted demo**
 

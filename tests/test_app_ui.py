@@ -210,3 +210,115 @@ def test_chat_whose_store_was_evicted_is_told_and_detached(monkeypatch, tmp_path
     assert any("were cleared after a period of inactivity" in i.value for i in at.info)
     chat = at.session_state.chats["c1"]
     assert chat["chroma_dir"] is None and chat["uploaded_files"] == []
+
+
+# ── Response cache ────────────────────────────────────────────────────────────
+# The chain is replaced by a counting fake, so these tests see exactly when an
+# answer is generated and when it is served from the cache. Each generated
+# answer is distinct ("answer 1", "answer 2", ...).
+
+CACHED_CAPTION = "retrieved from session cache"
+
+
+def _counting_chain(monkeypatch) -> list:
+    """Replace build_rag_chain; returns the list of questions it answered."""
+    from src import rag_chain
+
+    asked: list = []
+
+    class FakeChain:
+        def invoke(self, inputs):
+            asked.append(inputs["input"])
+            return {"answer": f"answer {len(asked)}", "context": []}
+
+    monkeypatch.setattr(rag_chain, "build_rag_chain",
+                        lambda api_key, model, chroma_dir: FakeChain())
+    return asked
+
+
+def _ask(at: AppTest, question: str) -> AppTest:
+    return at.chat_input[0].set_value(question).run()
+
+
+def _served_from_cache(at: AppTest) -> bool:
+    return any(CACHED_CAPTION in c for c in _captions(at))
+
+
+def _fake_store(monkeypatch, tmp_path):
+    """Indexing succeeds without embedding anything (no model download)."""
+    from src import vector_store
+
+    store = str(tmp_path / "chroma_db_fake")
+    monkeypatch.setattr(vector_store, "create_chat_vector_store",
+                        lambda chunks, progress_callback=None: (None, store))
+    monkeypatch.setattr(vector_store, "store_exists", lambda path: True)
+    monkeypatch.setattr(vector_store, "get_store_stats",
+                        lambda path: {"total_chunks": 1, "per_doc": {}})
+
+
+def test_a_repeated_question_is_served_from_the_cache(monkeypatch):
+    _fake_gemini(monkeypatch, reply="A title")
+    asked = _counting_chain(monkeypatch)
+    at = _app(monkeypatch, FAKE_SHARED_KEY).run()
+
+    _ask(at, QUESTION)
+    _ask(at, QUESTION)
+
+    assert not at.exception
+    assert len(asked) == 1
+    assert _served_from_cache(at)
+
+
+def test_a_document_added_after_a_cached_answer_invalidates_it(monkeypatch, tmp_path):
+    _fake_gemini(monkeypatch, reply="A title")
+    asked = _counting_chain(monkeypatch)
+    _fake_store(monkeypatch, tmp_path)
+    at = _app(monkeypatch, FAKE_SHARED_KEY).run()
+
+    _ask(at, QUESTION)                                   # cached, no documents
+    at.run()                                             # idle rerun shows the chip
+    # Index the bundled example repository through the real chip: the real
+    # chunking and _index_chunks run; only the embedding store is faked.
+    at.button(key="example_repo").click().run()
+    chat = at.session_state.chats[at.session_state.active_id]
+    assert chat["chroma_dir"] and len(chat["doc_digests"]) == 1
+
+    _ask(at, QUESTION)
+
+    assert not at.exception
+    assert asked == [QUESTION, QUESTION]                 # generated again
+    assert not _served_from_cache(at)
+    assert [m["content"] for m in chat["messages"] if m["role"] == "assistant"] == [
+        "answer 1", "answer 2"]
+
+
+def test_the_same_question_in_two_chats_is_answered_in_each(monkeypatch):
+    _fake_gemini(monkeypatch, reply="A title")
+    asked = _counting_chain(monkeypatch)
+    at = _app(monkeypatch, FAKE_SHARED_KEY).run()
+
+    _ask(at, QUESTION)
+    first_chat = at.session_state.active_id
+    at.button(key="new_chat").click().run()
+    assert at.session_state.active_id != first_chat
+    _ask(at, QUESTION)
+
+    assert not at.exception
+    assert len(asked) == 2
+    assert not _served_from_cache(at)
+
+
+def test_a_follow_up_that_depends_on_history_bypasses_the_cache(monkeypatch):
+    _fake_gemini(monkeypatch, reply="A title")
+    asked = _counting_chain(monkeypatch)
+    at = _app(monkeypatch, FAKE_SHARED_KEY).run()
+
+    _ask(at, QUESTION)
+    _ask(at, "and the next one?")
+    _ask(at, "and the next one?")
+
+    assert not at.exception
+    assert len(asked) == 3
+    assert not _served_from_cache(at)
+    chat = at.session_state.chats[at.session_state.active_id]
+    assert len(chat["response_cache"]) == 1              # only the first question
