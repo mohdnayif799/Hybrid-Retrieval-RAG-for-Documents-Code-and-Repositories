@@ -131,3 +131,11 @@ These are recorded in [`benchmark/v3/README.md`](../benchmark/v3/README.md):
 repository identity (`rid-01`, `rid-04`), misspelled code queries, code
 multi-hop, coverage of long lists, and a refusal threshold on the reranker
 score (about −7.5; AUROC 0.886 on dev and 0.935 on holdout, not wired in).
+
+## v4 (planned)
+
+The plan for the next phases (sources display, a generation eval, typo
+correction and intent, list and summary questions, answer length) is in
+[`ROADMAP_v4.md`](ROADMAP_v4.md). Decisions are recorded here as each phase
+lands. The retrieval holdout has been scored once (PR #6); the plan scores it
+a second and final time in its last phase.
