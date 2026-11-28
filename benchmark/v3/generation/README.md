@@ -47,6 +47,7 @@ file (`judge_v2.md`), so grades from different versions never mix.
 | `python -m benchmark.v3.generation.run` | all 127 dev questions, plus the noise runs and the judge-check sheet |
 | `python -m benchmark.v3.generation.agreement` | judge vs your hand labels on 20 questions |
 | `python -m benchmark.v3.generation.run --tag NAME --noise 0` | a comparison run (for example after a prompt change): writes `results/dev_NAME.json`, never the baseline, and no judge-check sheet |
+| `python -m benchmark.v3.generation.answer_features --ids A,B` | text-free features of cached answers under the baseline and current prompts (length, refusal, "says a part is missing", key facts present); cache only, $0 |
 | `python -m benchmark.v3.generation.compare --tag NAME` | that run vs the baseline, question by question: Phase 2b criteria, by shape and type, flips |
 
 **The pilot:**

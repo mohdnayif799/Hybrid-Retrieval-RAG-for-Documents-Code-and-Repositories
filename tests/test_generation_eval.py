@@ -525,3 +525,41 @@ def test_runs_with_different_judges_are_not_compared():
         C.check_comparable(base, other)
     assert C.check_comparable(base, _run({"a": ("keyword", "bare", {})})) == [
         "the answer prompt is the same in both runs"]
+
+
+# ── answer features (text-free diagnosis of cached answers) ─────────────────
+
+def test_the_kept_baseline_prompt_is_the_one_the_baseline_was_scored_with():
+    from benchmark.v3.generation import answer_features as F
+
+    results = os.path.join(os.path.dirname(J.__file__), "results", "dev.json")
+    if not os.path.exists(results):
+        pytest.skip("no baseline results in this checkout")
+    with open(results, encoding="utf-8") as handle:
+        assert F.prompt_hash(F.BASELINE_QA_TEMPLATE) == json.load(handle)["answer_prompt_sha256"]
+
+
+@pytest.mark.parametrize("answer, missing", [
+    ("The documents do not specify the timeout.", True),
+    ("This part is not covered in the provided documents.", True),
+    ("The context doesn't mention a default value.", True),
+    ("There is no information about retries.", True),
+    ("The default timeout is 30 seconds, set in adapters.py.", False),
+    ("It does not retry by default; set max_retries to change that.", False),
+])
+def test_says_missing_detects_a_declared_gap(answer, missing):
+    from benchmark.v3.generation import answer_features as F
+
+    assert bool(F.MISSING.search(answer)) is missing
+
+
+def test_features_count_parts_whose_key_fact_is_in_the_answer():
+    from benchmark.v3.generation import answer_features as F
+    from benchmark.v3.gold import Span, _norm
+
+    spans = [Span("a.py", 0, 0, 10, ("x",), evidence="max_redirects"),
+             Span("b.py", 0, 0, 10, ("y",), evidence="TooManyRedirects")]
+    f = F.features("It raises TooManyRedirects; the limit is not specified here.", spans,
+                   {"parts_in_context": 2, "n_parts": 2}, _norm)
+    assert f["parts_in_answer"] == "1/2" and f["parts_in_context"] == "2/2"
+    assert f["says_missing"] and not f["refusal_exact"]

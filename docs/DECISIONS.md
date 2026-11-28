@@ -412,3 +412,25 @@ No retrieval change, no extra model call.
 
 **Budget.** The cap for the whole plan's eval spend is raised to $2.00 and
 enforced from the cache. The $0.50 stop per run stays.
+
+**Phase 2b measured** (results/dev_refusal.json and compare_dev_refusal.json;
+222 new calls, $0.25):
+
+| Criterion | Result | |
+|---|---|---|
+| 1. ≤ 3 of the 13 answer-step refusals remain | 4 remain (crs-05, dfa-09, mh-02, pp-03) | **FAIL, by one** |
+| 2. correct up, question by question | score +8.8 [+3.1, +15.0]; 15 up, 5 down | PASS |
+| 3. unanswerable refused | 14/14 | PASS |
+| 4. grounded | 100% | PASS |
+
+* **Overall:** correct yes 64 → 71; bare questions' correct score 59 → 90;
+  wrong refusals 26 → 13.
+* **Guessing check.** Of the 13 baseline refusals with no gold in context, 5
+  are now answered, and all 5 are grounded: isw-01 and msp-06 correct, mh-04
+  partial, mh-03 and rid-04 wrong but grounded. None is a guess.
+* **crs-07** flipped to the exact refusal. Its baseline answer was grounded
+  but wrong (correct "no"), with no gold part in context, so the flip is
+  neutral for correctness and the refusal is right for the answer step.
+
+The diagnosis and the decision on criterion 1 are in the Phase 2b section of
+docs/ROADMAP_v4.md once taken.
