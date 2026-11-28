@@ -148,6 +148,7 @@ def answer_question(ctx: Context, q: dict, sample: int = 0) -> dict:
     docs = result.get("context") or []
     return {
         "answer": result["answer"],
+        "docs": docs,
         "context_texts": [d.page_content for d in docs],
         "stats": {
             "calls": len(replies),
@@ -160,6 +161,31 @@ def answer_question(ctx: Context, q: dict, sample: int = 0) -> dict:
             "n_context": len(docs),
         },
     }
+
+
+def query_shape(question: str) -> str:
+    """"bare" for keyword-style input (3 words or fewer, no "?"), else "sentence"."""
+    text = question.strip()
+    return "bare" if len(text.split()) <= 3 and not text.endswith("?") else "sentence"
+
+
+def gold_in_context(ctx: Context, q: dict, docs: list) -> dict:
+    """
+    Where the gold evidence sat in what the model was given (no text):
+    the rank of the first chunk overlapping a gold span, and whether any span's
+    evidence string occurs in the context. Separates a refusal or a wrong
+    answer with the evidence in front of the model (a generation failure) from
+    one without it (a retrieval failure). None for unanswerable questions.
+    """
+    if q["qtype"] == "unanswerable":
+        return {"gold_rank": None, "evidence_in_context": None}
+    G = ctx.G
+    spans = G.resolve_gold(q, ctx.parents)
+    direct = G.direct_gold(spans, docs)
+    evidence = [G._norm(s.evidence) for s in spans if s.evidence]
+    texts = [G._norm(d.page_content) for d in docs]
+    return {"gold_rank": (min(direct) + 1) if direct else None,
+            "evidence_in_context": any(e in t for e in evidence for t in texts)}
 
 
 def judge_answer(ctx: Context, q: dict, answer: str, context_texts: list, judge_model: str,
@@ -232,6 +258,8 @@ def aggregate(rows: dict, resamples: int = 10_000, seed: int = 20261123) -> dict
     groups: dict[str, list] = {"all": list(rows.values())}
     for r in rows.values():
         groups.setdefault(r["qtype"], []).append(r)
+        if r.get("query_shape"):
+            groups.setdefault(f"shape:{r['query_shape']}", []).append(r)
     out = {}
     for name, members in sorted(groups.items()):
         ok = [r for r in members if "error" not in r["verdict"]]
@@ -257,6 +285,18 @@ def aggregate(rows: dict, resamples: int = 10_000, seed: int = 20261123) -> dict
         words = [v["word_count"] for v in graded]
         out[name] = {"n": len(members), "graded": len(graded), "metrics": metrics,
                      "median_words": statistics.median(words) if words else None}
+    return out
+
+
+def refusal_diagnosis(rows: dict) -> dict:
+    """Ids of answerable questions the answer refused, split by whether the evidence was in context."""
+    out = {"evidence_in_context": [], "evidence_not_in_context": []}
+    for qid, r in sorted(rows.items()):
+        v = r.get("verdict", {})
+        if r["qtype"] != "unanswerable" and v.get("wrongly_refused"):
+            key = ("evidence_in_context" if r.get("gold_context", {}).get("evidence_in_context")
+                   else "evidence_not_in_context")
+            out[key].append(qid)
     return out
 
 
@@ -308,7 +348,7 @@ def print_pilot(rows: dict, judges: list, ledger: dict, projections: dict, chose
 def print_full(report: dict) -> None:
     agg = report["aggregates"]
     print(f"\nDEV RESULTS (judge: {report['judge_model']}; n = {agg['all']['n']})")
-    widths = [17, 4, 13, 13, 13, 13, 13, 8]
+    widths = [16, 4, 13, 13, 13, 13, 13, 8]
     print(_row(["qtype", "n", "correct_yes", "correct_score", "grounded", "refusal_ok",
                 "length_right", "words"], widths))
 
@@ -320,6 +360,12 @@ def print_full(report: dict) -> None:
         print(_row([name, g["n"], pct(m, "correct_yes"), pct(m, "correct_score"),
                     pct(m, "grounded_yes"), pct(m, "refusal_correct"), pct(m, "length_right"),
                     g["median_words"]], widths))
+    d = report["wrong_refusals"]
+    print("\nWRONG REFUSALS of answerable questions: "
+          f"{len(d['evidence_in_context'])} with the evidence in the model's context "
+          f"({', '.join(d['evidence_in_context']) or 'none'}); "
+          f"{len(d['evidence_not_in_context'])} without it "
+          f"({', '.join(d['evidence_not_in_context']) or 'none'})")
     n = report["noise"]
     print("\nNOISE (same answer re-judged / answer regenerated then judged): agreement per field")
     for kind in ("rejudge", "regenerate"):
@@ -429,6 +475,8 @@ def run_pilot(ctx: Context, questions: list, prices: dict) -> dict:
                 calls.setdefault(f"{jm}|judge", []).append(
                     {"prompt": t["prompt"], "output": t["output"], "thoughts": t["thoughts"]})
         rows[q["id"]] = {"qtype": q["qtype"], "domain": q["domain"],
+                         "query_shape": query_shape(q["question"]),
+                         "gold_context": gold_in_context(ctx, q, a["docs"]),
                          "answer_stats": a["stats"], "verdicts": verdicts}
         print(f"[gen-eval] {q['id']} done", flush=True)
 
@@ -453,6 +501,8 @@ def run_full(ctx: Context, questions: list, judge_model: str, noise_n: int) -> d
         answers[q["id"]] = a
         verdict = judge_answer(ctx, q, a["answer"], a["context_texts"], judge_model)
         rows[q["id"]] = {"qtype": q["qtype"], "domain": q["domain"],
+                         "query_shape": query_shape(q["question"]),
+                         "gold_context": gold_in_context(ctx, q, a["docs"]),
                          "answer_stats": a["stats"], "verdict": verdict}
         print(f"[gen-eval] {q['id']} done", flush=True)
 
@@ -607,6 +657,7 @@ def main(argv: list[str] | None = None) -> int:
             out = run_full(ctx, queries, judge_model, args.noise)
             report = {**common, "kind": "full", "judge_model": judge_model,
                       "per_question": out["rows"], "aggregates": aggregate(out["rows"]),
+                      "wrong_refusals": refusal_diagnosis(out["rows"]),
                       "noise": out["noise"],
                       "thinking_setting_dropped_for": sorted(llm.dropped_thinking),
                       "ledger": llm.ledger.summary(), "seconds": round(time.time() - started, 1)}

@@ -247,3 +247,37 @@ CRLF is replaced by an LF copy, which must match the pinned hash exactly.
 
 Nothing in the v3 results changes: those files contain no CR, so every hash
 is the same.
+
+**Pilot, run on the laptop (2026-11-28; figures as reported).** Its results
+file did not reach the branch, so it is re-pushed with the baseline.
+
+* **Cost:** 15 calls, $0.0163.
+* **Judge chosen:** `gemini-3.7-flash`, projecting **$1.17** for the whole
+  plan, under the $1.50 limit.
+* **3.7-flash is stricter than flash-lite.** It graded `con-01` and `crs-01`
+  "partial" where flash-lite said "yes". Whether stricter is right is for the
+  human check to settle.
+
+**Finding: `eid-01` is a false refusal, not a retrieval miss.** Recorded here,
+not fixed.
+
+* **What happened:** the answer refused in 12 words (judge: refused yes,
+  correct no). The prompt's exact refusal sentence is also 12 words; the
+  results file's `refusal_exact` will confirm it.
+* **What the model had in front of it**, rebuilt from the same deterministic
+  store (no text printed):
+  * the question is a bare identifier: one word, no "?";
+  * the gold chunk is rank 1 of the 5 and contains the evidence;
+  * the identifier appears in all 5 chunks.
+* **So the evidence was there and the answer step declined.**
+* **Hypothesis:** `_QA_TEMPLATE` has no instruction for keyword-style input.
+  Given a bare name rather than a question, the model takes the refusal path.
+* **Scale:** 29 of 127 dev questions have this shape (3 words or fewer, no
+  "?"): 20 exact_identifier, 6 keyword, 3 misspelled.
+
+From now on every result records `query_shape` and `gold_context` (the gold
+chunk's rank in the context, and whether the evidence was there), with no
+text. The baseline will therefore report:
+* answers by shape (bare vs sentence);
+* wrong refusals split into "evidence in context" (an answer-step failure)
+  and "evidence not in context" (a retrieval failure).

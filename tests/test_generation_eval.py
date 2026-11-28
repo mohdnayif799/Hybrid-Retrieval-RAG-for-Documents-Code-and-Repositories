@@ -253,15 +253,18 @@ def test_unfinished_labels_are_rejected(tmp_path):
 # ── end to end: pilot and full run with a fake chain ────────────────────────
 
 class _Doc:
-    def __init__(self, text):
+    def __init__(self, text, start=7):
         self.page_content = text
+        self.metadata = {"source": "doc.txt", "source_type": "upload", "start_index": start}
 
 
 def _fake_build_chain(api_key, model, chroma_dir, llm=None):
     class Chain:
         def invoke(self, inputs):
             reply = llm(f"PROMPT for: {inputs['input']}")
-            return {"answer": reply.text, "context": [_Doc(SECRET_CHUNK)]}
+            # A non-gold chunk first, then the gold one (it starts at offset 7).
+            return {"answer": reply.text,
+                    "context": [_Doc("unrelated text", start=500), _Doc(SECRET_CHUNK)]}
     return Chain()
 
 
@@ -398,3 +401,20 @@ def test_a_crlf_corpus_document_is_replaced_by_its_lf_copy(tmp_path, monkeypatch
     doc.write_bytes(b"something else\r\n")
     with pytest.raises(RuntimeError, match="sha256"):
         B._lf_copy_if_it_matches(str(doc), "notes.txt", "other-digest")
+
+
+def test_rows_record_query_shape_and_where_the_gold_was_in_context(tmp_path):
+    backend = FakeBackend(verdict={**GOOD_VERDICT, "refused": "yes", "correct": "no"})
+    qs = [*QUESTIONS, {**QUESTIONS[0], "id": "eid-02", "question": "DEFAULT_LIMIT"}]
+    out = R.run_full(_ctx(tmp_path, backend), qs, R.LITE_JUDGE, noise_n=0)
+    rows = out["rows"]
+
+    assert rows["eid-01"]["query_shape"] == "sentence"
+    assert rows["eid-02"]["query_shape"] == "bare"
+    assert rows["eid-01"]["gold_context"] == {"gold_rank": 2, "evidence_in_context": True}
+    assert rows["una-01"]["gold_context"] == {"gold_rank": None, "evidence_in_context": None}
+    # Answerable questions refused with the evidence present are generation failures.
+    assert R.refusal_diagnosis(rows) == {"evidence_in_context": ["eid-01", "eid-02"],
+                                         "evidence_not_in_context": []}
+    agg = R.aggregate(rows, resamples=100)
+    assert agg["shape:bare"]["n"] == 1 and agg["shape:sentence"]["n"] == 2
