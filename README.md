@@ -263,7 +263,7 @@ No test needs an API key or downloads a model, so the suite is fast and costs no
 
 ```bash
 python -m pytest tests/ -q
-# 411 passed, 58 subtests passed
+# 438 passed, 58 subtests passed
 ```
 
 | Test file | Tests run | Test functions | Covers |
@@ -283,6 +283,7 @@ python -m pytest tests/ -q
 | `test_store_registry.py` | 14 | 11 | Chat-store eviction policy: idle timeout, count and size budgets, least-recently-used order, never evicting the store in use, settings from environment variables |
 | `test_app_ui.py` | 21 | 21 | Headless Streamlit `AppTest` runs of `app.py`: demo-key counter and limit, quota and failure messages, model choice, the example chip, the evicted-store notice, the sources toggle (only the latest answer in full, earlier answers' own sources collapsed beneath them), and the response cache (a repeated question, a document added after a cached answer, the same question in two chats, a history-dependent follow-up) |
 | `test_response_cache.py` | 25 | 11 | Response-cache rules: the document-set digest, the key (chat, documents, question), and which follow-ups depend on earlier turns |
+| `test_generation_eval.py` | 27 | 27 | Generation eval harness with a fake model: the call cache (a rerun makes no calls), the spend cap, retries and the thinking-setting fallback, judge parsing and derived fields, the pinned judge prompt, the cost projection and the judge-model rule, aggregation, judge-vs-human agreement, results files without text, CRLF checkouts, and `build_rag_chain`'s injected model |
 | `test_example_repo.py` | 12 | 9 | Bundled example tarball checksum and offline loading, local archive ingestion, repository limits from environment variables |
 | `test_query_log.py` | 7 | 7 | Per-query log line, Gemini quota-error detection, key redaction, Gemini call counting through the RAG chain |
 | `test_demo_key.py` | 3 | 2 | Shared demo key detection |
@@ -290,7 +291,7 @@ python -m pytest tests/ -q
 | `test_store_eviction.py` | 3 | 3 | Eviction against real ChromaDB: stops Chroma, closes its files, deletes the store, drops stale BM25 entries |
 | `test_lazy_ocr_import.py` | 1 | 1 | EasyOCR is not imported until a page actually needs OCR |
 
-"Tests run" comes from an actual `python -m pytest tests/ -q` run; "Test functions" is counted from the current source (`def test_*`, including class-based methods). The run reports more passes than functions because `test_repo_ingestion.py`, three of the benchmark files, `test_store_registry.py`, `test_example_repo.py`, `test_demo_key.py` and `test_response_cache.py` use `@pytest.mark.parametrize` to run one function over several cases, and `test_casual_detection.py`'s `subTest` blocks report separately. That is why `pytest -q` totals 411 passed with 58 subtests from 355 test functions.
+"Tests run" comes from an actual `python -m pytest tests/ -q` run; "Test functions" is counted from the current source (`def test_*`, including class-based methods). The run reports more passes than functions because `test_repo_ingestion.py`, three of the benchmark files, `test_store_registry.py`, `test_example_repo.py`, `test_demo_key.py` and `test_response_cache.py` use `@pytest.mark.parametrize` to run one function over several cases, and `test_casual_detection.py`'s `subTest` blocks report separately. That is why `pytest -q` totals 438 passed with 58 subtests from 382 test functions.
 
 None of the benchmark tests assert on a measured, corpus-dependent number: they exercise the scoring and configuration code against fixed synthetic fixtures, since the actual benchmark numbers in [Evaluation](#evaluation) are measurements, not invariants, and move if the corpus does.
 
@@ -369,6 +370,7 @@ Hybrid-Retrieval-RAG-for-Documents-Code-and-Repositories/
 │
 ├── benchmark/                    # Controlled retrieval evaluation (see Evaluation)
 │   ├── v3/                       # Production-path evaluation, span-level gold, frozen split, results
+│   │   └── generation/           # Answer-quality eval: production chain + LLM judge, cached (v4)
 │   ├── RESULTS_V2.md             # v2 results: 93 queries, 1,222 chunks (predates the README pin)
 │   ├── TUNING.md                 # Pre-registered configuration sweep
 │   ├── blind_audit_log.md        # Ground-truth quality audit, logged before outcomes were known
@@ -379,7 +381,7 @@ Hybrid-Retrieval-RAG-for-Documents-Code-and-Repositories/
 │
 ├── scripts/                      # Browser check of the sources toggle (fake LLM; not in the suite)
 │
-├── tests/                        # 411 passed, 58 subtests — no API key required
+├── tests/                        # 438 passed, 58 subtests — no API key required
 │
 └── chroma_db_*/                  # Per-chat vector stores (auto-created, gitignored)
     chroma_eval_*/                # Evaluation stores (separate namespace)
@@ -593,7 +595,7 @@ Full methodology, per-category breakdowns and the pre-registration log are in [`
 
 - **Evaluation scope.** The retrieval evaluation covers one repository (`psf/requests`), one embedding model (`all-MiniLM-L6-v2`) and one chunking configuration. Nothing in it transfers automatically to a different repository, language or embedder.
 - **Both headline comparisons are statistically underpowered.** Bucket 1 has 3 discordant pairs and Bucket 2 has 4, both below the 6 needed for significance at the effect sizes observed — the evaluation characterises retrieval behaviour precisely, it does not establish that hybrid beats or loses to dense-only on aggregate.
-- **Retrieval-only evaluation.** No generation-quality (faithfulness or relevancy) evaluation currently exists in the project — an earlier Gemini-as-judge script was removed and has not been replaced — so nothing in Evaluation shows that any configuration produces a better final answer, only better, worse, or equal retrieved evidence.
+- **Answer quality is not scored yet.** The scores in Evaluation measure retrieved evidence, not final answers. A generation eval harness now exists (`benchmark/v3/generation/`: the production chain, graded by a Gemini judge with a pinned rubric, with every call cached). Its first real run, the dev baseline, is pending.
 - **One query's ranking is not reproducible run-to-run** (traced to Chroma rewriting its own SQLite file on open/query), giving Bucket 1 Hit@1 a ±1-query band.
 - **The embedding model is trained on prose, not code.** `all-MiniLM-L6-v2` is weaker at code semantics than a code-specific model, which is part of why the lexical side matters for repositories.
 - **Repository size is bounded.** Ingestion refuses above 3,000 indexable files, and well before that limit, embedding time on CPU becomes the practical constraint — a large repository produces tens of thousands of chunks and takes minutes to index.
@@ -625,7 +627,7 @@ Full methodology, per-category breakdowns and the pre-registration log are in [`
 ## Roadmap
 
 - **Vocabulary-mismatch retrieval** — `doc_paraphrase` queries score 20% across every retrieval method in the current evaluation, retrieving the right document but the wrong section; the evaluation's own conclusion is that this, not exact-match failure, is where retrieval work would actually pay off
-- **Answer-quality evaluation** — the current evaluation is retrieval-only; a faithfulness/relevancy harness against real generated answers does not currently exist in the project
+- **Answer-quality evaluation**: the harness is built (`benchmark/v3/generation/`); the dev baseline, the judge-vs-human check and the improvements planned in `docs/ROADMAP_v4.md` follow
 - **A properly-powered significance test** — both evaluation buckets sit below the discordant-pair count needed for significance; settling the dense-vs-hybrid question would need a larger query set or a corpus where the methods diverge more
 - **Per-query BM25 relevance gating** — a pre-registered test showed a promising but statistically inconclusive gain on the document bucket (87.2% → 92.3%, n=39); worth revisiting with more data before adopting
 - **Reranker** — a cross-encoder second stage, evaluated against the existing query set rather than assumed to help

@@ -50,11 +50,13 @@ class FrozenFileChanged(RuntimeError):
 
 
 def sha256_file(path: str) -> str:
-    h = hashlib.sha256()
+    """
+    SHA-256 of the file with CRLF read as LF, so a Windows checkout that
+    converted line endings (core.autocrlf) still verifies. The frozen files are
+    committed with LF, so this is the plain hash of their committed bytes.
+    """
     with open(path, "rb") as handle:
-        for block in iter(lambda: handle.read(1 << 20), b""):
-            h.update(block)
-    return h.hexdigest()
+        return hashlib.sha256(handle.read().replace(b"\r\n", b"\n")).hexdigest()
 
 
 def stratified_split(queries: list, seed: int = SEED, share: float = HOLDOUT_SHARE) -> dict:

@@ -41,3 +41,7 @@ benchmark/.cache/
 
 # Browser-check screenshots (scripts/ui_sources_check.js)
 .ui-check/
+
+# Generation eval: hand-label sheets hold document text (local only)
+benchmark/v3/generation/judge_check_*.yaml
+benchmark/v3/generation/judge_check_*.md

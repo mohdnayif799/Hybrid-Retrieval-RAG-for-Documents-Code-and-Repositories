@@ -199,7 +199,8 @@ def _history_to_text(chat_history: list) -> str:
     return "\n".join(lines)
 
 
-def build_rag_chain(gemini_api_key: str, model_name: str, chroma_dir: str | None):
+def build_rag_chain(gemini_api_key: str, model_name: str, chroma_dir: str | None,
+                    llm=None):
     """
     Build a conversational RAG chain using the google.genai SDK directly.
     Compatible with both AQ... and AIza... API key formats.
@@ -219,8 +220,13 @@ def build_rag_chain(gemini_api_key: str, model_name: str, chroma_dir: str | None
          chat history, retrieve (dense + BM25 candidate pool, reranked by
          a cross-encoder), generate a grounded answer that also
          receives conversation history for reference resolution.
+
+    ``llm`` is for evaluation and tests only: a callable taking a prompt and
+    returning an object with a ``.text`` attribute, used instead of the
+    Gemini client for every call this chain makes (benchmark/v3/generation
+    passes a cached, cost-tracked client). Production passes nothing.
     """
-    client = google_genai.Client(api_key=gemini_api_key)
+    client = google_genai.Client(api_key=gemini_api_key) if llm is None else None
     has_documents = chroma_dir is not None
 
     retriever = None
@@ -241,6 +247,8 @@ def build_rag_chain(gemini_api_key: str, model_name: str, chroma_dir: str | None
 
         def generate(prompt: str):
             on_gemini_call()
+            if llm is not None:
+                return llm(prompt)
             return client.models.generate_content(model=model_name, contents=prompt)
 
         # ── Route 1: no documents at all, or high-confidence casual message ──

@@ -203,3 +203,47 @@ expander, so a chat of ten questions showed ten source blocks.
   * opening the first shows only its own file and chunk.
 
 No retrieval, prompt or cache change; no latency or cost change.
+
+### Phase 2: generation eval harness (2026-11-28, in progress)
+
+Built: `benchmark/v3/generation/` (see its README).
+
+**The answers come from the production chain**, with only the Gemini client
+swapped. `build_rag_chain` gained an optional `llm` argument for this;
+production passes nothing, so it behaves exactly as before.
+
+**Judge candidates.** The "stronger Flash" judge is `gemini-3.7-flash`,
+introductory price $0.75 / $3.75 per 1M input / output tokens through
+2026-12-31. It falls back to `gemini-3.5-flash` ($1.50 / $9.00) if 3.7 is not
+available on the key. 3.7 is newer than 3.5 Flash and, at the introductory
+price, half its cost.
+
+**The judge rule**, applied by the pilot from measured tokens:
+* the stronger judge is used if the projected total eval spend for the whole
+  v4 plan is under $1.50;
+* otherwise flash-lite.
+
+A dry run here, with a fake model that sized its token counts from the real
+prompts, projected:
+
+| Judge | Whole-plan projection |
+|---|---|
+| flash-lite | $0.83 |
+| gemini-3.7-flash | $1.29 |
+
+That assumed no thinking tokens; the real pilot measures them.
+
+**Measured here, with no model calls:**
+
+| Prompt | Mean | Max |
+|---|---|---|
+| Answer prompt | ≈ 4.4k characters (≈ 1.1k tokens) | 5.6k characters |
+| Judge prompt | ≈ 8.5k characters | 10.9k characters |
+
+**Windows checkouts.** The frozen-file hashes (`freeze.py`) and the
+judge-prompt hash now read CRLF as LF. A `.txt` corpus document converted to
+CRLF is replaced by an LF copy, which must match the pinned hash exactly.
+`.gitattributes` keeps `benchmark/` byte-exact.
+
+Nothing in the v3 results changes: those files contain no CR, so every hash
+is the same.
