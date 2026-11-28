@@ -463,3 +463,61 @@ partial-answer sentence is now:
     --ids all`, cache only);
   * every no-gold question by outcome, to see whether more of them become
     grounded-but-wrong answers.
+
+**refusal2 measured** (dev_refusal2.json, compare_dev_refusal2.json; 219 new
+calls, $0.24). All five criteria pass, against the baseline:
+
+| Criterion | Result | |
+|---|---|---|
+| 1. ≤ 3 answer-step refusals remain | 3 of 13 (crs-05, dfa-09, mh-02) | PASS |
+| 2. correct up | score +10.2 [+4.9, +15.9]; 15 up, 2 down | PASS |
+| 3. unanswerable refused | 14/14 | PASS |
+| 4. grounded | 99.0% | PASS |
+| 5. multi-hop correct_yes | 5/15, equal to the baseline | PASS |
+
+**"Not covered" caveats** in answers to answerable questions:
+
+| Prompt | Caveats | Of which with every gold part in context |
+|---|---|---|
+| baseline | 2 | 2 |
+| first 2b wording | 17 | 12 |
+| refusal2 | 3 | 3 (lst-05, mh-06, mh-08) |
+
+**No-gold questions by outcome**, baseline → refusal2:
+
+| Outcome | Baseline | refusal2 |
+|---|---|---|
+| refused | 13 | 9 |
+| correct | 3 | 4 |
+| partial | 2 | 4 |
+| grounded but wrong | 3 | 4 |
+| ungrounded | 0 | 0 |
+
+The grounded-but-wrong set gained mh-04 and rid-04 and lost crs-07.
+
+**List regression, under investigation (not shipped).** On the 7 dev list
+questions:
+
+| Measure | Baseline | refusal2 | Paired difference |
+|---|---|---|---|
+| correct_yes | 5/7 | 3/7 | −28.6 [−57.1, 0.0] |
+| length right | 5/7 | 3/7 | |
+| grounded | 7/7 | 6/7 | |
+
+Against the first 2b wording the drop is larger, 6/7 → 3/7. Per question:
+
+| question | baseline | refusal2 | what changed |
+|---|---|---|---|
+| lst-01 | yes | partial, too short | 113 → 80 words; the key fact is no longer in the answer |
+| lst-04 | yes, 79 words | partial, too short, 79 words | same length |
+| lst-05 | partial, grounded | partial, **ungrounded** (1 unsupported claim) | 60 → 76 words |
+
+About **lst-05**:
+* Its list spans 3 gold chunks, and only 2 are in the top 5 (chunk_cov@5
+  0.67; the third ranks 6-20).
+* Under all three prompts the answer says items are missing.
+* Under refusal2 it added one claim that the context does not support.
+
+The list questions are single-part. So the wording about several parts
+changed their answers in both directions: one list got shorter, and the
+incomplete list got padded.
