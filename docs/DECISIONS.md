@@ -203,3 +203,321 @@ expander, so a chat of ten questions showed ten source blocks.
   * opening the first shows only its own file and chunk.
 
 No retrieval, prompt or cache change; no latency or cost change.
+
+### Phase 2: generation eval harness (2026-11-28, in progress)
+
+Built: `benchmark/v3/generation/` (see its README).
+
+**The answers come from the production chain**, with only the Gemini client
+swapped. `build_rag_chain` gained an optional `llm` argument for this;
+production passes nothing, so it behaves exactly as before.
+
+**Judge candidates.** The "stronger Flash" judge is `gemini-3.7-flash`,
+introductory price $0.75 / $3.75 per 1M input / output tokens through
+2026-12-31. It falls back to `gemini-3.5-flash` ($1.50 / $9.00) if 3.7 is not
+available on the key. 3.7 is newer than 3.5 Flash and, at the introductory
+price, half its cost.
+
+**The judge rule**, applied by the pilot from measured tokens:
+* the stronger judge is used if the projected total eval spend for the whole
+  v4 plan is under $1.50;
+* otherwise flash-lite.
+
+A dry run here, with a fake model that sized its token counts from the real
+prompts, projected:
+
+| Judge | Whole-plan projection |
+|---|---|
+| flash-lite | $0.83 |
+| gemini-3.7-flash | $1.29 |
+
+That assumed no thinking tokens; the real pilot measures them.
+
+**Measured here, with no model calls:**
+
+| Prompt | Mean | Max |
+|---|---|---|
+| Answer prompt | ≈ 4.4k characters (≈ 1.1k tokens) | 5.6k characters |
+| Judge prompt | ≈ 8.5k characters | 10.9k characters |
+
+**Windows checkouts.** The frozen-file hashes (`freeze.py`) and the
+judge-prompt hash now read CRLF as LF. A `.txt` corpus document converted to
+CRLF is replaced by an LF copy, which must match the pinned hash exactly.
+`.gitattributes` keeps `benchmark/` byte-exact.
+
+Nothing in the v3 results changes: those files contain no CR, so every hash
+is the same.
+
+**Pilot, run on the laptop (2026-11-28; figures as reported).** Its results
+file did not reach the branch, so it is re-pushed with the baseline.
+
+* **Cost:** 15 calls, $0.0163.
+* **Judge chosen:** `gemini-3.7-flash`, projecting **$1.17** for the whole
+  plan, under the $1.50 limit.
+* **3.7-flash is stricter than flash-lite.** It graded `con-01` and `crs-01`
+  "partial" where flash-lite said "yes". Whether stricter is right is for the
+  human check to settle.
+
+**Finding: `eid-01` is a false refusal, not a retrieval miss.** Recorded here,
+not fixed.
+
+* **What happened:** the answer refused in 12 words (judge: refused yes,
+  correct no). The prompt's exact refusal sentence is also 12 words; the
+  results file's `refusal_exact` will confirm it.
+* **What the model had in front of it**, rebuilt from the same deterministic
+  store (no text printed):
+  * the question is a bare identifier: one word, no "?";
+  * the gold chunk is rank 1 of the 5 and contains the evidence;
+  * the identifier appears in all 5 chunks.
+* **So the evidence was there and the answer step declined.**
+* **Hypothesis:** `_QA_TEMPLATE` has no instruction for keyword-style input.
+  Given a bare name rather than a question, the model takes the refusal path.
+* **Scale:** 29 of 127 dev questions have this shape (3 words or fewer, no
+  "?"): 20 exact_identifier, 6 keyword, 3 misspelled.
+
+From now on every result records `query_shape` and `gold_context` (the gold
+chunk's rank in the context, and whether the evidence was there), with no
+text. The baseline will therefore report:
+* answers by shape (bare vs sentence);
+* wrong refusals split into "evidence in context" (an answer-step failure)
+  and "evidence not in context" (a retrieval failure).
+
+### BM25 ablation: keep BM25 as shipped (2026-11-28)
+
+**Question.** Does the BM25 half of the candidate pool earn its place now that
+a cross-encoder reranks the pool?
+
+**Setup.**
+* **Shipped:** plain top 50 + BM25 top 50, min-max fusion, rerank top 20.
+* **No BM25:** plain top 50, rerank top 20. This is the shipped fallback path
+  (`bm25_index=None`).
+* Dev only: 113 answerable questions, scored by the v3 code on the exact eval
+  store, with paired 95% bootstrap intervals. The shipped arm reproduces the
+  committed dev numbers exactly.
+
+No-BM25 minus shipped; `*` = interval excludes 0:
+
+| group | n | Hit@1 | Hit@5 | MRR@5 | Recall@20 |
+|---|---|---|---|---|---|
+| all | 113 | 54.9 → 57.5, +2.7 [0.0, +6.2] | 81.4 → 78.8, −2.7 [−8.0, +2.7] | +0.8 [−1.6, +3.1] | 89.5 → 83.0, **−6.5 [−11.4, −2.5] \*** |
+| code | 65 | +3.1 | −3.1 | +1.0 | **−9.7 [−17.2, −3.1] \*** |
+| docs | 48 | +2.1 | −2.1 | +0.4 | −2.1 |
+| exact_identifier | 21 | 0.0 | −4.8 | −1.0 | −14.3 [−28.6, 0.0] |
+| misspelled | 7 | 0.0 | −14.3 | −7.1 | −28.6 [−57.1, 0.0] |
+| keyword | 24 | 0.0 | −4.2 | −1.4 | −4.2 |
+| paraphrase | 35 | +8.6 [0.0, +17.1] | +5.7 | **+7.2 [+2.9, +12.3] \*** | 0.0 |
+| multi_hop | 15 | 0.0 | −13.3 | −4.1 | −8.9 |
+| bare wording (≤3 words, no "?") | 29 | 0.0 | −3.4 | −0.7 | **−13.8 [−27.6, −3.4] \*** |
+| identifier-like wording | 31 | 0.0 | −3.2 | −0.5 | **−12.9 [−24.2, −3.2] \*** |
+
+**Other measurements.**
+* **List coverage (list_all, n = 7):** 69.0 → 61.9 @5; 90.5 → 88.1 @20.
+* **Gained and lost without BM25:**
+
+  | metric | gained | lost |
+  |---|---|---|
+  | Hit@1 | 3 (dpa-05, par-01, par-03; all paraphrase) | 0 |
+  | Hit@5 | 3 (con-07, dco-09, isw-01) | 6 (crs-01, dco-06, dfa-11, eid-04, lit-09, msp-11) |
+  | Recall@20 | 1 | 10 (mostly identifier, misspelled and multi-hop) |
+
+* **Latency** on one thread (rag-qa has one vCPU), p50 / p95:
+
+  | | total retrieval | BM25 search |
+  |---|---|---|
+  | shipped | 1,225 / 1,536 ms | 2.5 / 4.4 ms |
+  | no BM25 | 1,210 / 1,545 ms | — |
+
+  The reranker is ≈ 1.2 s of either total. The BM25 index costs 0.46 s to
+  build per store, and 10 MB for 1,222 chunks.
+* **Gating BM25 by wording does not beat shipped.** BM25 only for
+  identifier-like questions: Hit@1 +2.7, Hit@5 −1.8, Recall@20 −2.9. Adding
+  bare questions: Hit@5 −1.8, Recall@20 −2.1.
+
+**Why keep it.**
+* BM25 is what brings identifier, bare-keyword, misspelled and multi-hop gold
+  into the reranker's window. Phases 3 (typo correction) and 4 (lists,
+  multi-part questions) depend on that recall.
+* Removing it saves about 2.5 ms per question.
+* Its one cost is on paraphrases. Word-matching distractors reach the window,
+  and the reranker sometimes ranks one first (3 Hit@1 hits). A wording gate
+  cannot isolate that without losing recall elsewhere.
+
+**Open items**, recorded in `benchmark/v3/README.md`:
+* the paraphrase Hit@1 follow-up (item 11);
+* the first-question rerank timeout on one vCPU (item 12).
+
+### Phase 2 dev baseline (2026-11-28, as reported; results file pending)
+
+* **Run:** about 300 calls, $0.35, judge `gemini-3.7-flash`.
+* **Grounded:** 99%.
+* **Unanswerable questions refused:** 14/14.
+* **Wrongly refused:** 26 of 113 answerable questions.
+* **Verdict:** the answer model is over-cautious, not hallucinating.
+* **Pilot check of `eid-01`:** it returned the prompt's exact refusal sentence
+  (`refusal_exact` true), and the answer model used no thinking tokens.
+
+**Correction to the harness's own split.** The baseline counted 16 of the 26
+as "evidence in context". Rebuilding those 16 contexts here (structure only,
+no text) shows that 4 of them (isw-01, isw-10, msp-06, par-05) had **no gold
+chunk** in the context: the short evidence string just occurs in other chunks.
+
+* **The real split:** 12 refused with the gold in front of the model, 4
+  retrieval misses.
+* **Fix:** `gold_context` now counts only gold chunks (near-duplicate copies
+  included, as in the retrieval eval), and records how many answer parts were
+  present.
+* **On the laptop:** re-running the dev eval from its cache rewrites dev.json
+  with the corrected fields at $0. The diagnosis and the proposed fix are in
+  `docs/ROADMAP_v4.md`, Phase 2b.
+
+### Phase 2b: over-refusal fix, implemented and awaiting measurement (2026-11-28)
+
+**The baseline** (dev.json, 34d509e; judge `gemini-3.7-flash`):
+
+| Measure | Value |
+|---|---|
+| correct, yes rate | 63.7% |
+| correct score (yes 1, partial 0.5, no 0) | 69.0 |
+| grounded | 98.9% |
+| unanswerable refused | 14/14 |
+| answerable questions wrongly refused | 23.0% (26 of 113) |
+| length right | 95.3% |
+
+**The 26 wrong refusals, by where the gold was:**
+
+| Gold in the model's context | n | Questions |
+|---|---|---|
+| every part | 11 | dfa-09, eid-01, eid-02, eid-04, eid-10, isw-13, lit-01, lit-05, mh-06, msp-03, pp-03 |
+| some parts | 2 | crs-05, mh-02 |
+| none | 13 | listed under Phase 2b in the roadmap |
+
+The first two rows, 13 questions, are the answer-step failures that 2b targets.
+
+**Noise floor.**
+* The same answer, re-judged: agreed on all four fields, 20/20.
+* A regenerated answer: changed one verdict per field in 20, except
+  length_fit.
+
+**The change** is to `_QA_TEMPLATE`'s refusal rule only:
+* a bare term is read as "what is it and what does it do";
+* a partly answerable question gets the part that can be answered, and says
+  which part is missing;
+* the exact refusal sentence is kept for questions the context does not
+  answer at all.
+
+No retrieval change, no extra model call.
+
+**Criteria and the guessing check** are in `docs/ROADMAP_v4.md` (Phase 2b).
+`benchmark/v3/generation/compare.py` scores them.
+
+**Budget.** The cap for the whole plan's eval spend is raised to $2.00 and
+enforced from the cache. The $0.50 stop per run stays.
+
+**Phase 2b measured** (results/dev_refusal.json and compare_dev_refusal.json;
+222 new calls, $0.25):
+
+| Criterion | Result | |
+|---|---|---|
+| 1. ≤ 3 of the 13 answer-step refusals remain | 4 remain (crs-05, dfa-09, mh-02, pp-03) | **FAIL, by one** |
+| 2. correct up, question by question | score +8.8 [+3.1, +15.0]; 15 up, 5 down | PASS |
+| 3. unanswerable refused | 14/14 | PASS |
+| 4. grounded | 100% | PASS |
+
+* **Overall:** correct yes 64 → 71; bare questions' correct score 59 → 90;
+  wrong refusals 26 → 13.
+* **Guessing check.** Of the 13 baseline refusals with no gold in context, 5
+  are now answered, and all 5 are grounded: isw-01 and msp-06 correct, mh-04
+  partial, mh-03 and rid-04 wrong but grounded. None is a guess.
+* **crs-07** flipped to the exact refusal. Its baseline answer was grounded
+  but wrong (correct "no"), with no gold part in context, so the flip is
+  neutral for correctness and the refusal is right for the answer step.
+
+The diagnosis and the decision on criterion 1 are in the Phase 2b section of
+docs/ROADMAP_v4.md once taken.
+
+**The free check, and the revision it triggered (refusal2, 2026-11-28).**
+`answer_features` replayed the cached answers with no calls and printed no
+text. Results:
+
+| question | finding |
+|---|---|
+| mh-08 | says a part is missing with 2/2 parts in context (the baseline answer did too) |
+| mh-09 | says a part is missing with 1/1 in context; the answer now holds the key fact but adds a wrong "not covered" caveat |
+| mh-05 | 2/2 key facts in the answer → 1/2; says missing; 1/2 parts in context |
+| crs-05, mh-02, pp-03 | still the exact refusal, with part of the answer in context |
+| mh-03, rid-04 | now answered with no gold part in context: grounded but wrong |
+
+The pre-set rule was to revise if at least 2 of mh-05/08/09 claim a part is
+missing with every key fact in context. mh-08 and mh-09 qualify, so the
+partial-answer sentence is now:
+
+> If the question has several parts, answer every part that any passage in
+> the context covers; say a part is not covered only if no passage covers it.
+
+**How it is measured:** `--tag refusal2`, against the same baseline.
+* The four criteria, plus a fifth: multi-hop correct_yes at least the
+  baseline's 5/15 (33%).
+* Also reported:
+  * crs-05 and mh-02;
+  * the number of answers with a "not covered" caveat (from `answer_features
+    --ids all`, cache only);
+  * every no-gold question by outcome, to see whether more of them become
+    grounded-but-wrong answers.
+
+**refusal2 measured** (dev_refusal2.json, compare_dev_refusal2.json; 219 new
+calls, $0.24). All five criteria pass, against the baseline:
+
+| Criterion | Result | |
+|---|---|---|
+| 1. ≤ 3 answer-step refusals remain | 3 of 13 (crs-05, dfa-09, mh-02) | PASS |
+| 2. correct up | score +10.2 [+4.9, +15.9]; 15 up, 2 down | PASS |
+| 3. unanswerable refused | 14/14 | PASS |
+| 4. grounded | 99.0% | PASS |
+| 5. multi-hop correct_yes | 5/15, equal to the baseline | PASS |
+
+**"Not covered" caveats** in answers to answerable questions:
+
+| Prompt | Caveats | Of which with every gold part in context |
+|---|---|---|
+| baseline | 2 | 2 |
+| first 2b wording | 17 | 12 |
+| refusal2 | 3 | 3 (lst-05, mh-06, mh-08) |
+
+**No-gold questions by outcome**, baseline → refusal2:
+
+| Outcome | Baseline | refusal2 |
+|---|---|---|
+| refused | 13 | 9 |
+| correct | 3 | 4 |
+| partial | 2 | 4 |
+| grounded but wrong | 3 | 4 |
+| ungrounded | 0 | 0 |
+
+The grounded-but-wrong set gained mh-04 and rid-04 and lost crs-07.
+
+**List regression, under investigation (not shipped).** On the 7 dev list
+questions:
+
+| Measure | Baseline | refusal2 | Paired difference |
+|---|---|---|---|
+| correct_yes | 5/7 | 3/7 | −28.6 [−57.1, 0.0] |
+| length right | 5/7 | 3/7 | |
+| grounded | 7/7 | 6/7 | |
+
+Against the first 2b wording the drop is larger, 6/7 → 3/7. Per question:
+
+| question | baseline | refusal2 | what changed |
+|---|---|---|---|
+| lst-01 | yes | partial, too short | 113 → 80 words; the key fact is no longer in the answer |
+| lst-04 | yes, 79 words | partial, too short, 79 words | same length |
+| lst-05 | partial, grounded | partial, **ungrounded** (1 unsupported claim) | 60 → 76 words |
+
+About **lst-05**:
+* Its list spans 3 gold chunks, and only 2 are in the top 5 (chunk_cov@5
+  0.67; the third ranks 6-20).
+* Under all three prompts the answer says items are missing.
+* Under refusal2 it added one claim that the context does not support.
+
+The list questions are single-part. So the wording about several parts
+changed their answers in both directions: one list got shorter, and the
+incomplete list got padded.

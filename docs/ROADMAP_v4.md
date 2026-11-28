@@ -107,7 +107,7 @@ full run.
 | **Total** | | | **≈ $1.00** (cap: abort any single run projected over $0.50) |
 
 That is about a dollar if thinking tokens are small, which is above "in the
-cents" taken strictly. You accepted about $1 (see *Decisions taken*).
+cents" taken strictly. You accepted about $1, later raised to $2.00 when Phase 2b was added (see *Decisions taken*).
 
 If your key is on the free tier, the cost is $0 but rate limits apply. The
 runner throttles to a configurable requests-per-minute, and resumes from the
@@ -275,6 +275,139 @@ python -m benchmark.v3.generation.run --split dev
 * **Thinking tokens:** unknown in advance. The pilot measures them.
 
 **Latency and cost per question.** None in production; it is eval only.
+
+---
+
+## Phase 2b: Over-refusal fix (added 2026-11-28, before Phase 3)
+
+**Why.** The Phase 2 dev baseline is grounded (99%) and refuses every
+unanswerable question (14/14). But it wrongly refused **26 of 113 answerable
+questions**. The model is over-cautious, not hallucinating.
+
+**Diagnosis of the 16 the baseline flagged as "evidence in context".** Each
+context was rebuilt from the same deterministic store and checked
+structurally, with no text printed:
+* the question's shape;
+* which gold chunks, including near-duplicate copies, were among the 5
+  chunks the model saw;
+* how many answer parts they covered.
+
+| cause | n | questions | what the model had |
+|---|---|---|---|
+| **A. Bare term**: 1-3 words, no "?", an identifier or keyword | 8 | eid-01, eid-02, eid-04, eid-10, isw-13, lit-01, lit-05, msp-03 | the gold chunk at rank 1-4 and the only part; all code |
+| **B. Multi-part, some parts present** | 2 | crs-05, mh-02 | 1 of 2 parts in context (gold at rank 1) |
+| **C. Full question, everything present** | 2 | mh-06 (2/2 parts, ranks 3 and 5), pp-03 (rank 1, docs) | the whole answer |
+| **D. Retrieval miss**, miscounted | 4 | isw-01, isw-10 (bare identifiers), msp-06 (misspelled), par-05 | no gold chunk; the evidence string occurred in other chunks |
+
+So 12 are answer-step failures: A, B and C. The 4 in D are retrieval misses
+for Phase 3 (typos) and later. The harness now records `gold_in_context` and
+`parts_in_context` instead of the loose evidence-string check. The other 10
+of the 26 failed even the loose check; their split under the new definition
+comes with the regenerated dev.json.
+
+* **Cause A** is the dominant one. The prompt is written for questions; given
+  a bare name, the model takes the refusal path, even with the name's
+  definition at rank 1. 29 of the 127 dev questions have this shape.
+* **Cause B:** the prompt's only options are a full answer or the refusal
+  sentence, so a half-answerable question gets refused whole.
+* **Cause C** suggests the rule "if the context does not contain the answer"
+  is read too strictly when the answer needs a small inference across chunks.
+
+**The proposed change** is the smallest that addresses A, B and C. Only the
+refusal rule of `_QA_TEMPLATE` changes:
+
+```diff
+ Use ONLY the context below to answer the question.
+-If the context does not contain the answer, say exactly:
++If the question is only a term, name or identifier rather than a full question,
++treat it as "What is <term> and what does it do?" and answer that from the context.
++If the context answers only part of the question, answer that part and say plainly
++which part the documents do not cover.
++Only if the context contains nothing that answers any part of the question, say exactly:
+ "I don't have enough information in the provided documents to answer this."
+-Do not fabricate any information.
++Do not fabricate any information: every statement must be supported by the context.
+```
+
+The rest of the prompt is unchanged: the exact refusal sentence, the casual
+escape and the history block. No retrieval change, no extra model call.
+
+**Measurement** (dev only; laptop command):
+* The generation eval adds `--tag` (it writes `dev_<tag>.json`), plus a
+  comparison script with paired bootstrap differences against
+  `results/dev.json`, per question type and per shape, and the questions that
+  flipped.
+* The new prompt changes every answer prompt, so all 127 answers are new and
+  most grades too: ≈ 254 calls, ≈ $0.29.
+* Spent before 2b: ≈ $0.37 (pilot + baseline). After 2b: ≈ $0.66, against the
+  $2.00 cap.
+
+**Success criteria (dev, all four required)**, as approved 2026-11-28:
+1. **At most 3 of the 13 answer-step refusals remain.** These are the
+   baseline refusals with every part (11) or some parts (2) of the gold in
+   context: crs-05, dfa-09, eid-01, eid-02, eid-04, eid-10, isw-13, lit-01,
+   lit-05, mh-02, mh-06, msp-03, pp-03.
+2. **`correct` goes up, question by question.** The paired mean of the
+   correct score (yes 1, partial 0.5, no 0) rises, and more questions improve
+   than get worse.
+3. **Unanswerable refusals stay 14/14.**
+4. **Grounded stays at or above 97%.**
+
+**The 13 baseline refusals with no gold in context** were right for the
+answer step, so they don't count against 2b. They are retrieval targets for
+Phases 3 and 4: con-05, dco-09, dpa-02, dpp-02, isw-01, isw-10, lit-04, mh-03,
+mh-04, msp-06, msp-12, par-05, rid-04. The comparison reports what the new
+prompt does with each. Answering one without grounding means the model is
+guessing, which is a grounding failure, not a win.
+
+**Also reported:**
+* results by shape (bare vs sentence) and by question type;
+* length_fit and word counts;
+* every question that flipped each way;
+* the baseline noise floor.
+
+**Implementation.**
+* `_QA_TEMPLATE` as in the diff above.
+* `benchmark/v3/generation/run.py --tag refusal` writes `results/dev_refusal.json`.
+* `benchmark/v3/generation/compare.py --tag refusal` prints the criteria as
+  PASS/FAIL, with no text, and writes `results/compare_dev_refusal.json`.
+* No noise re-runs: the baseline's noise floor is reused.
+* Estimated cost ≈ $0.29.
+
+**Revision: refusal2 (2026-11-28).**
+* **Result of the first wording:** it passed criteria 2-4 but missed
+  criterion 1 by one (4 of 13 left). Multi-hop correct_yes fell from 5/15 to
+  3/15.
+* **The cause:** the free answer-feature check found answers claiming a part
+  was missing although every key fact was in context (mh-08, mh-09).
+* **The change:** the partial-answer sentence now reads "answer every part
+  that any passage in the context covers; say a part is not covered only if
+  no passage covers it".
+* **How it is judged:** the same four criteria against the baseline, plus
+  **5. multi-hop correct_yes ≥ the baseline's 5/15**.
+* **Also reported:** crs-05 and mh-02, the number of answers with a "not
+  covered" caveat, and no-gold questions by outcome.
+* **Cost:** ≈ $0.29.
+* **If it fails:** your call between the two wordings, with the misses recorded.
+
+**Risks.**
+* **Unanswerable questions may get partial or tangential answers.** "Answer
+  the part you can" could make the model offer related facts where it should
+  refuse. That is criterion 3.
+  * The judge counts a reply whose substance is "the documents don't cover
+    this" as a refusal.
+  * A single-part unanswerable question has no answerable part.
+* **Bare terms may get over-long answers.** A bare term that names something
+  minor could draw a long explanation. length_fit tracks this; Phase 5 owns
+  answer length.
+* **Budget.** The plan's eval cap is raised to **$2.00** (decided
+  2026-11-28) rather than weakening the Phase 5 measurement. The runner
+  enforces it with `--max-total-usd 2.00`, which counts every call already in
+  the cache. The $0.50 stop per run stays.
+
+**Latency and cost per question in production.** No extra calls. Answers to
+bare terms and to partial questions get longer (output tokens), so
+≈ +$0.0002-0.0005 on those questions.
 
 ---
 
@@ -583,6 +716,9 @@ These override the phase descriptions above where they differ.
    fixed seed, and **frozen (hashed) before anything is measured on it**.
 7. **Freshness test:** from Phase 3 it points at dev-only results until
    Phase 6.
+8. **Budget raised to $2.00 for all eval runs** (2026-11-28), enforced from
+   the cache, with the $0.50 stop per run kept. Phase 2b (over-refusal fix) is
+   added before Phase 3.
 
 [aa]: https://artificialanalysis.ai/models/gemini-3-5-flash-lite
 [dm]: https://deepmind.google/models/gemini/flash-lite/

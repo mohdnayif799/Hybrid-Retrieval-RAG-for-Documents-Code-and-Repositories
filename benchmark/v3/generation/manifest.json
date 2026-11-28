@@ -1,0 +1,6 @@
+{
+ "comment": "SHA-256 of each judge prompt version. A changed rubric gets a new file (judge_v2.md) and a new entry here; grades from different versions never mix.",
+ "judge": {
+  "judge_v1.md": "a54c75b2d4d91af6310da0269e6d860ba096a013c4481420ca65eb697c201725"
+ }
+}

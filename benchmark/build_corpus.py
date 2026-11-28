@@ -139,9 +139,30 @@ def document_paths() -> list[str]:
             raise FileNotFoundError(f"benchmark corpus document missing: {path}")
         digest = sha256_file(path)
         if digest != EXPECTED_SHA256[name]:
-            raise RuntimeError(f"{name} sha256 {digest} != expected {EXPECTED_SHA256[name]}")
+            path = _lf_copy_if_it_matches(path, name, digest)
         paths.append(path)
     return paths
+
+
+def _lf_copy_if_it_matches(path: str, name: str, digest: str) -> str:
+    """
+    A checkout that converted line endings to CRLF (Git for Windows with
+    core.autocrlf) changes a text document's bytes and so its hash. If the
+    LF-normalized bytes match the pinned hash, use an LF copy under
+    benchmark/.cache/ so the corpus is identical on every OS; otherwise fail.
+    """
+    with open(path, "rb") as handle:
+        raw = handle.read()
+    lf = raw.replace(b"\r\n", b"\n")
+    if lf == raw or hashlib.sha256(lf).hexdigest() != EXPECTED_SHA256[name]:
+        raise RuntimeError(f"{name} sha256 {digest} != expected {EXPECTED_SHA256[name]}")
+    copy = os.path.join(CACHE_DIR, "lf", name)
+    os.makedirs(os.path.dirname(copy), exist_ok=True)
+    with open(copy, "wb") as handle:
+        handle.write(lf)
+    print(f"[INFO] {name}: CRLF line endings in the checkout; using an LF copy "
+          "(identical to the pinned file).", flush=True)
+    return copy
 
 
 def load_doc_documents():

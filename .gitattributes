@@ -1,0 +1,4 @@
+# Benchmark inputs are verified by SHA-256 (frozen query set, judge prompt,
+# corpus documents). Check them out byte-for-byte on every OS: no CRLF
+# conversion, whatever core.autocrlf says.
+benchmark/** -text

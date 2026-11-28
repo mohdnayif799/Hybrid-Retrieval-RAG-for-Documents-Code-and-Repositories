@@ -168,13 +168,32 @@ Rewritten search query (be specific -- expand abbreviations and resolve all refe
 # Includes a small safety net (final paragraph) for the rare case where a
 # casual message slips past the heuristic and reaches this path anyway --
 # e.g. an unusual phrasing not covered by _CASUAL_PATTERNS.
+#
+# The refusal rule (v4 Phase 2b, docs/DECISIONS.md): with the old rule ("if
+# the context does not contain the answer, refuse"), 13 of 113 answerable dev
+# questions were refused with the gold passage in front of the model. 10 of
+# those were bare terms (an identifier or keyword with no question around it)
+# or 2-part questions with one part answerable. A bare term is now read as
+# "what is it and what does it do", a partly answerable question gets the
+# part that can be answered, and the exact refusal sentence is kept for
+# questions the context does not answer at all.
+#
+# Revision (refusal2): the first wording ("answer that part and say which part
+# the documents do not cover") made the model claim a part was missing when
+# every key fact was in context (mh-08, mh-09 on dev). Each part is now
+# answered from any passage that covers it, and "not covered" is reserved for
+# parts no passage covers.
 
 _QA_TEMPLATE = """You are a helpful assistant that answers questions strictly from the provided documents.
 
 Use ONLY the context below to answer the question.
-If the context does not contain the answer, say exactly:
+If the question is only a term, name or identifier rather than a full question,
+treat it as "What is <term> and what does it do?" and answer that from the context.
+If the question has several parts, answer every part that any passage in the context covers;
+say a part is not covered only if no passage covers it.
+Only if the context contains nothing that answers any part of the question, say exactly:
 "I don't have enough information in the provided documents to answer this."
-Do not fabricate any information.
+Do not fabricate any information: every statement must be supported by the context.
 
 Exception: if the question is actually casual conversation (a greeting, thanks,
 acknowledgment, or small talk) rather than a genuine request for document
@@ -199,7 +218,8 @@ def _history_to_text(chat_history: list) -> str:
     return "\n".join(lines)
 
 
-def build_rag_chain(gemini_api_key: str, model_name: str, chroma_dir: str | None):
+def build_rag_chain(gemini_api_key: str, model_name: str, chroma_dir: str | None,
+                    llm=None):
     """
     Build a conversational RAG chain using the google.genai SDK directly.
     Compatible with both AQ... and AIza... API key formats.
@@ -219,8 +239,13 @@ def build_rag_chain(gemini_api_key: str, model_name: str, chroma_dir: str | None
          chat history, retrieve (dense + BM25 candidate pool, reranked by
          a cross-encoder), generate a grounded answer that also
          receives conversation history for reference resolution.
+
+    ``llm`` is for evaluation and tests only: a callable taking a prompt and
+    returning an object with a ``.text`` attribute, used instead of the
+    Gemini client for every call this chain makes (benchmark/v3/generation
+    passes a cached, cost-tracked client). Production passes nothing.
     """
-    client = google_genai.Client(api_key=gemini_api_key)
+    client = google_genai.Client(api_key=gemini_api_key) if llm is None else None
     has_documents = chroma_dir is not None
 
     retriever = None
@@ -241,6 +266,8 @@ def build_rag_chain(gemini_api_key: str, model_name: str, chroma_dir: str | None
 
         def generate(prompt: str):
             on_gemini_call()
+            if llm is not None:
+                return llm(prompt)
             return client.models.generate_content(model=model_name, contents=prompt)
 
         # ── Route 1: no documents at all, or high-confidence casual message ──

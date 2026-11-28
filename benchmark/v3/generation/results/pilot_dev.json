@@ -1,0 +1,371 @@
+{
+ "split": "dev",
+ "manifest_sha256": "3f23a54f7ef6d4e38d95e0e5f20ec327d095dd86f91403d388aee711372cdfa8",
+ "judge_version": "v1",
+ "judge_prompt_sha256": "a54c75b2d4d91af6310da0269e6d860ba096a013c4481420ca65eb697c201725",
+ "answer_prompt_sha256": "e45f2e95817fcf2cc32cdc9353c62f401e0f6e48a6197584cfe30cdbf8529629",
+ "answer_model": "gemini-3.5-flash-lite",
+ "prices_usd_per_1m": {
+  "gemini-3.5-flash-lite": [
+   0.3,
+   2.5
+  ],
+  "gemini-3.5-flash": [
+   1.5,
+   9.0
+  ],
+  "gemini-3.7-flash": [
+   0.75,
+   3.75
+  ]
+ },
+ "kind": "pilot",
+ "questions": [
+  "eid-01",
+  "con-01",
+  "lst-01",
+  "crs-01",
+  "una-01"
+ ],
+ "per_question": {
+  "eid-01": {
+   "qtype": "exact_identifier",
+   "domain": "code",
+   "answer_stats": {
+    "calls": 1,
+    "cached": false,
+    "prompt_tokens": 1063,
+    "output_tokens": 15,
+    "thought_tokens": 0,
+    "llm_seconds": 1.766,
+    "chain_seconds": 2.125,
+    "n_context": 5,
+    "word_count": 12
+   },
+   "verdicts": {
+    "gemini-3.5-flash-lite": {
+     "refused": "yes",
+     "correct": "no",
+     "grounded": "na",
+     "length_fit": "right",
+     "unsupported_claims": 0,
+     "refusal_exact": true,
+     "refusal_correct": "na",
+     "wrongly_refused": true,
+     "word_count": 12,
+     "judge_model": "gemini-3.5-flash-lite",
+     "judge_tokens": {
+      "prompt": 1991,
+      "output": 73,
+      "thoughts": 0
+     },
+     "judge_seconds": 1.203
+    },
+    "gemini-3.7-flash": {
+     "refused": "yes",
+     "correct": "no",
+     "grounded": "na",
+     "length_fit": "right",
+     "unsupported_claims": 0,
+     "refusal_exact": true,
+     "refusal_correct": "na",
+     "wrongly_refused": true,
+     "word_count": 12,
+     "judge_model": "gemini-3.7-flash",
+     "judge_tokens": {
+      "prompt": 1991,
+      "output": 78,
+      "thoughts": 0
+     },
+     "judge_seconds": 2.563
+    }
+   }
+  },
+  "con-01": {
+   "qtype": "paraphrase",
+   "domain": "code",
+   "answer_stats": {
+    "calls": 1,
+    "cached": false,
+    "prompt_tokens": 1025,
+    "output_tokens": 161,
+    "thought_tokens": 0,
+    "llm_seconds": 1.281,
+    "chain_seconds": 4.703,
+    "n_context": 5,
+    "word_count": 101
+   },
+   "verdicts": {
+    "gemini-3.5-flash-lite": {
+     "refused": "no",
+     "correct": "yes",
+     "grounded": "yes",
+     "length_fit": "right",
+     "unsupported_claims": 0,
+     "refusal_exact": false,
+     "refusal_correct": "na",
+     "wrongly_refused": false,
+     "word_count": 101,
+     "judge_model": "gemini-3.5-flash-lite",
+     "judge_tokens": {
+      "prompt": 2294,
+      "output": 69,
+      "thoughts": 0
+     },
+     "judge_seconds": 1.219
+    },
+    "gemini-3.7-flash": {
+     "refused": "no",
+     "correct": "partial",
+     "grounded": "yes",
+     "length_fit": "right",
+     "unsupported_claims": 0,
+     "refusal_exact": false,
+     "refusal_correct": "na",
+     "wrongly_refused": false,
+     "word_count": 101,
+     "judge_model": "gemini-3.7-flash",
+     "judge_tokens": {
+      "prompt": 2294,
+      "output": 97,
+      "thoughts": 0
+     },
+     "judge_seconds": 2.281
+    }
+   }
+  },
+  "lst-01": {
+   "qtype": "list_all",
+   "domain": "docs",
+   "answer_stats": {
+    "calls": 1,
+    "cached": false,
+    "prompt_tokens": 1144,
+    "output_tokens": 158,
+    "thought_tokens": 0,
+    "llm_seconds": 0.891,
+    "chain_seconds": 4.594,
+    "n_context": 5,
+    "word_count": 113
+   },
+   "verdicts": {
+    "gemini-3.5-flash-lite": {
+     "refused": "no",
+     "correct": "yes",
+     "grounded": "yes",
+     "length_fit": "right",
+     "unsupported_claims": 0,
+     "refusal_exact": false,
+     "refusal_correct": "na",
+     "wrongly_refused": false,
+     "word_count": 113,
+     "judge_model": "gemini-3.5-flash-lite",
+     "judge_tokens": {
+      "prompt": 2451,
+      "output": 72,
+      "thoughts": 0
+     },
+     "judge_seconds": 1.266
+    },
+    "gemini-3.7-flash": {
+     "refused": "no",
+     "correct": "yes",
+     "grounded": "yes",
+     "length_fit": "right",
+     "unsupported_claims": 0,
+     "refusal_exact": false,
+     "refusal_correct": "na",
+     "wrongly_refused": false,
+     "word_count": 113,
+     "judge_model": "gemini-3.7-flash",
+     "judge_tokens": {
+      "prompt": 2451,
+      "output": 81,
+      "thoughts": 0
+     },
+     "judge_seconds": 2.5
+    }
+   }
+  },
+  "crs-01": {
+   "qtype": "multi_hop",
+   "domain": "code",
+   "answer_stats": {
+    "calls": 1,
+    "cached": false,
+    "prompt_tokens": 960,
+    "output_tokens": 50,
+    "thought_tokens": 0,
+    "llm_seconds": 1.016,
+    "chain_seconds": 4.516,
+    "n_context": 5,
+    "word_count": 29
+   },
+   "verdicts": {
+    "gemini-3.5-flash-lite": {
+     "refused": "no",
+     "correct": "yes",
+     "grounded": "yes",
+     "length_fit": "right",
+     "unsupported_claims": 0,
+     "refusal_exact": false,
+     "refusal_correct": "na",
+     "wrongly_refused": false,
+     "word_count": 29,
+     "judge_model": "gemini-3.5-flash-lite",
+     "judge_tokens": {
+      "prompt": 2027,
+      "output": 78,
+      "thoughts": 0
+     },
+     "judge_seconds": 1.266
+    },
+    "gemini-3.7-flash": {
+     "refused": "no",
+     "correct": "partial",
+     "grounded": "yes",
+     "length_fit": "right",
+     "unsupported_claims": 0,
+     "refusal_exact": false,
+     "refusal_correct": "na",
+     "wrongly_refused": false,
+     "word_count": 29,
+     "judge_model": "gemini-3.7-flash",
+     "judge_tokens": {
+      "prompt": 2027,
+      "output": 95,
+      "thoughts": 0
+     },
+     "judge_seconds": 3.047
+    }
+   }
+  },
+  "una-01": {
+   "qtype": "unanswerable",
+   "domain": "code",
+   "answer_stats": {
+    "calls": 1,
+    "cached": false,
+    "prompt_tokens": 1049,
+    "output_tokens": 15,
+    "thought_tokens": 0,
+    "llm_seconds": 0.875,
+    "chain_seconds": 3.828,
+    "n_context": 5,
+    "word_count": 12
+   },
+   "verdicts": {
+    "gemini-3.5-flash-lite": {
+     "refused": "yes",
+     "correct": "na",
+     "grounded": "na",
+     "length_fit": "right",
+     "unsupported_claims": 0,
+     "refusal_exact": true,
+     "refusal_correct": "yes",
+     "wrongly_refused": null,
+     "word_count": 12,
+     "judge_model": "gemini-3.5-flash-lite",
+     "judge_tokens": {
+      "prompt": 1948,
+      "output": 66,
+      "thoughts": 0
+     },
+     "judge_seconds": 0.906
+    },
+    "gemini-3.7-flash": {
+     "refused": "yes",
+     "correct": "na",
+     "grounded": "na",
+     "length_fit": "right",
+     "unsupported_claims": 0,
+     "refusal_exact": true,
+     "refusal_correct": "yes",
+     "wrongly_refused": null,
+     "word_count": 12,
+     "judge_model": "gemini-3.7-flash",
+     "judge_tokens": {
+      "prompt": 1948,
+      "output": 76,
+      "thoughts": 0
+     },
+     "judge_seconds": 2.516
+    }
+   }
+  }
+ },
+ "usd_per_call": {
+  "gemini-3.5-flash-lite|answer": 0.00051396,
+  "gemini-3.5-flash-lite|judge": 0.00082166,
+  "gemini-3.7-flash|judge": 0.0019269
+ },
+ "projections": {
+  "gemini-3.5-flash-lite": {
+   "phases": {
+    "phase 2 dev run": 0.2128,
+    "phase 3 LLM rewrite": 0.026,
+    "phase 4 list/small-doc": 0.1182,
+    "phase 5 length prompt": 0.1696,
+    "phase 6 holdout x2": 0.1442
+   },
+   "total_usd": 0.6708
+  },
+  "gemini-3.7-flash": {
+   "phases": {
+    "phase 2 dev run": 0.3973,
+    "phase 3 LLM rewrite": 0.026,
+    "phase 4 list/small-doc": 0.1734,
+    "phase 5 length prompt": 0.31,
+    "phase 6 holdout x2": 0.2636
+   },
+   "total_usd": 1.1703
+  },
+  "gemini-3.5-flash": null
+ },
+ "strong_judge_available": "gemini-3.7-flash",
+ "strong_judges_unavailable": [],
+ "judge_chosen": "gemini-3.7-flash",
+ "judge_choice_reason": "gemini-3.7-flash projects $1.17 for the whole plan, under $1.50",
+ "thinking_setting_dropped_for": [],
+ "ledger": {
+  "new_calls": 15,
+  "cached_calls": 0,
+  "new_usd": 0.01631,
+  "by_model_and_purpose": {
+   "gemini-3.5-flash-lite|answer": {
+    "model": "gemini-3.5-flash-lite",
+    "purpose": "answer",
+    "new_calls": 5,
+    "cached_calls": 0,
+    "prompt_tokens": 5241,
+    "output_tokens": 399,
+    "thought_tokens": 0,
+    "usd": 0.00257,
+    "seconds": 5.83
+   },
+   "gemini-3.5-flash-lite|judge": {
+    "model": "gemini-3.5-flash-lite",
+    "purpose": "judge",
+    "new_calls": 5,
+    "cached_calls": 0,
+    "prompt_tokens": 10711,
+    "output_tokens": 358,
+    "thought_tokens": 0,
+    "usd": 0.00411,
+    "seconds": 5.86
+   },
+   "gemini-3.7-flash|judge": {
+    "model": "gemini-3.7-flash",
+    "purpose": "judge",
+    "new_calls": 5,
+    "cached_calls": 0,
+    "prompt_tokens": 10711,
+    "output_tokens": 427,
+    "thought_tokens": 0,
+    "usd": 0.00963,
+    "seconds": 12.91
+   }
+  }
+ },
+ "seconds": 207.9
+}
