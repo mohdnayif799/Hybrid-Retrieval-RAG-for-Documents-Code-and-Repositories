@@ -4,9 +4,9 @@ The v3 benchmark scores the chunks retrieval returns. This harness scores the
 **answers**. It runs the production chain on the frozen v3 questions, then
 grades every answer with an LLM judge.
 
-> **Status: harness built; pilot pending.** No real answers have been graded
-> yet. The dev baseline is scored after the 5-question pilot has measured real
-> token use and fixed the judge model.
+> **Status:** the pilot (`results/pilot_dev.json`) chose `gemini-3.7-flash` as
+> the judge. The dev baseline is `results/dev.json`. The Phase 2b comparison
+> run is pending, and so are the judge-vs-human labels.
 
 ## What one question goes through
 
@@ -46,6 +46,8 @@ file (`judge_v2.md`), so grades from different versions never mix.
 | `python -m benchmark.v3.generation.run --pilot 5` | 5 dev questions, one per type: exact_identifier, paraphrase, list_all, multi_hop, unanswerable |
 | `python -m benchmark.v3.generation.run` | all 127 dev questions, plus the noise runs and the judge-check sheet |
 | `python -m benchmark.v3.generation.agreement` | judge vs your hand labels on 20 questions |
+| `python -m benchmark.v3.generation.run --tag NAME --noise 0` | a comparison run (for example after a prompt change): writes `results/dev_NAME.json`, never the baseline, and no judge-check sheet |
+| `python -m benchmark.v3.generation.compare --tag NAME` | that run vs the baseline, question by question: Phase 2b criteria, by shape and type, flips |
 
 **The pilot:**
 * Each pilot answer is graded by flash-lite and by the stronger Flash
@@ -73,8 +75,9 @@ Phase 6.
 * **Cache.** Every model call is stored on disk under
   `benchmark/.cache/generation/` (gitignored). A rerun makes zero calls and
   costs nothing. An interrupted run resumes from where it stopped.
-* **Cap.** Any single run stops before it would spend more than `--max-usd`
-  (default $0.50).
+* **Caps.** A run stops before it would spend more than `--max-usd` (default
+  $0.50). The whole plan stops at `--max-total-usd` (default $2.00), counting
+  every call already in the cache.
 * **Throttle and retries.** `--rpm` (default 10 requests per minute).
   Rate-limit and server errors are retried with backoff.
 * **Prices** are list prices from `llm.PRICES`, in USD per 1M tokens, and can

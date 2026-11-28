@@ -168,13 +168,26 @@ Rewritten search query (be specific -- expand abbreviations and resolve all refe
 # Includes a small safety net (final paragraph) for the rare case where a
 # casual message slips past the heuristic and reaches this path anyway --
 # e.g. an unusual phrasing not covered by _CASUAL_PATTERNS.
+#
+# The refusal rule (v4 Phase 2b, docs/DECISIONS.md): with the old rule ("if
+# the context does not contain the answer, refuse"), 13 of 113 answerable dev
+# questions were refused with the gold passage in front of the model. 10 of
+# those were bare terms (an identifier or keyword with no question around it)
+# or 2-part questions with one part answerable. A bare term is now read as
+# "what is it and what does it do", a partly answerable question gets the
+# part that can be answered, and the exact refusal sentence is kept for
+# questions the context does not answer at all.
 
 _QA_TEMPLATE = """You are a helpful assistant that answers questions strictly from the provided documents.
 
 Use ONLY the context below to answer the question.
-If the context does not contain the answer, say exactly:
+If the question is only a term, name or identifier rather than a full question,
+treat it as "What is <term> and what does it do?" and answer that from the context.
+If the context answers only part of the question, answer that part and say plainly
+which part the documents do not cover.
+Only if the context contains nothing that answers any part of the question, say exactly:
 "I don't have enough information in the provided documents to answer this."
-Do not fabricate any information.
+Do not fabricate any information: every statement must be supported by the context.
 
 Exception: if the question is actually casual conversation (a greeting, thanks,
 acknowledgment, or small talk) rather than a genuine request for document

@@ -107,7 +107,7 @@ full run.
 | **Total** | | | **≈ $1.00** (cap: abort any single run projected over $0.50) |
 
 That is about a dollar if thinking tokens are small, which is above "in the
-cents" taken strictly. You accepted about $1 (see *Decisions taken*).
+cents" taken strictly. You accepted about $1, later raised to $2.00 when Phase 2b was added (see *Decisions taken*).
 
 If your key is on the free tier, the cost is $0 but rate limits apply. The
 runner throttles to a configurable requests-per-minute, and resumes from the
@@ -337,22 +337,42 @@ escape and the history block. No retrieval change, no extra model call.
   comparison script with paired bootstrap differences against
   `results/dev.json`, per question type and per shape, and the questions that
   flipped.
-* The new prompt changes every answer prompt, so all 127 answers and grades
-  are new: ≈ 260 calls, ≈ $0.35, plus ≈ $0.08 for the noise re-runs.
-* Spent so far: $0.37 of the ≈ $1.17 plan. Phase 2b's ≈ $0.43 is extra, which
-  takes the projected total to ≈ $1.6. Phase 5 can reuse this run's design to
-  stay cheap; see Risks.
+* The new prompt changes every answer prompt, so all 127 answers are new and
+  most grades too: ≈ 254 calls, ≈ $0.29.
+* Spent before 2b: ≈ $0.37 (pilot + baseline). After 2b: ≈ $0.66, against the
+  $2.00 cap.
 
-**Success criteria (dev, all four required):**
-1. **`correct` goes up** (yes rate, and the yes=1 / partial=0.5 score),
-   paired against the baseline.
-2. **Wrong refusals with gold in context fall** from 12. Target ≤ 3; cause A
-   should go to ~0.
+**Success criteria (dev, all four required)**, as approved 2026-11-28:
+1. **At most 3 of the 13 answer-step refusals remain.** These are the
+   baseline refusals with every part (11) or some parts (2) of the gold in
+   context: crs-05, dfa-09, eid-01, eid-02, eid-04, eid-10, isw-13, lit-01,
+   lit-05, mh-02, mh-06, msp-03, pp-03.
+2. **`correct` goes up, question by question.** The paired mean of the
+   correct score (yes 1, partial 0.5, no 0) rises, and more questions improve
+   than get worse.
 3. **Unanswerable refusals stay 14/14.**
-4. **Grounded stays ≥ 97%.**
+4. **Grounded stays at or above 97%.**
 
-Also reported, not gating: length_fit (bare terms will get longer answers),
-flips in each direction, and the noise floor from the Phase 2 noise runs.
+**The 13 baseline refusals with no gold in context** were right for the
+answer step, so they don't count against 2b. They are retrieval targets for
+Phases 3 and 4: con-05, dco-09, dpa-02, dpp-02, isw-01, isw-10, lit-04, mh-03,
+mh-04, msp-06, msp-12, par-05, rid-04. The comparison reports what the new
+prompt does with each. Answering one without grounding means the model is
+guessing, which is a grounding failure, not a win.
+
+**Also reported:**
+* results by shape (bare vs sentence) and by question type;
+* length_fit and word counts;
+* every question that flipped each way;
+* the baseline noise floor.
+
+**Implementation.**
+* `_QA_TEMPLATE` as in the diff above.
+* `benchmark/v3/generation/run.py --tag refusal` writes `results/dev_refusal.json`.
+* `benchmark/v3/generation/compare.py --tag refusal` prints the criteria as
+  PASS/FAIL, with no text, and writes `results/compare_dev_refusal.json`.
+* No noise re-runs: the baseline's noise floor is reused.
+* Estimated cost ≈ $0.29.
 
 **Risks.**
 * **Unanswerable questions may get partial or tangential answers.** "Answer
@@ -364,11 +384,10 @@ flips in each direction, and the noise floor from the Phase 2 noise runs.
 * **Bare terms may get over-long answers.** A bare term that names something
   minor could draw a long explanation. length_fit tracks this; Phase 5 owns
   answer length.
-* **Budget.** The extra run pushes the projected total over $1.50. Phase 5
-  (answer length) re-generates every answer again. To stay near the budget,
-  Phase 5 can be measured on the questions whose intent changes the prompt
-  line (fact and list, ≈ 80), or the two prompt changes can be measured
-  together. That is your call when Phase 5 comes.
+* **Budget.** The plan's eval cap is raised to **$2.00** (decided
+  2026-11-28) rather than weakening the Phase 5 measurement. The runner
+  enforces it with `--max-total-usd 2.00`, which counts every call already in
+  the cache. The $0.50 stop per run stays.
 
 **Latency and cost per question in production.** No extra calls. Answers to
 bare terms and to partial questions get longer (output tokens), so
@@ -681,6 +700,9 @@ These override the phase descriptions above where they differ.
    fixed seed, and **frozen (hashed) before anything is measured on it**.
 7. **Freshness test:** from Phase 3 it points at dev-only results until
    Phase 6.
+8. **Budget raised to $2.00 for all eval runs** (2026-11-28), enforced from
+   the cache, with the $0.50 stop per run kept. Phase 2b (over-refusal fix) is
+   added before Phase 3.
 
 [aa]: https://artificialanalysis.ai/models/gemini-3-5-flash-lite
 [dm]: https://deepmind.google/models/gemini/flash-lite/

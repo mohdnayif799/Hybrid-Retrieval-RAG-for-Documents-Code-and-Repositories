@@ -43,6 +43,7 @@ import argparse
 import json
 import os
 import random
+import re
 import statistics
 import sys
 import time
@@ -64,6 +65,7 @@ ANSWER_MODEL = "gemini-3.5-flash-lite"          # production default (Dockerfile
 LITE_JUDGE = "gemini-3.5-flash-lite"
 STRONG_JUDGES = ("gemini-3.7-flash", "gemini-3.5-flash")   # first one the key can use
 STRONG_JUDGE_LIMIT_USD = 1.50
+MAX_TOTAL_USD = 2.00                     # the whole v4 plan's eval spend (raised from ~$1)
 
 PILOT_QTYPES = ("exact_identifier", "paraphrase", "list_all", "multi_hop", "unanswerable",
                 "keyword", "misspelled", "repo_identity")
@@ -604,6 +606,10 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--judge", help="judge model for the full run (default: the pilot's choice)")
     parser.add_argument("--answer-model", default=ANSWER_MODEL)
     parser.add_argument("--max-usd", type=float, default=0.50, help="cap on new spend in this run")
+    parser.add_argument("--max-total-usd", type=float, default=MAX_TOTAL_USD,
+                        help="cap on the whole plan's eval spend, counting every cached call")
+    parser.add_argument("--tag", help="a comparison run: writes results/<split>_<tag>.json, "
+                                      "never the baseline file, and no judge-check sheet")
     parser.add_argument("--rpm", type=float, default=10.0, help="requests per minute (throttle)")
     parser.add_argument("--noise", type=int, default=NOISE_N)
     parser.add_argument("--price", action="append", metavar="MODEL=IN,OUT",
@@ -619,6 +625,9 @@ def main(argv: list[str] | None = None) -> int:
                          "--split holdout --final-look.")
     if args.split == "holdout" and args.pilot:
         raise SystemExit("no pilot on holdout")
+    if args.tag is not None and (args.pilot or not re.fullmatch(r"[a-z0-9][a-z0-9_-]{0,30}", args.tag)):
+        raise SystemExit("--tag takes a short lowercase name (letters, digits, - or _), "
+                         "and is not for pilots")
 
     from benchmark.v3 import dataset as D
     from benchmark.v3 import freeze
@@ -642,7 +651,10 @@ def main(argv: list[str] | None = None) -> int:
         return (6000 * p_in + 1500 * p_out) / 1_000_000   # a generous single call
 
     llm = L.CachedLLM(L.gemini_backend(key) if key else None, L.Cache(),
-                      max_usd=args.max_usd, rpm=args.rpm, prices=prices, estimate_usd=estimate)
+                      max_usd=args.max_usd, rpm=args.rpm, prices=prices, estimate_usd=estimate,
+                      max_total_usd=args.max_total_usd)
+    print(f"[gen-eval] eval spend so far (cached calls): ${llm.spent_before_usd:.4f} of the "
+          f"${args.max_total_usd:.2f} plan cap", flush=True)
     from benchmark.v3 import gold as G
     from src.hybrid_retrieval import chunk_key
 
@@ -688,13 +700,13 @@ def main(argv: list[str] | None = None) -> int:
                 with open(pilot_path, encoding="utf-8") as handle:
                     judge_model = json.load(handle)["judge_chosen"]
             out = run_full(ctx, queries, judge_model, args.noise)
-            report = {**common, "kind": "full", "judge_model": judge_model,
+            report = {**common, "kind": "full", "tag": args.tag, "judge_model": judge_model,
                       "per_question": out["rows"], "aggregates": aggregate(out["rows"]),
                       "wrong_refusals": refusal_diagnosis(out["rows"]),
                       "noise": out["noise"],
                       "thinking_setting_dropped_for": sorted(llm.dropped_thinking),
                       "ledger": llm.ledger.summary(), "seconds": round(time.time() - started, 1)}
-            if args.split == "dev":
+            if args.split == "dev" and args.tag is None:
                 if os.path.exists(JUDGE_CHECK_PATH):
                     # Never overwrite hand labels: the 20 ids are seeded, so a
                     # rerun would pick the same questions anyway.
@@ -703,16 +715,17 @@ def main(argv: list[str] | None = None) -> int:
                 else:
                     report["judge_check_ids"] = write_judge_check(ctx, queries, out["answers"],
                                                                   JUDGE_CHECK_PATH)
-            path = os.path.join(RESULTS_DIR, f"{args.split}.json")
+            name = args.split if args.tag is None else f"{args.split}_{args.tag}"
+            path = os.path.join(RESULTS_DIR, f"{name}.json")
             write_json(path, report)
             print_full(report)
-            if args.split == "dev":
+            if args.split == "dev" and args.tag is None:
                 print("\nJudge check (local, do not commit): read "
                       f"{os.path.relpath(os.path.splitext(JUDGE_CHECK_PATH)[0] + '.md', PROJECT_ROOT)}"
                       f", label in {os.path.relpath(JUDGE_CHECK_PATH, PROJECT_ROOT)}")
     except L.SpendCapReached as exc:
-        print(f"\nSTOPPED: {exc}. Finished calls are cached; rerun with a higher --max-usd "
-              "to continue from where it stopped.")
+        print(f"\nSTOPPED: {exc}. Finished calls are cached; rerunning resumes from where it "
+              "stopped, but only raise a cap after checking the spend.")
         return 2
     except L.CallFailed as exc:
         print(f"\nSTOPPED: {exc}. Finished calls are cached; rerunning the same command "

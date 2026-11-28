@@ -435,3 +435,93 @@ def test_an_evidence_string_outside_the_gold_chunk_does_not_count(tmp_path):
     rows = {"eid-09": {"qtype": "exact_identifier", "gold_context": some,
                        "verdict": {"wrongly_refused": True}}}
     assert R.refusal_diagnosis(rows)["some_parts_in_context"] == ["eid-09"]
+
+
+# ── Phase 2b: the answer prompt, the plan cap, the comparison ──────────────
+
+def test_the_answer_prompt_keeps_the_exact_refusal_sentence_and_formats():
+    from src import rag_chain
+
+    assert J.REFUSAL_SENTENCE in rag_chain._QA_TEMPLATE
+    prompt = rag_chain._QA_TEMPLATE.format(context="C", question="Q", history_block="")
+    assert "term, name or identifier" in prompt and "answer that part" in prompt
+    assert prompt.rstrip().endswith("Answer:")
+
+
+def test_the_plan_cap_counts_every_cached_call(tmp_path):
+    backend = FakeBackend()
+    _llm(tmp_path, backend)("gemini-3.5-flash-lite", "answer", "earlier run")   # ~$0.00075
+    llm = _llm(tmp_path, backend, max_total_usd=0.0009, estimate_usd=lambda m: 0.0005)
+    assert llm.spent_before_usd == pytest.approx(L.Usage(1500, 120, 0).cost(
+        "gemini-3.5-flash-lite", L.PRICES))
+    with pytest.raises(L.SpendCapReached, match="plan's"):
+        llm("gemini-3.5-flash-lite", "answer", "a new prompt")
+    assert llm("gemini-3.5-flash-lite", "answer", "earlier run").cached   # cached is still free
+
+
+def test_a_bad_tag_is_refused():
+    with pytest.raises(SystemExit, match="--tag"):
+        R.main(["--tag", "Not OK!"])
+
+
+def _run(rows: dict, **extra) -> dict:
+    per_question = {}
+    for qid, (qtype, shape, verdict) in rows.items():
+        v = J.derive({**GOOD_VERDICT, **verdict}, qtype != "unanswerable", "w " * 20)
+        per_question[qid] = {"qtype": qtype, "query_shape": shape, "verdict": v}
+    return {"split": "dev", "manifest_sha256": "m", "judge_model": "j", "judge_version": "v1",
+            "judge_prompt_sha256": "h", "answer_prompt_sha256": extra.get("prompt", "p1"),
+            "tag": extra.get("tag"), "per_question": per_question,
+            "wrong_refusals": extra.get("wrong_refusals", {}),
+            "noise": {"rejudge": {}, "regenerate": {}}}
+
+
+REFUSED = {"refused": "yes", "correct": "no", "grounded": "na"}
+
+
+def test_the_comparison_scores_the_phase_2b_criteria():
+    from benchmark.v3.generation import compare as C
+
+    base = _run({
+        "eid-01": ("exact_identifier", "bare", REFUSED),          # answer-step refusal
+        "crs-05": ("multi_hop", "sentence", REFUSED),             # some parts in context
+        "isw-01": ("exact_identifier", "bare", REFUSED),          # no gold in context
+        "par-05": ("paraphrase", "sentence", REFUSED),            # no gold in context
+        "kw-01": ("keyword", "bare", {}),
+        "una-01": ("unanswerable", "sentence", {"refused": "yes", "grounded": "na"}),
+    }, wrong_refusals={"all_parts_in_context": ["eid-01"], "some_parts_in_context": ["crs-05"],
+                       "gold_not_in_context": ["isw-01", "par-05"]})
+    new = _run({
+        "eid-01": ("exact_identifier", "bare", {}),               # now answered, correct
+        "crs-05": ("multi_hop", "sentence", {"correct": "partial"}),
+        "isw-01": ("exact_identifier", "bare", {"correct": "no", "grounded": "no"}),  # guessing
+        "par-05": ("paraphrase", "sentence", REFUSED),
+        "kw-01": ("keyword", "bare", {"correct": "partial"}),     # got worse
+        "una-01": ("unanswerable", "sentence", {"refused": "yes", "grounded": "na"}),
+    }, prompt="p2", tag="refusal")
+
+    assert C.check_comparable(base, new) == []
+    out = C.compare(base, new)
+    crit = out["criteria"]
+    assert crit["answer_step_refusals_remaining"]["remaining"] == []
+    assert crit["answer_step_refusals_remaining"]["pass"]
+    assert crit["unanswerable_refused"]["pass"]
+    assert crit["correct_up"]["pass"]                 # 2 up (eid-01, crs-05) vs 1 down (kw-01)
+    assert not crit["grounded"]["pass"]               # isw-01 is ungrounded: 1 of 5 graded
+    assert not out["passes"]
+    assert out["flips"]["correct_up"] == ["crs-05", "eid-01"]
+    assert out["flips"]["correct_down"] == ["kw-01"]
+    assert out["gold_not_in_context_after"]["isw-01"].endswith("(guessing)")
+    assert out["gold_not_in_context_after"]["par-05"] == "still refused"
+    assert out["by_group"]["shape:bare"]["n"] == 3
+
+
+def test_runs_with_different_judges_are_not_compared():
+    from benchmark.v3.generation import compare as C
+
+    base = _run({"a": ("keyword", "bare", {})})
+    other = {**_run({"a": ("keyword", "bare", {})}), "judge_model": "another"}
+    with pytest.raises(SystemExit, match="judge_model"):
+        C.check_comparable(base, other)
+    assert C.check_comparable(base, _run({"a": ("keyword", "bare", {})})) == [
+        "the answer prompt is the same in both runs"]

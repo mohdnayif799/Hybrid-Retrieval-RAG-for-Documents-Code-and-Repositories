@@ -369,3 +369,46 @@ chunk** in the context: the short evidence string just occurs in other chunks.
 * **On the laptop:** re-running the dev eval from its cache rewrites dev.json
   with the corrected fields at $0. The diagnosis and the proposed fix are in
   `docs/ROADMAP_v4.md`, Phase 2b.
+
+### Phase 2b: over-refusal fix, implemented and awaiting measurement (2026-11-28)
+
+**The baseline** (dev.json, 34d509e; judge `gemini-3.7-flash`):
+
+| Measure | Value |
+|---|---|
+| correct, yes rate | 63.7% |
+| correct score (yes 1, partial 0.5, no 0) | 69.0 |
+| grounded | 98.9% |
+| unanswerable refused | 14/14 |
+| answerable questions wrongly refused | 23.0% (26 of 113) |
+| length right | 95.3% |
+
+**The 26 wrong refusals, by where the gold was:**
+
+| Gold in the model's context | n | Questions |
+|---|---|---|
+| every part | 11 | dfa-09, eid-01, eid-02, eid-04, eid-10, isw-13, lit-01, lit-05, mh-06, msp-03, pp-03 |
+| some parts | 2 | crs-05, mh-02 |
+| none | 13 | listed under Phase 2b in the roadmap |
+
+The first two rows, 13 questions, are the answer-step failures that 2b targets.
+
+**Noise floor.**
+* The same answer, re-judged: agreed on all four fields, 20/20.
+* A regenerated answer: changed one verdict per field in 20, except
+  length_fit.
+
+**The change** is to `_QA_TEMPLATE`'s refusal rule only:
+* a bare term is read as "what is it and what does it do";
+* a partly answerable question gets the part that can be answered, and says
+  which part is missing;
+* the exact refusal sentence is kept for questions the context does not
+  answer at all.
+
+No retrieval change, no extra model call.
+
+**Criteria and the guessing check** are in `docs/ROADMAP_v4.md` (Phase 2b).
+`benchmark/v3/generation/compare.py` scores them.
+
+**Budget.** The cap for the whole plan's eval spend is raised to $2.00 and
+enforced from the cache. The $0.50 stop per run stays.

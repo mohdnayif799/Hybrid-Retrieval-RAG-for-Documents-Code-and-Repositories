@@ -10,6 +10,10 @@ zero API calls and costs nothing.
 * ``sample`` > 0 deliberately bypasses an earlier cached result, for the
   noise runs that re-generate or re-judge the same input.
 
+Two caps: ``max_usd`` stops a single run, and ``max_total_usd`` stops the
+whole plan, counting every call already in the cache (the spend of all
+earlier runs on this machine) plus this run's.
+
 Cost is computed from the token counts Gemini returns (``usage_metadata``),
 with thinking tokens billed as output. A run aborts before any call that
 would take its new spend over ``max_usd``. Cached calls cost nothing.
@@ -138,6 +142,15 @@ class Cache:
     def get(self, key: str) -> dict | None:
         return self.records.get(key)
 
+    def total_usd(self, prices: dict) -> float:
+        """List-price cost of every call in the cache: the eval's spend so far."""
+        total = 0.0
+        for rec in self.records.values():
+            u = rec.get("usage") or {}
+            total += Usage(u.get("prompt", 0), u.get("output", 0),
+                           u.get("thoughts", 0)).cost(rec.get("model", ""), prices)
+        return total
+
     def put(self, record: dict) -> None:
         os.makedirs(os.path.dirname(self.path), exist_ok=True)
         with open(self.path, "a", encoding="utf-8") as handle:
@@ -189,10 +202,14 @@ class CachedLLM:
                  rpm: float, prices: dict | None = None, retries: int = 4,
                  sleep: Callable[[float], None] = time.sleep,
                  clock: Callable[[], float] = time.monotonic,
-                 estimate_usd: Callable[[str], float] | None = None):
+                 estimate_usd: Callable[[str], float] | None = None,
+                 max_total_usd: float | None = None):
         self.backend = backend
         self.cache = cache
         self.max_usd = max_usd
+        # The whole plan's cap: everything already in the cache (every earlier
+        # run on this machine) plus this run's new calls.
+        self.max_total_usd = max_total_usd
         self.min_interval = 60.0 / rpm if rpm > 0 else 0.0
         self.prices = dict(PRICES if prices is None else prices)
         self.retries = retries
@@ -202,6 +219,7 @@ class CachedLLM:
         self.ledger = Ledger()
         self._last_call: float | None = None
         self.dropped_thinking: set[str] = set()
+        self.spent_before_usd = cache.total_usd(self.prices)
 
     def __call__(self, model: str, purpose: str, prompt: str, *,
                  config: dict | None = None, sample: int = 0) -> Reply:
@@ -216,10 +234,17 @@ class CachedLLM:
 
         if self.backend is None:
             raise CallFailed("no API key: this call is not cached and no backend is configured")
-        if self.ledger.new_usd + self.estimate_usd(model) > self.max_usd:
+        next_usd = self.estimate_usd(model)
+        if self.ledger.new_usd + next_usd > self.max_usd:
             raise SpendCapReached(
                 f"stopping before a new {model} call: this run has spent "
                 f"${self.ledger.new_usd:.4f} of its ${self.max_usd:.2f} cap")
+        if (self.max_total_usd is not None
+                and self.spent_before_usd + self.ledger.new_usd + next_usd > self.max_total_usd):
+            raise SpendCapReached(
+                f"stopping before a new {model} call: the eval has spent "
+                f"${self.spent_before_usd + self.ledger.new_usd:.4f} in total, against the "
+                f"plan's ${self.max_total_usd:.2f} cap")
 
         text, usage, seconds = self._call_with_retries(model, prompt, config)
         usd = usage.cost(model, self.prices)
