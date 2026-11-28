@@ -695,8 +695,14 @@ def main(argv: list[str] | None = None) -> int:
                       "thinking_setting_dropped_for": sorted(llm.dropped_thinking),
                       "ledger": llm.ledger.summary(), "seconds": round(time.time() - started, 1)}
             if args.split == "dev":
-                report["judge_check_ids"] = write_judge_check(ctx, queries, out["answers"],
-                                                              JUDGE_CHECK_PATH)
+                if os.path.exists(JUDGE_CHECK_PATH):
+                    # Never overwrite hand labels: the 20 ids are seeded, so a
+                    # rerun would pick the same questions anyway.
+                    report["judge_check_ids"] = [q["id"] for q in judge_check_questions(queries)]
+                    print(f"[gen-eval] kept the existing labels file {JUDGE_CHECK_PATH}")
+                else:
+                    report["judge_check_ids"] = write_judge_check(ctx, queries, out["answers"],
+                                                                  JUDGE_CHECK_PATH)
             path = os.path.join(RESULTS_DIR, f"{args.split}.json")
             write_json(path, report)
             print_full(report)
