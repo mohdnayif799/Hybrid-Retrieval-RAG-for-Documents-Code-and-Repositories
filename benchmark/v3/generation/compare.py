@@ -16,9 +16,14 @@ results/compare_dev_<tag>.json:
      questions improved than got worse.
   3. Every unanswerable question is still refused.
   4. Grounded stays at or above 97%.
+  5. (added for the refusal2 revision) multi-hop correct_yes is at least the
+     baseline's.
 * Paired differences with 95% bootstrap intervals, overall, by query shape
   (bare vs sentence) and by question type.
 * The questions that flipped each way.
+* Every answerable question with no gold in context, by outcome, in both
+  runs: refused, correct, partial, grounded but wrong (answering a nearby
+  question), or ungrounded (guessing).
 * What happened to the baseline's refusals with no gold in context. Those
   refusals were right for the answer step. If one is now answered without
   grounding, the model is guessing: a grounding failure, not a win.
@@ -116,6 +121,15 @@ def compare(base: dict, new: dict) -> dict:
             "value": "n/a" if grounded_rate is None else f"{100 * grounded_rate:.1f}%",
             "pass": grounded_rate is not None and grounded_rate >= MIN_GROUNDED},
     }
+    # Added for the refusal2 revision: the first 2b wording cost multi-hop
+    # answers their "yes" (wrong "not covered" caveats), so multi-hop
+    # correct_yes must be back to at least the baseline's.
+    mh_base, mh_new = _yes_rate(a, "multi_hop"), _yes_rate(b, "multi_hop")
+    if mh_base is not None and mh_new is not None:
+        criteria["multi_hop_correct_yes"] = {
+            "value": (f"{mh_new[0]}/{mh_new[1]} ({100 * mh_new[0] / mh_new[1]:.0f}%), "
+                      f"baseline {mh_base[0]}/{mh_base[1]} ({100 * mh_base[0] / mh_base[1]:.0f}%)"),
+            "pass": mh_new[0] / mh_new[1] >= mh_base[0] / mh_base[1]}
 
     # The answers that were right to refuse: what did the new prompt do with them?
     no_gold_after = {}
@@ -159,8 +173,42 @@ def compare(base: dict, new: dict) -> dict:
     }
     return {"criteria": criteria, "passes": all(c["pass"] for c in criteria.values()),
             "target_set": target, "gold_not_in_context_after": no_gold_after,
+            "no_gold_outcomes": {"base": no_gold_outcomes(a), "new": no_gold_outcomes(b)},
             "by_group": by_group, "flips": flips,
             "noise_floor": base.get("noise"), "shape": {i: a[i].get("query_shape") for i in a}}
+
+
+def _yes_rate(rows: dict, qtype: str) -> tuple[int, int] | None:
+    graded = [r["verdict"] for r in rows.values() if r["qtype"] == qtype and _ok(r["verdict"])]
+    return (sum(v["correct"] == "yes" for v in graded), len(graded)) if graded else None
+
+
+def no_gold_outcomes(rows: dict) -> dict:
+    """
+    Answerable questions whose gold was not in the context, by what the answer
+    did. Refusing is right for the answer step. "grounded_wrong" answers from
+    the context but not the asked fact (a nearby question); "ungrounded" is
+    guessing.
+    """
+    out = {k: [] for k in ("refused", "correct", "partial", "grounded_wrong", "ungrounded",
+                           "judge_error")}
+    for qid, r in sorted(rows.items()):
+        if r["qtype"] == "unanswerable" or (r.get("gold_context") or {}).get("gold_in_context"):
+            continue
+        v = r["verdict"]
+        if not _ok(v):
+            out["judge_error"].append(qid)
+        elif v.get("wrongly_refused"):
+            out["refused"].append(qid)
+        elif v["grounded"] == "no":
+            out["ungrounded"].append(qid)
+        elif v["correct"] == "yes":
+            out["correct"].append(qid)
+        elif v["correct"] == "partial":
+            out["partial"].append(qid)
+        else:
+            out["grounded_wrong"].append(qid)
+    return out
 
 
 def _fmt(d: dict | None) -> str:
@@ -177,7 +225,7 @@ def print_report(out: dict, base: dict, new: dict, warnings: list) -> None:
     def tag(ids) -> str:
         return ", ".join(f"{i}({shape.get(i) or '?'})" for i in ids) or "none"
 
-    print(f"COMPARE dev baseline vs dev_{new.get('tag')} (judge {new['judge_model']}, "
+    print(f"COMPARE {out.get('base_name', 'dev')} vs dev_{new.get('tag')} (judge {new['judge_model']}, "
           f"rubric {new['judge_version']}); answer prompt "
           f"{base['answer_prompt_sha256'][:12]} -> {new['answer_prompt_sha256'][:12]}")
     for w in warnings:
@@ -207,6 +255,13 @@ def print_report(out: dict, base: dict, new: dict, warnings: list) -> None:
     guessing = [i for i, s in out["gold_not_in_context_after"].items() if "guessing" in s]
     print(f"  guessing (answered without grounding): {len(guessing)}")
 
+    print("\nALL ANSWERABLE QUESTIONS WITH NO GOLD IN CONTEXT, by outcome (base -> new):")
+    ng = out["no_gold_outcomes"]
+    for kind in ng["new"]:
+        b_ids, n_ids = ng["base"][kind], ng["new"][kind]
+        if b_ids or n_ids:
+            print(f"  {kind.replace('_', ' '):15s} {len(b_ids):2d} -> {len(n_ids):2d}: {tag(n_ids)}")
+
     noise = out.get("noise_floor") or {}
     if noise:
         print("\nNOISE FLOOR (baseline, 20 answers): regenerated-answer agreement "
@@ -217,21 +272,27 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--tag", required=True)
+    parser.add_argument("--base", default="dev",
+                        help="results file to compare against (default: dev, the baseline; "
+                             "the success criteria are defined against the baseline)")
     parser.add_argument("--split", default="dev", choices=("dev",))
     args = parser.parse_args(argv)
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(errors="replace")
 
-    with open(os.path.join(RESULTS_DIR, f"{args.split}.json"), encoding="utf-8") as handle:
+    with open(os.path.join(RESULTS_DIR, f"{args.base}.json"), encoding="utf-8") as handle:
         base = json.load(handle)
     new_path = os.path.join(RESULTS_DIR, f"{args.split}_{args.tag}.json")
     with open(new_path, encoding="utf-8") as handle:
         new = json.load(handle)
     warnings = check_comparable(base, new)
     out = compare(base, new)
+    out["base_name"] = args.base
     print_report(out, base, new, warnings)
 
-    path = os.path.join(RESULTS_DIR, f"compare_{args.split}_{args.tag}.json")
+    name = (f"compare_{args.split}_{args.tag}" if args.base == args.split
+            else f"compare_{args.base}_vs_{args.tag}")
+    path = os.path.join(RESULTS_DIR, f"{name}.json")
     with open(path, "w", encoding="utf-8") as handle:
         json.dump({"base_answer_prompt_sha256": base["answer_prompt_sha256"],
                    "new_answer_prompt_sha256": new["answer_prompt_sha256"],

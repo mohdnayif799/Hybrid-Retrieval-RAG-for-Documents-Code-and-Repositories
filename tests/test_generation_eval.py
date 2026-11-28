@@ -444,7 +444,7 @@ def test_the_answer_prompt_keeps_the_exact_refusal_sentence_and_formats():
 
     assert J.REFUSAL_SENTENCE in rag_chain._QA_TEMPLATE
     prompt = rag_chain._QA_TEMPLATE.format(context="C", question="Q", history_block="")
-    assert "term, name or identifier" in prompt and "answer that part" in prompt
+    assert "term, name or identifier" in prompt and "answer every part" in prompt
     assert prompt.rstrip().endswith("Answer:")
 
 
@@ -563,3 +563,73 @@ def test_features_count_parts_whose_key_fact_is_in_the_answer():
                    {"parts_in_context": 2, "n_parts": 2}, _norm)
     assert f["parts_in_answer"] == "1/2" and f["parts_in_context"] == "2/2"
     assert f["says_missing"] and not f["refusal_exact"]
+
+
+# ── refusal2: multi-hop criterion, no-gold outcomes, three kept prompts ─────
+
+def test_multi_hop_correct_yes_must_return_to_the_baseline_and_no_gold_outcomes_are_split():
+    from benchmark.v3.generation import compare as C
+
+    gold = {"gold_in_context": True}
+    nogold = {"gold_in_context": False}
+
+    def runs(mh_new_correct):
+        base = _run({"mh-1": ("multi_hop", "sentence", {}),
+                     "mh-2": ("multi_hop", "sentence", {"correct": "partial"}),
+                     "ng-1": ("paraphrase", "sentence", REFUSED),
+                     "ng-2": ("keyword", "bare", REFUSED)},
+                    wrong_refusals={"all_parts_in_context": [], "some_parts_in_context": [],
+                                    "gold_not_in_context": ["ng-1", "ng-2"]})
+        new = _run({"mh-1": ("multi_hop", "sentence", {"correct": mh_new_correct}),
+                    "mh-2": ("multi_hop", "sentence", {"correct": "partial"}),
+                    "ng-1": ("paraphrase", "sentence", {"correct": "no"}),       # grounded, wrong
+                    "ng-2": ("keyword", "bare", {"correct": "no", "grounded": "no"})},
+                   prompt="p2", tag="refusal2")
+        for run in (base, new):
+            for qid, row in run["per_question"].items():
+                row["gold_context"] = nogold if qid.startswith("ng") else gold
+        return base, new
+
+    base, new = runs("partial")                      # mh-1 drops yes -> partial
+    out = C.compare(base, new)
+    assert out["criteria"]["multi_hop_correct_yes"]["value"].startswith("0/2")
+    assert not out["criteria"]["multi_hop_correct_yes"]["pass"]
+    assert out["no_gold_outcomes"]["base"]["refused"] == ["ng-1", "ng-2"]
+    assert out["no_gold_outcomes"]["new"]["grounded_wrong"] == ["ng-1"]
+    assert out["no_gold_outcomes"]["new"]["ungrounded"] == ["ng-2"]
+
+    base, new = runs("yes")
+    assert C.compare(base, new)["criteria"]["multi_hop_correct_yes"]["pass"]
+
+
+def test_the_kept_2b_prompt_is_the_one_dev_refusal_was_scored_with():
+    from benchmark.v3.generation import answer_features as F
+
+    results = os.path.join(os.path.dirname(J.__file__), "results", "dev_refusal.json")
+    if not os.path.exists(results):
+        pytest.skip("no 2b results in this checkout")
+    with open(results, encoding="utf-8") as handle:
+        assert F.prompt_hash(F.REFUSAL_V1_QA_TEMPLATE) == json.load(handle)["answer_prompt_sha256"]
+
+
+def test_the_current_prompt_is_the_refusal2_revision():
+    from benchmark.v3.generation import answer_features as F
+    from src import rag_chain
+
+    assert rag_chain._QA_TEMPLATE not in (F.BASELINE_QA_TEMPLATE, F.REFUSAL_V1_QA_TEMPLATE)
+    assert "answer every part that any passage in the context covers" in rag_chain._QA_TEMPLATE
+    assert "say a part is not covered only if no passage covers it" in rag_chain._QA_TEMPLATE
+
+
+def test_the_summary_counts_caveats_with_every_part_in_context():
+    from benchmark.v3.generation import answer_features as F
+
+    def f(missing, ctx, refusal=False, answerable=True):
+        return {"words": 10, "refusal_exact": refusal, "says_missing": missing,
+                "parts_in_answer": "1/2", "parts_in_context": ctx, "answerable": answerable}
+    out = {"a": {"current": f(True, "2/2")}, "b": {"current": f(True, "1/2")},
+           "c": {"current": f(True, "1/1", refusal=True)}, "d": {"current": None},
+           "u": {"current": f(True, "-", answerable=False)}}
+    s = F.summarize(out, "current")
+    assert s["answers"] == 3 and s["not_cached"] == 1 and s["exact_refusals"] == 1
+    assert s["says_missing"] == 2 and s["says_missing_all_parts_in_context"] == ["a"]

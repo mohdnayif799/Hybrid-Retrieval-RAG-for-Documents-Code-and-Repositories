@@ -434,3 +434,32 @@ enforced from the cache. The $0.50 stop per run stays.
 
 The diagnosis and the decision on criterion 1 are in the Phase 2b section of
 docs/ROADMAP_v4.md once taken.
+
+**The free check, and the revision it triggered (refusal2, 2026-11-28).**
+`answer_features` replayed the cached answers with no calls and printed no
+text. Results:
+
+| question | finding |
+|---|---|
+| mh-08 | says a part is missing with 2/2 parts in context (the baseline answer did too) |
+| mh-09 | says a part is missing with 1/1 in context; the answer now holds the key fact but adds a wrong "not covered" caveat |
+| mh-05 | 2/2 key facts in the answer → 1/2; says missing; 1/2 parts in context |
+| crs-05, mh-02, pp-03 | still the exact refusal, with part of the answer in context |
+| mh-03, rid-04 | now answered with no gold part in context: grounded but wrong |
+
+The pre-set rule was to revise if at least 2 of mh-05/08/09 claim a part is
+missing with every key fact in context. mh-08 and mh-09 qualify, so the
+partial-answer sentence is now:
+
+> If the question has several parts, answer every part that any passage in
+> the context covers; say a part is not covered only if no passage covers it.
+
+**How it is measured:** `--tag refusal2`, against the same baseline.
+* The four criteria, plus a fifth: multi-hop correct_yes at least the
+  baseline's 5/15 (33%).
+* Also reported:
+  * crs-05 and mh-02;
+  * the number of answers with a "not covered" caveat (from `answer_features
+    --ids all`, cache only);
+  * every no-gold question by outcome, to see whether more of them become
+    grounded-but-wrong answers.

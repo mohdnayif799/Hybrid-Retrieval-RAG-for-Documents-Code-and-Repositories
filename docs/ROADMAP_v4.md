@@ -374,6 +374,22 @@ guessing, which is a grounding failure, not a win.
 * No noise re-runs: the baseline's noise floor is reused.
 * Estimated cost ≈ $0.29.
 
+**Revision: refusal2 (2026-11-28).**
+* **Result of the first wording:** it passed criteria 2-4 but missed
+  criterion 1 by one (4 of 13 left). Multi-hop correct_yes fell from 5/15 to
+  3/15.
+* **The cause:** the free answer-feature check found answers claiming a part
+  was missing although every key fact was in context (mh-08, mh-09).
+* **The change:** the partial-answer sentence now reads "answer every part
+  that any passage in the context covers; say a part is not covered only if
+  no passage covers it".
+* **How it is judged:** the same four criteria against the baseline, plus
+  **5. multi-hop correct_yes ≥ the baseline's 5/15**.
+* **Also reported:** crs-05 and mh-02, the number of answers with a "not
+  covered" caveat, and no-gold questions by outcome.
+* **Cost:** ≈ $0.29.
+* **If it fails:** your call between the two wordings, with the misses recorded.
+
 **Risks.**
 * **Unanswerable questions may get partial or tangential answers.** "Answer
   the part you can" could make the model offer related facts where it should

@@ -263,7 +263,7 @@ No test needs an API key or downloads a model, so the suite is fast and costs no
 
 ```bash
 python -m pytest tests/ -q
-# 453 passed, 58 subtests passed
+# 457 passed, 58 subtests passed
 ```
 
 | Test file | Tests run | Test functions | Covers |
@@ -283,7 +283,7 @@ python -m pytest tests/ -q
 | `test_store_registry.py` | 14 | 11 | Chat-store eviction policy: idle timeout, count and size budgets, least-recently-used order, never evicting the store in use, settings from environment variables |
 | `test_app_ui.py` | 21 | 21 | Headless Streamlit `AppTest` runs of `app.py`: demo-key counter and limit, quota and failure messages, model choice, the example chip, the evicted-store notice, the sources toggle (only the latest answer in full, earlier answers' own sources collapsed beneath them), and the response cache (a repeated question, a document added after a cached answer, the same question in two chats, a history-dependent follow-up) |
 | `test_response_cache.py` | 25 | 11 | Response-cache rules: the document-set digest, the key (chat, documents, question), and which follow-ups depend on earlier turns |
-| `test_generation_eval.py` | 42 | 37 | Generation eval harness with a fake model: the call cache (a rerun makes no calls), the spend cap, retries and the thinking-setting fallback, judge parsing and derived fields, the pinned judge prompt, the cost projection and the judge-model rule, aggregation, judge-vs-human agreement, results files without text, CRLF checkouts, and `build_rag_chain`'s injected model |
+| `test_generation_eval.py` | 46 | 41 | Generation eval harness with a fake model: the call cache (a rerun makes no calls), the spend cap, retries and the thinking-setting fallback, judge parsing and derived fields, the pinned judge prompt, the cost projection and the judge-model rule, aggregation, judge-vs-human agreement, results files without text, CRLF checkouts, and `build_rag_chain`'s injected model |
 | `test_example_repo.py` | 12 | 9 | Bundled example tarball checksum and offline loading, local archive ingestion, repository limits from environment variables |
 | `test_query_log.py` | 7 | 7 | Per-query log line, Gemini quota-error detection, key redaction, Gemini call counting through the RAG chain |
 | `test_demo_key.py` | 3 | 2 | Shared demo key detection |
@@ -291,7 +291,7 @@ python -m pytest tests/ -q
 | `test_store_eviction.py` | 3 | 3 | Eviction against real ChromaDB: stops Chroma, closes its files, deletes the store, drops stale BM25 entries |
 | `test_lazy_ocr_import.py` | 1 | 1 | EasyOCR is not imported until a page actually needs OCR |
 
-"Tests run" comes from an actual `python -m pytest tests/ -q` run; "Test functions" is counted from the current source (`def test_*`, including class-based methods). The run reports more passes than functions because `test_repo_ingestion.py`, three of the benchmark files, `test_store_registry.py`, `test_example_repo.py`, `test_demo_key.py`, `test_response_cache.py` and `test_generation_eval.py` use `@pytest.mark.parametrize` to run one function over several cases, and `test_casual_detection.py`'s `subTest` blocks report separately. That is why `pytest -q` totals 453 passed with 58 subtests from 392 test functions.
+"Tests run" comes from an actual `python -m pytest tests/ -q` run; "Test functions" is counted from the current source (`def test_*`, including class-based methods). The run reports more passes than functions because `test_repo_ingestion.py`, three of the benchmark files, `test_store_registry.py`, `test_example_repo.py`, `test_demo_key.py`, `test_response_cache.py` and `test_generation_eval.py` use `@pytest.mark.parametrize` to run one function over several cases, and `test_casual_detection.py`'s `subTest` blocks report separately. That is why `pytest -q` totals 457 passed with 58 subtests from 396 test functions.
 
 None of the benchmark tests assert on a measured, corpus-dependent number: they exercise the scoring and configuration code against fixed synthetic fixtures, since the actual benchmark numbers in [Evaluation](#evaluation) are measurements, not invariants, and move if the corpus does.
 
@@ -381,7 +381,7 @@ Hybrid-Retrieval-RAG-for-Documents-Code-and-Repositories/
 │
 ├── scripts/                      # Browser check of the sources toggle (fake LLM; not in the suite)
 │
-├── tests/                        # 453 passed, 58 subtests — no API key required
+├── tests/                        # 457 passed, 58 subtests — no API key required
 │
 └── chroma_db_*/                  # Per-chat vector stores (auto-created, gitignored)
     chroma_eval_*/                # Evaluation stores (separate namespace)

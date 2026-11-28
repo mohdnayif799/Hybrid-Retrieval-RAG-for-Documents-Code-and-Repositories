@@ -177,14 +177,20 @@ Rewritten search query (be specific -- expand abbreviations and resolve all refe
 # "what is it and what does it do", a partly answerable question gets the
 # part that can be answered, and the exact refusal sentence is kept for
 # questions the context does not answer at all.
+#
+# Revision (refusal2): the first wording ("answer that part and say which part
+# the documents do not cover") made the model claim a part was missing when
+# every key fact was in context (mh-08, mh-09 on dev). Each part is now
+# answered from any passage that covers it, and "not covered" is reserved for
+# parts no passage covers.
 
 _QA_TEMPLATE = """You are a helpful assistant that answers questions strictly from the provided documents.
 
 Use ONLY the context below to answer the question.
 If the question is only a term, name or identifier rather than a full question,
 treat it as "What is <term> and what does it do?" and answer that from the context.
-If the context answers only part of the question, answer that part and say plainly
-which part the documents do not cover.
+If the question has several parts, answer every part that any passage in the context covers;
+say a part is not covered only if no passage covers it.
 Only if the context contains nothing that answers any part of the question, say exactly:
 "I don't have enough information in the provided documents to answer this."
 Do not fabricate any information: every statement must be supported by the context.
