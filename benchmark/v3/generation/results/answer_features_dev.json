@@ -1,0 +1,3304 @@
+{
+ "con-01": {
+  "baseline": {
+   "words": 101,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "2/2",
+   "parts_in_context": "1/2",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 85,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "2/2",
+   "parts_in_context": "1/2",
+   "answerable": true
+  },
+  "current": {
+   "words": 86,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "2/2",
+   "parts_in_context": "1/2",
+   "answerable": true
+  }
+ },
+ "con-02": {
+  "baseline": {
+   "words": 33,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "0/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 37,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "0/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 32,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "0/1",
+   "answerable": true
+  }
+ },
+ "con-03": {
+  "baseline": {
+   "words": 70,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 91,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 65,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "con-05": {
+  "baseline": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "0/2",
+   "parts_in_context": "0/2",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "0/2",
+   "parts_in_context": "0/2",
+   "answerable": true
+  },
+  "current": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "0/2",
+   "parts_in_context": "0/2",
+   "answerable": true
+  }
+ },
+ "con-06": {
+  "baseline": {
+   "words": 26,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 26,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 26,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "con-07": {
+  "baseline": {
+   "words": 45,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/2",
+   "parts_in_context": "0/2",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 38,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/2",
+   "parts_in_context": "0/2",
+   "answerable": true
+  },
+  "current": {
+   "words": 42,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/2",
+   "parts_in_context": "0/2",
+   "answerable": true
+  }
+ },
+ "crs-01": {
+  "baseline": {
+   "words": 29,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "2/3",
+   "parts_in_context": "1/3",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 46,
+   "refusal_exact": false,
+   "says_missing": true,
+   "parts_in_answer": "3/3",
+   "parts_in_context": "1/3",
+   "answerable": true
+  },
+  "current": {
+   "words": 34,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "2/3",
+   "parts_in_context": "1/3",
+   "answerable": true
+  }
+ },
+ "crs-03": {
+  "baseline": {
+   "words": 21,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/2",
+   "parts_in_context": "0/2",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 26,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/2",
+   "parts_in_context": "0/2",
+   "answerable": true
+  },
+  "current": {
+   "words": 27,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/2",
+   "parts_in_context": "0/2",
+   "answerable": true
+  }
+ },
+ "crs-05": {
+  "baseline": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "0/2",
+   "parts_in_context": "1/2",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "0/2",
+   "parts_in_context": "1/2",
+   "answerable": true
+  },
+  "current": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "0/2",
+   "parts_in_context": "1/2",
+   "answerable": true
+  }
+ },
+ "crs-07": {
+  "baseline": {
+   "words": 76,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/3",
+   "parts_in_context": "0/3",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "0/3",
+   "parts_in_context": "0/3",
+   "answerable": true
+  },
+  "current": {
+   "words": 20,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/3",
+   "parts_in_context": "0/3",
+   "answerable": true
+  }
+ },
+ "dco-01": {
+  "baseline": {
+   "words": 26,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 26,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 19,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "dco-02": {
+  "baseline": {
+   "words": 21,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 16,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 21,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "dco-04": {
+  "baseline": {
+   "words": 30,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 50,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 48,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "dco-05": {
+  "baseline": {
+   "words": 17,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 22,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 17,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "dco-06": {
+  "baseline": {
+   "words": 143,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 179,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 180,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "dco-08": {
+  "baseline": {
+   "words": 32,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 22,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 100,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "dco-09": {
+  "baseline": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "0/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "0/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "0/1",
+   "answerable": true
+  }
+ },
+ "dco-10": {
+  "baseline": {
+   "words": 93,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 100,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 66,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "ddi-03": {
+  "baseline": {
+   "words": 239,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 230,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 226,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "ddi-04": {
+  "baseline": {
+   "words": 81,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 80,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 111,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "ddi-05": {
+  "baseline": {
+   "words": 171,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 265,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 220,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "ddi-06": {
+  "baseline": {
+   "words": 85,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 105,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 71,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "ddi-07": {
+  "baseline": {
+   "words": 111,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 126,
+   "refusal_exact": false,
+   "says_missing": true,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 137,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "ddi-08": {
+  "baseline": {
+   "words": 138,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 208,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 149,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "dex-01": {
+  "baseline": {
+   "words": 116,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 146,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 133,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "dex-03": {
+  "baseline": {
+   "words": 64,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 134,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 178,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "dex-05": {
+  "baseline": {
+   "words": 69,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 65,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 67,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "dfa-01": {
+  "baseline": {
+   "words": 4,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 4,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 3,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "dfa-02": {
+  "baseline": {
+   "words": 27,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 24,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 16,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "dfa-03": {
+  "baseline": {
+   "words": 9,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 9,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 9,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "dfa-05": {
+  "baseline": {
+   "words": 5,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 14,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 14,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "dfa-07": {
+  "baseline": {
+   "words": 22,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 18,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 19,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "dfa-08": {
+  "baseline": {
+   "words": 31,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 31,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 29,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "dfa-09": {
+  "baseline": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 48,
+   "refusal_exact": false,
+   "says_missing": true,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "dfa-10": {
+  "baseline": {
+   "words": 34,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 35,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 35,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "dfa-11": {
+  "baseline": {
+   "words": 22,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 23,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 21,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "dpa-01": {
+  "baseline": {
+   "words": 98,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 103,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 45,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "dpa-02": {
+  "baseline": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "0/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "0/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "0/1",
+   "answerable": true
+  }
+ },
+ "dpa-05": {
+  "baseline": {
+   "words": 28,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 40,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 30,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "dpp-01": {
+  "baseline": {
+   "words": 30,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 37,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 19,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "dpp-02": {
+  "baseline": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "0/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "0/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "0/1",
+   "answerable": true
+  }
+ },
+ "dpp-04": {
+  "baseline": {
+   "words": 14,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 81,
+   "refusal_exact": false,
+   "says_missing": true,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 19,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "dpp-05": {
+  "baseline": {
+   "words": 10,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 10,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 10,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "dpp-07": {
+  "baseline": {
+   "words": 25,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 22,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 28,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "eid-01": {
+  "baseline": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 72,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 70,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "eid-02": {
+  "baseline": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 117,
+   "refusal_exact": false,
+   "says_missing": true,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 57,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "eid-04": {
+  "baseline": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 54,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 46,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "eid-05": {
+  "baseline": {
+   "words": 63,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 37,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 59,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "eid-07": {
+  "baseline": {
+   "words": 101,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 41,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 113,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "eid-08": {
+  "baseline": {
+   "words": 79,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 122,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 47,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "eid-10": {
+  "baseline": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 82,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 55,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "isw-01": {
+  "baseline": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "0/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 30,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "0/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 34,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "0/1",
+   "answerable": true
+  }
+ },
+ "isw-02": {
+  "baseline": {
+   "words": 85,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 104,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 104,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "isw-04": {
+  "baseline": {
+   "words": 62,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 58,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 36,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "isw-07": {
+  "baseline": {
+   "words": 122,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 42,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 63,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "isw-09": {
+  "baseline": {
+   "words": 115,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 73,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 118,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "isw-10": {
+  "baseline": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "0/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "0/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 25,
+   "refusal_exact": true,
+   "says_missing": true,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "0/1",
+   "answerable": true
+  }
+ },
+ "isw-11": {
+  "baseline": {
+   "words": 78,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 46,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 66,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "isw-12": {
+  "baseline": {
+   "words": 41,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 50,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 46,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "isw-13": {
+  "baseline": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 21,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 20,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "kw-01": {
+  "baseline": {
+   "words": 116,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 106,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 135,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "kw-03": {
+  "baseline": {
+   "words": 29,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 96,
+   "refusal_exact": false,
+   "says_missing": true,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 45,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "kw-06": {
+  "baseline": {
+   "words": 70,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 66,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 94,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "kw-08": {
+  "baseline": {
+   "words": 5,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 14,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 5,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "lit-01": {
+  "baseline": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 75,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 49,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "lit-02": {
+  "baseline": {
+   "words": 16,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 41,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 29,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "lit-03": {
+  "baseline": {
+   "words": 27,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 25,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 28,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "lit-04": {
+  "baseline": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "0/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "0/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "0/1",
+   "answerable": true
+  }
+ },
+ "lit-05": {
+  "baseline": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 30,
+   "refusal_exact": false,
+   "says_missing": true,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 43,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "lit-08": {
+  "baseline": {
+   "words": 17,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 42,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 21,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "lit-09": {
+  "baseline": {
+   "words": 14,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 31,
+   "refusal_exact": false,
+   "says_missing": true,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 11,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "lst-01": {
+  "baseline": {
+   "words": 113,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 232,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 80,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "lst-02": {
+  "baseline": {
+   "words": 104,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 146,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 130,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "lst-03": {
+  "baseline": {
+   "words": 93,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 95,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 89,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "lst-04": {
+  "baseline": {
+   "words": 79,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 91,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 79,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "lst-05": {
+  "baseline": {
+   "words": 60,
+   "refusal_exact": false,
+   "says_missing": true,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 66,
+   "refusal_exact": false,
+   "says_missing": true,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 76,
+   "refusal_exact": false,
+   "says_missing": true,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "lst-07": {
+  "baseline": {
+   "words": 231,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 229,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 226,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "lst-08": {
+  "baseline": {
+   "words": 96,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 90,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 96,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "mh-01": {
+  "baseline": {
+   "words": 76,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/2",
+   "parts_in_context": "1/2",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 102,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/2",
+   "parts_in_context": "1/2",
+   "answerable": true
+  },
+  "current": {
+   "words": 73,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/2",
+   "parts_in_context": "1/2",
+   "answerable": true
+  }
+ },
+ "mh-02": {
+  "baseline": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "0/2",
+   "parts_in_context": "1/2",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "0/2",
+   "parts_in_context": "1/2",
+   "answerable": true
+  },
+  "current": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "0/2",
+   "parts_in_context": "1/2",
+   "answerable": true
+  }
+ },
+ "mh-03": {
+  "baseline": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "0/2",
+   "parts_in_context": "0/2",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 38,
+   "refusal_exact": false,
+   "says_missing": true,
+   "parts_in_answer": "0/2",
+   "parts_in_context": "0/2",
+   "answerable": true
+  },
+  "current": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "0/2",
+   "parts_in_context": "0/2",
+   "answerable": true
+  }
+ },
+ "mh-04": {
+  "baseline": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "0/2",
+   "parts_in_context": "0/2",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 55,
+   "refusal_exact": false,
+   "says_missing": true,
+   "parts_in_answer": "0/2",
+   "parts_in_context": "0/2",
+   "answerable": true
+  },
+  "current": {
+   "words": 132,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/2",
+   "parts_in_context": "0/2",
+   "answerable": true
+  }
+ },
+ "mh-05": {
+  "baseline": {
+   "words": 75,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "2/2",
+   "parts_in_context": "1/2",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 41,
+   "refusal_exact": false,
+   "says_missing": true,
+   "parts_in_answer": "1/2",
+   "parts_in_context": "1/2",
+   "answerable": true
+  },
+  "current": {
+   "words": 155,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "2/2",
+   "parts_in_context": "1/2",
+   "answerable": true
+  }
+ },
+ "mh-06": {
+  "baseline": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "0/2",
+   "parts_in_context": "2/2",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 31,
+   "refusal_exact": false,
+   "says_missing": true,
+   "parts_in_answer": "1/2",
+   "parts_in_context": "2/2",
+   "answerable": true
+  },
+  "current": {
+   "words": 38,
+   "refusal_exact": false,
+   "says_missing": true,
+   "parts_in_answer": "1/2",
+   "parts_in_context": "2/2",
+   "answerable": true
+  }
+ },
+ "mh-08": {
+  "baseline": {
+   "words": 48,
+   "refusal_exact": false,
+   "says_missing": true,
+   "parts_in_answer": "2/2",
+   "parts_in_context": "2/2",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 90,
+   "refusal_exact": false,
+   "says_missing": true,
+   "parts_in_answer": "2/2",
+   "parts_in_context": "2/2",
+   "answerable": true
+  },
+  "current": {
+   "words": 96,
+   "refusal_exact": false,
+   "says_missing": true,
+   "parts_in_answer": "2/2",
+   "parts_in_context": "2/2",
+   "answerable": true
+  }
+ },
+ "mh-09": {
+  "baseline": {
+   "words": 70,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 83,
+   "refusal_exact": false,
+   "says_missing": true,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 71,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "mh-11": {
+  "baseline": {
+   "words": 45,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "2/2",
+   "parts_in_context": "2/2",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 45,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "2/2",
+   "parts_in_context": "2/2",
+   "answerable": true
+  },
+  "current": {
+   "words": 45,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "2/2",
+   "parts_in_context": "2/2",
+   "answerable": true
+  }
+ },
+ "msp-02": {
+  "baseline": {
+   "words": 44,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "0/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 74,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "0/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 71,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "0/1",
+   "answerable": true
+  }
+ },
+ "msp-03": {
+  "baseline": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 86,
+   "refusal_exact": false,
+   "says_missing": true,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 107,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "msp-05": {
+  "baseline": {
+   "words": 48,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 27,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 65,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "msp-06": {
+  "baseline": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "0/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 56,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "0/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "0/1",
+   "answerable": true
+  }
+ },
+ "msp-07": {
+  "baseline": {
+   "words": 84,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 126,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 109,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "msp-09": {
+  "baseline": {
+   "words": 10,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 10,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 10,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "msp-11": {
+  "baseline": {
+   "words": 33,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 30,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 31,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "msp-12": {
+  "baseline": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "0/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "0/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 66,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "0/1",
+   "answerable": true
+  }
+ },
+ "par-01": {
+  "baseline": {
+   "words": 51,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 57,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 54,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "par-02": {
+  "baseline": {
+   "words": 24,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 50,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 34,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "par-03": {
+  "baseline": {
+   "words": 32,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 62,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 71,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "par-05": {
+  "baseline": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "0/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "0/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "0/1",
+   "answerable": true
+  }
+ },
+ "par-07": {
+  "baseline": {
+   "words": 77,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 66,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 151,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "par-08": {
+  "baseline": {
+   "words": 82,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 46,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 64,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "par-09": {
+  "baseline": {
+   "words": 30,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 30,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 29,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "pp-01": {
+  "baseline": {
+   "words": 50,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 69,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 38,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "pp-02": {
+  "baseline": {
+   "words": 17,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "0/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 18,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "0/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 25,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "0/1",
+   "answerable": true
+  }
+ },
+ "pp-03": {
+  "baseline": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 39,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "pp-04": {
+  "baseline": {
+   "words": 40,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 36,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 34,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "pp-07": {
+  "baseline": {
+   "words": 18,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 21,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 26,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "pp-09": {
+  "baseline": {
+   "words": 41,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 49,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 20,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "pp-10": {
+  "baseline": {
+   "words": 28,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "0/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 34,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "0/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 28,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "0/1",
+   "answerable": true
+  }
+ },
+ "rid-01": {
+  "baseline": {
+   "words": 10,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "0/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 29,
+   "refusal_exact": false,
+   "says_missing": true,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "0/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 16,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "0/1",
+   "answerable": true
+  }
+ },
+ "rid-03": {
+  "baseline": {
+   "words": 20,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 20,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 21,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "rid-04": {
+  "baseline": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "0/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 30,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "0/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 34,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "0/1",
+   "parts_in_context": "0/1",
+   "answerable": true
+  }
+ },
+ "rid-06": {
+  "baseline": {
+   "words": 34,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "refusal": {
+   "words": 33,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  },
+  "current": {
+   "words": 32,
+   "refusal_exact": false,
+   "says_missing": false,
+   "parts_in_answer": "1/1",
+   "parts_in_context": "1/1",
+   "answerable": true
+  }
+ },
+ "una-01": {
+  "baseline": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "-",
+   "parts_in_context": "-",
+   "answerable": false
+  },
+  "refusal": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "-",
+   "parts_in_context": "-",
+   "answerable": false
+  },
+  "current": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "-",
+   "parts_in_context": "-",
+   "answerable": false
+  }
+ },
+ "una-02": {
+  "baseline": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "-",
+   "parts_in_context": "-",
+   "answerable": false
+  },
+  "refusal": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "-",
+   "parts_in_context": "-",
+   "answerable": false
+  },
+  "current": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "-",
+   "parts_in_context": "-",
+   "answerable": false
+  }
+ },
+ "una-04": {
+  "baseline": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "-",
+   "parts_in_context": "-",
+   "answerable": false
+  },
+  "refusal": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "-",
+   "parts_in_context": "-",
+   "answerable": false
+  },
+  "current": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "-",
+   "parts_in_context": "-",
+   "answerable": false
+  }
+ },
+ "una-05": {
+  "baseline": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "-",
+   "parts_in_context": "-",
+   "answerable": false
+  },
+  "refusal": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "-",
+   "parts_in_context": "-",
+   "answerable": false
+  },
+  "current": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "-",
+   "parts_in_context": "-",
+   "answerable": false
+  }
+ },
+ "una-07": {
+  "baseline": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "-",
+   "parts_in_context": "-",
+   "answerable": false
+  },
+  "refusal": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "-",
+   "parts_in_context": "-",
+   "answerable": false
+  },
+  "current": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "-",
+   "parts_in_context": "-",
+   "answerable": false
+  }
+ },
+ "una-08": {
+  "baseline": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "-",
+   "parts_in_context": "-",
+   "answerable": false
+  },
+  "refusal": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "-",
+   "parts_in_context": "-",
+   "answerable": false
+  },
+  "current": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "-",
+   "parts_in_context": "-",
+   "answerable": false
+  }
+ },
+ "una-11": {
+  "baseline": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "-",
+   "parts_in_context": "-",
+   "answerable": false
+  },
+  "refusal": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "-",
+   "parts_in_context": "-",
+   "answerable": false
+  },
+  "current": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "-",
+   "parts_in_context": "-",
+   "answerable": false
+  }
+ },
+ "una-12": {
+  "baseline": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "-",
+   "parts_in_context": "-",
+   "answerable": false
+  },
+  "refusal": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "-",
+   "parts_in_context": "-",
+   "answerable": false
+  },
+  "current": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "-",
+   "parts_in_context": "-",
+   "answerable": false
+  }
+ },
+ "una-13": {
+  "baseline": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "-",
+   "parts_in_context": "-",
+   "answerable": false
+  },
+  "refusal": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "-",
+   "parts_in_context": "-",
+   "answerable": false
+  },
+  "current": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "-",
+   "parts_in_context": "-",
+   "answerable": false
+  }
+ },
+ "una-14": {
+  "baseline": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "-",
+   "parts_in_context": "-",
+   "answerable": false
+  },
+  "refusal": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "-",
+   "parts_in_context": "-",
+   "answerable": false
+  },
+  "current": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "-",
+   "parts_in_context": "-",
+   "answerable": false
+  }
+ },
+ "una-16": {
+  "baseline": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "-",
+   "parts_in_context": "-",
+   "answerable": false
+  },
+  "refusal": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "-",
+   "parts_in_context": "-",
+   "answerable": false
+  },
+  "current": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "-",
+   "parts_in_context": "-",
+   "answerable": false
+  }
+ },
+ "una-17": {
+  "baseline": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "-",
+   "parts_in_context": "-",
+   "answerable": false
+  },
+  "refusal": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "-",
+   "parts_in_context": "-",
+   "answerable": false
+  },
+  "current": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "-",
+   "parts_in_context": "-",
+   "answerable": false
+  }
+ },
+ "una-18": {
+  "baseline": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "-",
+   "parts_in_context": "-",
+   "answerable": false
+  },
+  "refusal": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "-",
+   "parts_in_context": "-",
+   "answerable": false
+  },
+  "current": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "-",
+   "parts_in_context": "-",
+   "answerable": false
+  }
+ },
+ "una-19": {
+  "baseline": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "-",
+   "parts_in_context": "-",
+   "answerable": false
+  },
+  "refusal": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "-",
+   "parts_in_context": "-",
+   "answerable": false
+  },
+  "current": {
+   "words": 12,
+   "refusal_exact": true,
+   "says_missing": false,
+   "parts_in_answer": "-",
+   "parts_in_context": "-",
+   "answerable": false
+  }
+ }
+}

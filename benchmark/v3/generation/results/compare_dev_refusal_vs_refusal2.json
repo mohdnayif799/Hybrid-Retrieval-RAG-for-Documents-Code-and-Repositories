@@ -1,0 +1,624 @@
+{
+ "base_answer_prompt_sha256": "71d923dbc90ac9fb25c58456a7da77e276a247ed7392ddd127e496459698f091",
+ "new_answer_prompt_sha256": "27bfa0a823187624b4eecb0607a21ab87dc9cdc7eacc84396152f3db67b9ba20",
+ "warnings": [],
+ "criteria": {
+  "answer_step_refusals_remaining": {
+   "value": "3 of 4",
+   "remaining": [
+    "crs-05",
+    "dfa-09",
+    "mh-02"
+   ],
+   "pass": true
+  },
+  "correct_up": {
+   "value": "score +1.3 [-2.7, +5.3]; 9 up, 6 down",
+   "pass": true
+  },
+  "unanswerable_refused": {
+   "value": "14/14",
+   "pass": true
+  },
+  "grounded": {
+   "value": "99.0%",
+   "pass": true
+  },
+  "multi_hop_correct_yes": {
+   "value": "5/15 (33%), baseline 3/15 (20%)",
+   "pass": true
+  }
+ },
+ "passes": true,
+ "target_set": [
+  "crs-05",
+  "dfa-09",
+  "mh-02",
+  "pp-03"
+ ],
+ "gold_not_in_context_after": {
+  "con-05": "still refused",
+  "crs-07": "answered, grounded, correct=partial",
+  "dco-09": "still refused",
+  "dpa-02": "still refused",
+  "dpp-02": "still refused",
+  "isw-10": "still refused",
+  "lit-04": "still refused",
+  "msp-12": "answered, grounded, correct=partial",
+  "par-05": "still refused"
+ },
+ "no_gold_outcomes": {
+  "base": {
+   "refused": [
+    "con-05",
+    "crs-07",
+    "dco-09",
+    "dpa-02",
+    "dpp-02",
+    "isw-10",
+    "lit-04",
+    "msp-12",
+    "par-05"
+   ],
+   "correct": [
+    "isw-01",
+    "msp-02",
+    "msp-06",
+    "pp-02",
+    "pp-10"
+   ],
+   "partial": [
+    "con-07",
+    "crs-03",
+    "mh-04"
+   ],
+   "grounded_wrong": [
+    "con-02",
+    "mh-03",
+    "rid-01",
+    "rid-04"
+   ],
+   "ungrounded": [],
+   "judge_error": []
+  },
+  "new": {
+   "refused": [
+    "con-05",
+    "dco-09",
+    "dpa-02",
+    "dpp-02",
+    "isw-10",
+    "lit-04",
+    "mh-03",
+    "msp-06",
+    "par-05"
+   ],
+   "correct": [
+    "isw-01",
+    "msp-02",
+    "pp-02",
+    "pp-10"
+   ],
+   "partial": [
+    "con-07",
+    "crs-03",
+    "crs-07",
+    "msp-12"
+   ],
+   "grounded_wrong": [
+    "con-02",
+    "mh-04",
+    "rid-01",
+    "rid-04"
+   ],
+   "ungrounded": [],
+   "judge_error": []
+  }
+ },
+ "by_group": {
+  "all answerable": {
+   "n": 113,
+   "correct_score": {
+    "n": 113,
+    "base": 0.7787610619469026,
+    "new": 0.7920353982300885,
+    "diff": 0.01327433628318584,
+    "ci_low": -0.02654867256637168,
+    "ci_high": 0.05309734513274336,
+    "excludes_zero": false
+   },
+   "correct_yes": {
+    "n": 113,
+    "base": 0.7079646017699115,
+    "new": 0.7256637168141593,
+    "diff": 0.017699115044247787,
+    "ci_low": -0.04424778761061947,
+    "ci_high": 0.07964601769911504,
+    "excludes_zero": false
+   },
+   "wrongly_refused": {
+    "n": 113,
+    "base": 0.11504424778761062,
+    "new": 0.10619469026548672,
+    "diff": -0.008849557522123894,
+    "ci_low": -0.05309734513274336,
+    "ci_high": 0.02654867256637168,
+    "excludes_zero": false
+   },
+   "length_right": {
+    "n": 113,
+    "base": 0.9557522123893806,
+    "new": 0.9203539823008849,
+    "diff": -0.035398230088495575,
+    "ci_low": -0.08849557522123894,
+    "ci_high": 0.008849557522123894,
+    "excludes_zero": false
+   },
+   "median_words": [
+    42,
+    39
+   ]
+  },
+  "exact_identifier": {
+   "n": 21,
+   "correct_score": {
+    "n": 21,
+    "base": 0.9047619047619048,
+    "new": 0.9047619047619048,
+    "diff": 0.0,
+    "ci_low": 0.0,
+    "ci_high": 0.0,
+    "excludes_zero": false
+   },
+   "correct_yes": {
+    "n": 21,
+    "base": 0.9047619047619048,
+    "new": 0.9047619047619048,
+    "diff": 0.0,
+    "ci_low": 0.0,
+    "ci_high": 0.0,
+    "excludes_zero": false
+   },
+   "wrongly_refused": {
+    "n": 21,
+    "base": 0.09523809523809523,
+    "new": 0.09523809523809523,
+    "diff": 0.0,
+    "ci_low": 0.0,
+    "ci_high": 0.0,
+    "excludes_zero": false
+   },
+   "length_right": {
+    "n": 21,
+    "base": 1.0,
+    "new": 1.0,
+    "diff": 0.0,
+    "ci_low": 0.0,
+    "ci_high": 0.0,
+    "excludes_zero": false
+   },
+   "median_words": [
+    46,
+    47
+   ]
+  },
+  "keyword": {
+   "n": 24,
+   "correct_score": {
+    "n": 24,
+    "base": 0.875,
+    "new": 0.8958333333333334,
+    "diff": 0.020833333333333332,
+    "ci_low": 0.0,
+    "ci_high": 0.0625,
+    "excludes_zero": false
+   },
+   "correct_yes": {
+    "n": 24,
+    "base": 0.7916666666666666,
+    "new": 0.8333333333333334,
+    "diff": 0.041666666666666664,
+    "ci_low": 0.0,
+    "ci_high": 0.125,
+    "excludes_zero": false
+   },
+   "wrongly_refused": {
+    "n": 24,
+    "base": 0.041666666666666664,
+    "new": 0.041666666666666664,
+    "diff": 0.0,
+    "ci_low": 0.0,
+    "ci_high": 0.0,
+    "excludes_zero": false
+   },
+   "length_right": {
+    "n": 24,
+    "base": 0.875,
+    "new": 0.875,
+    "diff": 0.0,
+    "ci_low": -0.125,
+    "ci_high": 0.125,
+    "excludes_zero": false
+   },
+   "median_words": [
+    56.5,
+    40.0
+   ]
+  },
+  "list_all": {
+   "n": 7,
+   "correct_score": {
+    "n": 7,
+    "base": 0.9285714285714286,
+    "new": 0.7142857142857143,
+    "diff": -0.21428571428571427,
+    "ci_low": -0.42857142857142855,
+    "ci_high": -0.07142857142857142,
+    "excludes_zero": true
+   },
+   "correct_yes": {
+    "n": 7,
+    "base": 0.8571428571428571,
+    "new": 0.42857142857142855,
+    "diff": -0.42857142857142855,
+    "ci_low": -0.8571428571428571,
+    "ci_high": -0.14285714285714285,
+    "excludes_zero": true
+   },
+   "wrongly_refused": {
+    "n": 7,
+    "base": 0.0,
+    "new": 0.0,
+    "diff": 0.0,
+    "ci_low": 0.0,
+    "ci_high": 0.0,
+    "excludes_zero": false
+   },
+   "length_right": {
+    "n": 7,
+    "base": 0.8571428571428571,
+    "new": 0.42857142857142855,
+    "diff": -0.42857142857142855,
+    "ci_low": -0.8571428571428571,
+    "ci_high": -0.14285714285714285,
+    "excludes_zero": true
+   },
+   "median_words": [
+    95,
+    89
+   ]
+  },
+  "misspelled": {
+   "n": 7,
+   "correct_score": {
+    "n": 7,
+    "base": 0.8571428571428571,
+    "new": 0.7857142857142857,
+    "diff": -0.07142857142857142,
+    "ci_low": -0.42857142857142855,
+    "ci_high": 0.21428571428571427,
+    "excludes_zero": false
+   },
+   "correct_yes": {
+    "n": 7,
+    "base": 0.8571428571428571,
+    "new": 0.7142857142857143,
+    "diff": -0.14285714285714285,
+    "ci_low": -0.42857142857142855,
+    "ci_high": 0.0,
+    "excludes_zero": false
+   },
+   "wrongly_refused": {
+    "n": 7,
+    "base": 0.14285714285714285,
+    "new": 0.14285714285714285,
+    "diff": 0.0,
+    "ci_low": -0.42857142857142855,
+    "ci_high": 0.42857142857142855,
+    "excludes_zero": false
+   },
+   "length_right": {
+    "n": 7,
+    "base": 1.0,
+    "new": 1.0,
+    "diff": 0.0,
+    "ci_low": 0.0,
+    "ci_high": 0.0,
+    "excludes_zero": false
+   },
+   "median_words": [
+    30,
+    65
+   ]
+  },
+  "multi_hop": {
+   "n": 15,
+   "correct_score": {
+    "n": 15,
+    "base": 0.4666666666666667,
+    "new": 0.5333333333333333,
+    "diff": 0.06666666666666667,
+    "ci_low": -0.1,
+    "ci_high": 0.23333333333333334,
+    "excludes_zero": false
+   },
+   "correct_yes": {
+    "n": 15,
+    "base": 0.2,
+    "new": 0.3333333333333333,
+    "diff": 0.13333333333333333,
+    "ci_low": -0.13333333333333333,
+    "ci_high": 0.4,
+    "excludes_zero": false
+   },
+   "wrongly_refused": {
+    "n": 15,
+    "base": 0.2,
+    "new": 0.2,
+    "diff": 0.0,
+    "ci_low": -0.2,
+    "ci_high": 0.2,
+    "excludes_zero": false
+   },
+   "length_right": {
+    "n": 15,
+    "base": 1.0,
+    "new": 0.9333333333333333,
+    "diff": -0.06666666666666667,
+    "ci_low": -0.2,
+    "ci_high": 0.0,
+    "excludes_zero": false
+   },
+   "median_words": [
+    45,
+    45
+   ]
+  },
+  "paraphrase": {
+   "n": 35,
+   "correct_score": {
+    "n": 35,
+    "base": 0.7571428571428571,
+    "new": 0.8142857142857143,
+    "diff": 0.05714285714285714,
+    "ci_low": 0.0,
+    "ci_high": 0.12857142857142856,
+    "excludes_zero": false
+   },
+   "correct_yes": {
+    "n": 35,
+    "base": 0.7142857142857143,
+    "new": 0.8,
+    "diff": 0.08571428571428572,
+    "ci_low": 0.0,
+    "ci_high": 0.2,
+    "excludes_zero": false
+   },
+   "wrongly_refused": {
+    "n": 35,
+    "base": 0.17142857142857143,
+    "new": 0.14285714285714285,
+    "diff": -0.02857142857142857,
+    "ci_low": -0.08571428571428572,
+    "ci_high": 0.0,
+    "excludes_zero": false
+   },
+   "length_right": {
+    "n": 35,
+    "base": 0.9714285714285714,
+    "new": 1.0,
+    "diff": 0.02857142857142857,
+    "ci_low": 0.0,
+    "ci_high": 0.08571428571428572,
+    "excludes_zero": false
+   },
+   "median_words": [
+    36,
+    29
+   ]
+  },
+  "repo_identity": {
+   "n": 4,
+   "correct_score": {
+    "n": 4,
+    "base": 0.5,
+    "new": 0.5,
+    "diff": 0.0,
+    "ci_low": 0.0,
+    "ci_high": 0.0,
+    "excludes_zero": false
+   },
+   "correct_yes": {
+    "n": 4,
+    "base": 0.5,
+    "new": 0.5,
+    "diff": 0.0,
+    "ci_low": 0.0,
+    "ci_high": 0.0,
+    "excludes_zero": false
+   },
+   "wrongly_refused": {
+    "n": 4,
+    "base": 0.0,
+    "new": 0.0,
+    "diff": 0.0,
+    "ci_low": 0.0,
+    "ci_high": 0.0,
+    "excludes_zero": false
+   },
+   "length_right": {
+    "n": 4,
+    "base": 1.0,
+    "new": 0.75,
+    "diff": -0.25,
+    "ci_low": -0.75,
+    "ci_high": 0.0,
+    "excludes_zero": false
+   },
+   "median_words": [
+    29.5,
+    26.5
+   ]
+  },
+  "shape:bare": {
+   "n": 29,
+   "correct_score": {
+    "n": 29,
+    "base": 0.9137931034482759,
+    "new": 0.9137931034482759,
+    "diff": 0.0,
+    "ci_low": -0.08620689655172414,
+    "ci_high": 0.06896551724137931,
+    "excludes_zero": false
+   },
+   "correct_yes": {
+    "n": 29,
+    "base": 0.896551724137931,
+    "new": 0.896551724137931,
+    "diff": 0.0,
+    "ci_low": -0.10344827586206896,
+    "ci_high": 0.10344827586206896,
+    "excludes_zero": false
+   },
+   "wrongly_refused": {
+    "n": 29,
+    "base": 0.06896551724137931,
+    "new": 0.06896551724137931,
+    "diff": 0.0,
+    "ci_low": -0.10344827586206896,
+    "ci_high": 0.10344827586206896,
+    "excludes_zero": false
+   },
+   "length_right": {
+    "n": 29,
+    "base": 1.0,
+    "new": 0.9655172413793104,
+    "diff": -0.034482758620689655,
+    "ci_low": -0.10344827586206896,
+    "ci_high": 0.0,
+    "excludes_zero": false
+   },
+   "median_words": [
+    56,
+    57
+   ]
+  },
+  "shape:sentence": {
+   "n": 84,
+   "correct_score": {
+    "n": 84,
+    "base": 0.7321428571428571,
+    "new": 0.75,
+    "diff": 0.017857142857142856,
+    "ci_low": -0.023809523809523808,
+    "ci_high": 0.06547619047619048,
+    "excludes_zero": false
+   },
+   "correct_yes": {
+    "n": 84,
+    "base": 0.6428571428571429,
+    "new": 0.6666666666666666,
+    "diff": 0.023809523809523808,
+    "ci_low": -0.047619047619047616,
+    "ci_high": 0.09523809523809523,
+    "excludes_zero": false
+   },
+   "wrongly_refused": {
+    "n": 84,
+    "base": 0.13095238095238096,
+    "new": 0.11904761904761904,
+    "diff": -0.011904761904761904,
+    "ci_low": -0.05952380952380952,
+    "ci_high": 0.023809523809523808,
+    "excludes_zero": false
+   },
+   "length_right": {
+    "n": 84,
+    "base": 0.9404761904761905,
+    "new": 0.9047619047619048,
+    "diff": -0.03571428571428571,
+    "ci_low": -0.09523809523809523,
+    "ci_high": 0.023809523809523808,
+    "excludes_zero": false
+   },
+   "median_words": [
+    37.5,
+    34.0
+   ]
+  }
+ },
+ "flips": {
+  "correct_up": [
+   "con-01",
+   "crs-07",
+   "dco-08",
+   "dex-03",
+   "mh-05",
+   "mh-08",
+   "mh-09",
+   "msp-12",
+   "pp-03"
+  ],
+  "correct_down": [
+   "crs-01",
+   "lst-01",
+   "lst-03",
+   "lst-04",
+   "mh-04",
+   "msp-06"
+  ],
+  "refused_to_answered": [
+   "crs-07",
+   "msp-12",
+   "pp-03"
+  ],
+  "answered_to_refused": [
+   "mh-03",
+   "msp-06"
+  ],
+  "grounded_yes_to_no": [
+   "lst-05"
+  ],
+  "unanswerable_now_answered": []
+ },
+ "noise_floor": {
+  "ids": [],
+  "rejudge": {
+   "refused": {
+    "agree": 0,
+    "n": 0
+   },
+   "correct": {
+    "agree": 0,
+    "n": 0
+   },
+   "grounded": {
+    "agree": 0,
+    "n": 0
+   },
+   "length_fit": {
+    "agree": 0,
+    "n": 0
+   }
+  },
+  "regenerate": {
+   "refused": {
+    "agree": 0,
+    "n": 0
+   },
+   "correct": {
+    "agree": 0,
+    "n": 0
+   },
+   "grounded": {
+    "agree": 0,
+    "n": 0
+   },
+   "length_fit": {
+    "agree": 0,
+    "n": 0
+   }
+  }
+ },
+ "base_name": "dev_refusal"
+}
