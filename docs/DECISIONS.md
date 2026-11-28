@@ -281,3 +281,91 @@ text. The baseline will therefore report:
 * answers by shape (bare vs sentence);
 * wrong refusals split into "evidence in context" (an answer-step failure)
   and "evidence not in context" (a retrieval failure).
+
+### BM25 ablation: keep BM25 as shipped (2026-11-28)
+
+**Question.** Does the BM25 half of the candidate pool earn its place now that
+a cross-encoder reranks the pool?
+
+**Setup.**
+* **Shipped:** plain top 50 + BM25 top 50, min-max fusion, rerank top 20.
+* **No BM25:** plain top 50, rerank top 20. This is the shipped fallback path
+  (`bm25_index=None`).
+* Dev only: 113 answerable questions, scored by the v3 code on the exact eval
+  store, with paired 95% bootstrap intervals. The shipped arm reproduces the
+  committed dev numbers exactly.
+
+No-BM25 minus shipped; `*` = interval excludes 0:
+
+| group | n | Hit@1 | Hit@5 | MRR@5 | Recall@20 |
+|---|---|---|---|---|---|
+| all | 113 | 54.9 → 57.5, +2.7 [0.0, +6.2] | 81.4 → 78.8, −2.7 [−8.0, +2.7] | +0.8 [−1.6, +3.1] | 89.5 → 83.0, **−6.5 [−11.4, −2.5] \*** |
+| code | 65 | +3.1 | −3.1 | +1.0 | **−9.7 [−17.2, −3.1] \*** |
+| docs | 48 | +2.1 | −2.1 | +0.4 | −2.1 |
+| exact_identifier | 21 | 0.0 | −4.8 | −1.0 | −14.3 [−28.6, 0.0] |
+| misspelled | 7 | 0.0 | −14.3 | −7.1 | −28.6 [−57.1, 0.0] |
+| keyword | 24 | 0.0 | −4.2 | −1.4 | −4.2 |
+| paraphrase | 35 | +8.6 [0.0, +17.1] | +5.7 | **+7.2 [+2.9, +12.3] \*** | 0.0 |
+| multi_hop | 15 | 0.0 | −13.3 | −4.1 | −8.9 |
+| bare wording (≤3 words, no "?") | 29 | 0.0 | −3.4 | −0.7 | **−13.8 [−27.6, −3.4] \*** |
+| identifier-like wording | 31 | 0.0 | −3.2 | −0.5 | **−12.9 [−24.2, −3.2] \*** |
+
+**Other measurements.**
+* **List coverage (list_all, n = 7):** 69.0 → 61.9 @5; 90.5 → 88.1 @20.
+* **Gained and lost without BM25:**
+
+  | metric | gained | lost |
+  |---|---|---|
+  | Hit@1 | 3 (dpa-05, par-01, par-03; all paraphrase) | 0 |
+  | Hit@5 | 3 (con-07, dco-09, isw-01) | 6 (crs-01, dco-06, dfa-11, eid-04, lit-09, msp-11) |
+  | Recall@20 | 1 | 10 (mostly identifier, misspelled and multi-hop) |
+
+* **Latency** on one thread (rag-qa has one vCPU), p50 / p95:
+
+  | | total retrieval | BM25 search |
+  |---|---|---|
+  | shipped | 1,225 / 1,536 ms | 2.5 / 4.4 ms |
+  | no BM25 | 1,210 / 1,545 ms | — |
+
+  The reranker is ≈ 1.2 s of either total. The BM25 index costs 0.46 s to
+  build per store, and 10 MB for 1,222 chunks.
+* **Gating BM25 by wording does not beat shipped.** BM25 only for
+  identifier-like questions: Hit@1 +2.7, Hit@5 −1.8, Recall@20 −2.9. Adding
+  bare questions: Hit@5 −1.8, Recall@20 −2.1.
+
+**Why keep it.**
+* BM25 is what brings identifier, bare-keyword, misspelled and multi-hop gold
+  into the reranker's window. Phases 3 (typo correction) and 4 (lists,
+  multi-part questions) depend on that recall.
+* Removing it saves about 2.5 ms per question.
+* Its one cost is on paraphrases. Word-matching distractors reach the window,
+  and the reranker sometimes ranks one first (3 Hit@1 hits). A wording gate
+  cannot isolate that without losing recall elsewhere.
+
+**Open items**, recorded in `benchmark/v3/README.md`:
+* the paraphrase Hit@1 follow-up (item 11);
+* the first-question rerank timeout on one vCPU (item 12).
+
+### Phase 2 dev baseline (2026-11-28, as reported; results file pending)
+
+* **Run:** about 300 calls, $0.35, judge `gemini-3.7-flash`.
+* **Grounded:** 99%.
+* **Unanswerable questions refused:** 14/14.
+* **Wrongly refused:** 26 of 113 answerable questions.
+* **Verdict:** the answer model is over-cautious, not hallucinating.
+* **Pilot check of `eid-01`:** it returned the prompt's exact refusal sentence
+  (`refusal_exact` true), and the answer model used no thinking tokens.
+
+**Correction to the harness's own split.** The baseline counted 16 of the 26
+as "evidence in context". Rebuilding those 16 contexts here (structure only,
+no text) shows that 4 of them (isw-01, isw-10, msp-06, par-05) had **no gold
+chunk** in the context: the short evidence string just occurs in other chunks.
+
+* **The real split:** 12 refused with the gold in front of the model, 4
+  retrieval misses.
+* **Fix:** `gold_context` now counts only gold chunks (near-duplicate copies
+  included, as in the retrieval eval), and records how many answer parts were
+  present.
+* **On the laptop:** re-running the dev eval from its cache rewrites dev.json
+  with the corrected fields at $0. The diagnosis and the proposed fix are in
+  `docs/ROADMAP_v4.md`, Phase 2b.

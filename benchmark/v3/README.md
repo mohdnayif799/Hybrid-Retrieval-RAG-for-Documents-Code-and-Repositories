@@ -156,3 +156,21 @@ exhaustive store. Default HNSW is itself nondeterministic across builds: 9 of
     mismatched, so the script ends 21 passed, 1 failed. It fails the same way
     on `main` before Phase 1+2. It concerns chunk `start_line` metadata
     (chunking), not retrieval ranking. Not investigated or fixed yet.
+11. **Paraphrase Hit@1 and BM25 (dev, later).** In the BM25 ablation
+    (docs/DECISIONS.md), removing BM25 raised paraphrase Hit@1 by 8.6 points
+    (3 questions) and MRR@5 by 7.2 (significant), while costing 6.5 points of
+    Recall@20 overall. BM25 stays.
+    * Follow-up, dev only: weight the fusion toward dense, or send the top
+      20 of each list into the reranker instead of the fused top 20.
+    * Accept only if paraphrase Hit@1 rises without losing Recall@20 on
+      identifier, misspelled or multi-hop questions.
+12. **First-question rerank timeout on one vCPU.** In the single-thread
+    ablation run, the first question (eid-01) hit the 3 s rerank budget even
+    after the startup warm-up, and fell back to the fused order. Its gold was
+    at rank 1 either way, so no scores changed. Production logs show how
+    often it happens.
+    * Count `fallback=timeout` against all retrieval lines for
+      `resource.labels.service_name="rag-qa"` (query in the Phase 2 PR).
+    * If it clusters on the first question after a cold start, warm up with a
+      realistic batch (20 passages) rather than one pair.
+

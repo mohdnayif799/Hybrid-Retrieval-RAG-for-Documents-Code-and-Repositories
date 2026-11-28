@@ -411,10 +411,27 @@ def test_rows_record_query_shape_and_where_the_gold_was_in_context(tmp_path):
 
     assert rows["eid-01"]["query_shape"] == "sentence"
     assert rows["eid-02"]["query_shape"] == "bare"
-    assert rows["eid-01"]["gold_context"] == {"gold_rank": 2, "evidence_in_context": True}
-    assert rows["una-01"]["gold_context"] == {"gold_rank": None, "evidence_in_context": None}
-    # Answerable questions refused with the evidence present are generation failures.
-    assert R.refusal_diagnosis(rows) == {"evidence_in_context": ["eid-01", "eid-02"],
-                                         "evidence_not_in_context": []}
+    assert rows["eid-01"]["gold_context"] == {"gold_rank": 2, "parts_in_context": 1,
+                                              "n_parts": 1, "gold_in_context": True}
+    assert rows["una-01"]["gold_context"]["gold_in_context"] is None
+    # Answerable questions refused with the gold in front of the model are
+    # answer-step failures; without it, retrieval failures.
+    assert R.refusal_diagnosis(rows) == {"all_parts_in_context": ["eid-01", "eid-02"],
+                                         "some_parts_in_context": [], "gold_not_in_context": []}
     agg = R.aggregate(rows, resamples=100)
     assert agg["shape:bare"]["n"] == 1 and agg["shape:sentence"]["n"] == 2
+
+
+def test_an_evidence_string_outside_the_gold_chunk_does_not_count(tmp_path):
+    """A short identifier appears in many chunks; only a gold chunk counts."""
+    q = {**QUESTIONS[0], "id": "eid-09",
+         "gold": [{"file": "doc.txt", "anchor": "the limit is 30 redirects", "evidence": "30"},
+                  {"file": "doc.txt", "anchor": "End.", "part": "second"}]}
+    ctx = _ctx(tmp_path, FakeBackend())
+    elsewhere = _Doc("unrelated text that also says 30", start=500)
+    assert R.gold_in_context(ctx, q, [elsewhere])["gold_in_context"] is False
+    some = R.gold_in_context(ctx, q, [elsewhere, _Doc(SECRET_CHUNK)])
+    assert some == {"gold_rank": 2, "parts_in_context": 1, "n_parts": 2, "gold_in_context": True}
+    rows = {"eid-09": {"qtype": "exact_identifier", "gold_context": some,
+                       "verdict": {"wrongly_refused": True}}}
+    assert R.refusal_diagnosis(rows)["some_parts_in_context"] == ["eid-09"]

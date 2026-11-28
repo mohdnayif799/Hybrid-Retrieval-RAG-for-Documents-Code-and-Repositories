@@ -124,10 +124,16 @@ class Context:
     """Everything a question needs: data, gold, store, LLM, judge template."""
 
     def __init__(self, *, llm: L.CachedLLM, chroma_dir: str, parents: dict,
-                 answer_model: str, template: str, build_chain=None):
+                 answer_model: str, template: str, build_chain=None,
+                 gold_index: dict | None = None, positions: dict | None = None):
         from benchmark.v3 import gold as G
 
         self.G = G
+        # Corpus-level gold (near-duplicate copies included), as the retrieval
+        # eval scores it: {query id: (chunk index -> parts, n_parts)} and
+        # {chunk key: chunk index}. Without them, direct span overlap is used.
+        self.gold_index = gold_index
+        self.positions = positions
         self.llm = llm
         self.chroma_dir = chroma_dir
         self.parents = parents
@@ -171,21 +177,36 @@ def query_shape(question: str) -> str:
 
 def gold_in_context(ctx: Context, q: dict, docs: list) -> dict:
     """
-    Where the gold evidence sat in what the model was given (no text):
-    the rank of the first chunk overlapping a gold span, and whether any span's
-    evidence string occurs in the context. Separates a refusal or a wrong
-    answer with the evidence in front of the model (a generation failure) from
-    one without it (a retrieval failure). None for unanswerable questions.
+    Where the gold sat in what the model was given (no text):
+
+    * gold_rank: rank of the first gold chunk among the context chunks
+      (near-duplicate copies count, as in the retrieval eval);
+    * parts_in_context / n_parts: how many answer parts had a gold chunk there;
+    * gold_in_context: at least one gold chunk was there.
+
+    A refusal with a gold chunk in front of the model is an answer-step
+    failure; without one, a retrieval failure. An evidence string occurring
+    in some other chunk does not count: short identifiers appear all over a
+    code base. None for unanswerable questions.
     """
     if q["qtype"] == "unanswerable":
-        return {"gold_rank": None, "evidence_in_context": None}
+        return {"gold_rank": None, "parts_in_context": None, "n_parts": None,
+                "gold_in_context": None}
     G = ctx.G
-    spans = G.resolve_gold(q, ctx.parents)
-    direct = G.direct_gold(spans, docs)
-    evidence = [G._norm(s.evidence) for s in spans if s.evidence]
-    texts = [G._norm(d.page_content) for d in docs]
-    return {"gold_rank": (min(direct) + 1) if direct else None,
-            "evidence_in_context": any(e in t for e in evidence for t in texts)}
+    if ctx.gold_index is not None and ctx.positions is not None:
+        from src.hybrid_retrieval import chunk_key
+
+        expanded, n_parts = ctx.gold_index[q["id"]]
+        hits = [expanded.get(ctx.positions.get(chunk_key(d))) for d in docs]
+    else:
+        spans = G.resolve_gold(q, ctx.parents)
+        n_parts = G.n_parts(spans)
+        direct = G.direct_gold(spans, docs)
+        hits = [direct.get(i) for i in range(len(docs))]
+    ranks = [i + 1 for i, h in enumerate(hits) if h]
+    parts = {p for h in hits if h for p in h}
+    return {"gold_rank": ranks[0] if ranks else None, "parts_in_context": len(parts),
+            "n_parts": n_parts, "gold_in_context": bool(ranks)}
 
 
 def judge_answer(ctx: Context, q: dict, answer: str, context_texts: list, judge_model: str,
@@ -289,14 +310,22 @@ def aggregate(rows: dict, resamples: int = 10_000, seed: int = 20261123) -> dict
 
 
 def refusal_diagnosis(rows: dict) -> dict:
-    """Ids of answerable questions the answer refused, split by whether the evidence was in context."""
-    out = {"evidence_in_context": [], "evidence_not_in_context": []}
+    """
+    Answerable questions the answer refused, by where the gold was:
+    all parts in context, some parts, or none (a retrieval miss).
+    """
+    out = {"all_parts_in_context": [], "some_parts_in_context": [], "gold_not_in_context": []}
     for qid, r in sorted(rows.items()):
         v = r.get("verdict", {})
-        if r["qtype"] != "unanswerable" and v.get("wrongly_refused"):
-            key = ("evidence_in_context" if r.get("gold_context", {}).get("evidence_in_context")
-                   else "evidence_not_in_context")
-            out[key].append(qid)
+        if r["qtype"] == "unanswerable" or not v.get("wrongly_refused"):
+            continue
+        g = r.get("gold_context") or {}
+        if not g.get("gold_in_context"):
+            out["gold_not_in_context"].append(qid)
+        elif g.get("parts_in_context", 0) < (g.get("n_parts") or 0):
+            out["some_parts_in_context"].append(qid)
+        else:
+            out["all_parts_in_context"].append(qid)
     return out
 
 
@@ -361,11 +390,9 @@ def print_full(report: dict) -> None:
                     pct(m, "grounded_yes"), pct(m, "refusal_correct"), pct(m, "length_right"),
                     g["median_words"]], widths))
     d = report["wrong_refusals"]
-    print("\nWRONG REFUSALS of answerable questions: "
-          f"{len(d['evidence_in_context'])} with the evidence in the model's context "
-          f"({', '.join(d['evidence_in_context']) or 'none'}); "
-          f"{len(d['evidence_not_in_context'])} without it "
-          f"({', '.join(d['evidence_not_in_context']) or 'none'})")
+    print(f"\nWRONG REFUSALS of answerable questions: {sum(len(v) for v in d.values())}")
+    for kind, ids in d.items():
+        print(f"  {kind.replace('_', ' ')}: {len(ids)} ({', '.join(ids) or 'none'})")
     n = report["noise"]
     print("\nNOISE (same answer re-judged / answer regenerated then judged): agreement per field")
     for kind in ("rejudge", "regenerate"):
@@ -616,8 +643,14 @@ def main(argv: list[str] | None = None) -> int:
 
     llm = L.CachedLLM(L.gemini_backend(key) if key else None, L.Cache(),
                       max_usd=args.max_usd, rpm=args.rpm, prices=prices, estimate_usd=estimate)
+    from benchmark.v3 import gold as G
+    from src.hybrid_retrieval import chunk_key
+
+    resolved, _errors = D.resolve_all(queries, chunks, parents, G.NearDuplicates(chunks))
+    gold_index = {qid: (r.expanded, r.n_parts) for qid, r in resolved.items()}
     ctx = Context(llm=llm, chroma_dir=chroma_dir, parents=parents,
-                  answer_model=args.answer_model, template=J.load_template())
+                  answer_model=args.answer_model, template=J.load_template(),
+                  gold_index=gold_index, positions={chunk_key(c): i for i, c in enumerate(chunks)})
     common = {
         "split": args.split,
         "manifest_sha256": manifest["manifest_sha256"],

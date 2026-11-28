@@ -278,6 +278,104 @@ python -m benchmark.v3.generation.run --split dev
 
 ---
 
+## Phase 2b: Over-refusal fix (added 2026-11-28, before Phase 3)
+
+**Why.** The Phase 2 dev baseline is grounded (99%) and refuses every
+unanswerable question (14/14). But it wrongly refused **26 of 113 answerable
+questions**. The model is over-cautious, not hallucinating.
+
+**Diagnosis of the 16 the baseline flagged as "evidence in context".** Each
+context was rebuilt from the same deterministic store and checked
+structurally, with no text printed:
+* the question's shape;
+* which gold chunks, including near-duplicate copies, were among the 5
+  chunks the model saw;
+* how many answer parts they covered.
+
+| cause | n | questions | what the model had |
+|---|---|---|---|
+| **A. Bare term**: 1-3 words, no "?", an identifier or keyword | 8 | eid-01, eid-02, eid-04, eid-10, isw-13, lit-01, lit-05, msp-03 | the gold chunk at rank 1-4 and the only part; all code |
+| **B. Multi-part, some parts present** | 2 | crs-05, mh-02 | 1 of 2 parts in context (gold at rank 1) |
+| **C. Full question, everything present** | 2 | mh-06 (2/2 parts, ranks 3 and 5), pp-03 (rank 1, docs) | the whole answer |
+| **D. Retrieval miss**, miscounted | 4 | isw-01, isw-10 (bare identifiers), msp-06 (misspelled), par-05 | no gold chunk; the evidence string occurred in other chunks |
+
+So 12 are answer-step failures: A, B and C. The 4 in D are retrieval misses
+for Phase 3 (typos) and later. The harness now records `gold_in_context` and
+`parts_in_context` instead of the loose evidence-string check. The other 10
+of the 26 failed even the loose check; their split under the new definition
+comes with the regenerated dev.json.
+
+* **Cause A** is the dominant one. The prompt is written for questions; given
+  a bare name, the model takes the refusal path, even with the name's
+  definition at rank 1. 29 of the 127 dev questions have this shape.
+* **Cause B:** the prompt's only options are a full answer or the refusal
+  sentence, so a half-answerable question gets refused whole.
+* **Cause C** suggests the rule "if the context does not contain the answer"
+  is read too strictly when the answer needs a small inference across chunks.
+
+**The proposed change** is the smallest that addresses A, B and C. Only the
+refusal rule of `_QA_TEMPLATE` changes:
+
+```diff
+ Use ONLY the context below to answer the question.
+-If the context does not contain the answer, say exactly:
++If the question is only a term, name or identifier rather than a full question,
++treat it as "What is <term> and what does it do?" and answer that from the context.
++If the context answers only part of the question, answer that part and say plainly
++which part the documents do not cover.
++Only if the context contains nothing that answers any part of the question, say exactly:
+ "I don't have enough information in the provided documents to answer this."
+-Do not fabricate any information.
++Do not fabricate any information: every statement must be supported by the context.
+```
+
+The rest of the prompt is unchanged: the exact refusal sentence, the casual
+escape and the history block. No retrieval change, no extra model call.
+
+**Measurement** (dev only; laptop command):
+* The generation eval adds `--tag` (it writes `dev_<tag>.json`), plus a
+  comparison script with paired bootstrap differences against
+  `results/dev.json`, per question type and per shape, and the questions that
+  flipped.
+* The new prompt changes every answer prompt, so all 127 answers and grades
+  are new: ≈ 260 calls, ≈ $0.35, plus ≈ $0.08 for the noise re-runs.
+* Spent so far: $0.37 of the ≈ $1.17 plan. Phase 2b's ≈ $0.43 is extra, which
+  takes the projected total to ≈ $1.6. Phase 5 can reuse this run's design to
+  stay cheap; see Risks.
+
+**Success criteria (dev, all four required):**
+1. **`correct` goes up** (yes rate, and the yes=1 / partial=0.5 score),
+   paired against the baseline.
+2. **Wrong refusals with gold in context fall** from 12. Target ≤ 3; cause A
+   should go to ~0.
+3. **Unanswerable refusals stay 14/14.**
+4. **Grounded stays ≥ 97%.**
+
+Also reported, not gating: length_fit (bare terms will get longer answers),
+flips in each direction, and the noise floor from the Phase 2 noise runs.
+
+**Risks.**
+* **Unanswerable questions may get partial or tangential answers.** "Answer
+  the part you can" could make the model offer related facts where it should
+  refuse. That is criterion 3.
+  * The judge counts a reply whose substance is "the documents don't cover
+    this" as a refusal.
+  * A single-part unanswerable question has no answerable part.
+* **Bare terms may get over-long answers.** A bare term that names something
+  minor could draw a long explanation. length_fit tracks this; Phase 5 owns
+  answer length.
+* **Budget.** The extra run pushes the projected total over $1.50. Phase 5
+  (answer length) re-generates every answer again. To stay near the budget,
+  Phase 5 can be measured on the questions whose intent changes the prompt
+  line (fact and list, ≈ 80), or the two prompt changes can be measured
+  together. That is your call when Phase 5 comes.
+
+**Latency and cost per question in production.** No extra calls. Answers to
+bare terms and to partial questions get longer (output tokens), so
+≈ +$0.0002-0.0005 on those questions.
+
+---
+
 ## Phase 3: Query understanding (typos and intent)
 
 **Goal.**
